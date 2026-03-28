@@ -1,7 +1,7 @@
 # Модуль 03 — PHP
 
 > **Для AI-архитектора:** PHP давно не «язык для новичков».
-> PHP 8.x — это мощная современная платформа для генерации,
+> PHP 8.4/8.5 — это современная платформа для генерации,
 > обработки текста и статической сборки. Именно то, что нужно WebForge.
 
 ---
@@ -10,7 +10,7 @@
 
 1. [PHP в 2026 — честная оценка](#1-php-в-2026--честная-оценка)
 2. [Механика выполнения](#2-механика-выполнения)
-3. [Современный PHP 8.x](#3-современный-php-8x)
+3. [Современный PHP 8.4 / 8.5](#3-современный-php-84--85)
 4. [PHP как инструмент сборки](#4-php-как-инструмент-сборки)
 5. [Работа с файлами и потоками](#5-работа-с-файлами-и-потоками)
 6. [Архитектурные паттерны](#6-архитектурные-паттерны)
@@ -20,15 +20,30 @@
 
 ---
 
+## Актуальные версии (март 2026)
+
+| Версия | Дата выхода | Статус | Поддержка до |
+|--------|-------------|--------|-------------|
+| PHP 8.2 | Ноябрь 2022 | Security only | Декабрь 2026 |
+| PHP 8.3 | Ноябрь 2023 | Active | Декабрь 2027 |
+| **PHP 8.4** | **Ноябрь 2024** | **Active (рекомендуется)** | **Декабрь 2028** |
+| PHP 8.5 | Ноябрь 2025 | Active | Декабрь 2029 |
+
+**Для нового проекта:** PHP 8.4 как минимум, PHP 8.5 если хостинг поддерживает.
+`"php": ">=8.4"` в `composer.json`.
+
+---
+
 ## 1. PHP в 2026 — честная оценка
 
 ### Почему PHP жив и актуален
 
-PHP работает на 77% веб-сайтов мира — не потому что хорош,
-а потому что **прагматичен**. Он встроен в любой хостинг,
-не требует настройки сервера, читается без компиляции.
+PHP работает на ~77% веб-сайтов мира — не только потому что
+исторически укоренился, но и потому что **прагматичен**.
+Встроен в любой хостинг, не требует настройки сервера,
+читается без компиляции.
 
-Но есть и реальные технические достоинства PHP 8.x:
+Реальные технические достоинства PHP 8.x:
 
 - **Нативная работа с текстом и HTML** — PHP изначально создан
   как шаблонизатор. Генерация HTML, XML, CSV — его естественная среда
@@ -45,7 +60,7 @@ PHP работает на 77% веб-сайтов мира — не потому
 | CLI без зависимостей | `php script.php` | Нужен Node.js + npm |
 | Деплой на дешёвый хостинг | Любой хостинг | Нужен VPS |
 | Синхронная логика сборки | Линейный код, просто | async/await усложняет |
-| Обработка больших строк | Эффективно в памяти | Аналогично |
+| Парсинг HTML5 | Нативный `Dom\HTMLDocument` (8.4+) | Через cheerio / htmlparser2 |
 
 ### Где Node.js выигрывает у PHP
 
@@ -97,197 +112,324 @@ PHP компилирует файлы
 и устраняет целый класс ошибок, характерных для долгоживущих
 Node.js процессов.
 
-### OPcache — как работает и почему важен
+### OPcache и JIT — как работает и почему важно
 
 ```
-Без OPcache:          С OPcache:
-PHP файл              PHP файл
-    ↓                     ↓ (только первый раз)
-Лексинг               Лексинг
-    ↓                     ↓
-Парсинг               Парсинг
-    ↓                     ↓
-Компиляция в байткод  Компиляция → сохранить в RAM
-    ↓                     ↓ (все последующие разы)
-Выполнение            Байткод из RAM → Выполнение
+Без OPcache:          С OPcache:           С OPcache + JIT:
+PHP файл              PHP файл             PHP файл
+    ↓                     ↓ (1й раз)           ↓ (1й раз)
+Лексинг               Лексинг              Лексинг
+    ↓                     ↓                    ↓
+Парсинг               Парсинг              Парсинг → машинный код
+    ↓                     ↓                    ↓
+Байткод               Байткод → RAM        Машинный код → RAM
+    ↓                     ↓ (2й раз+)          ↓ (2й раз+)
+Выполнение            Байткод из RAM       Машинный код из RAM
 ```
 
-Ускорение: 2-10x в зависимости от приложения.
+**OPcache** — ускорение 2-10x для веб-приложений.
+**JIT (улучшен в PHP 8.4)** — дополнительное ускорение CPU-intensive
+операций: рендеринг шаблонов, обработка строк, математика.
+
+Для WebForge (статическая генерация) JIT даёт реальный прирост
+при сборке сотен страниц с тяжёлой шаблонизацией.
+
+Настройка в `php.ini`:
+```ini
+opcache.enable=1
+opcache.memory_consumption=256
+opcache.jit=tracing
+opcache.jit_buffer_size=128M
+```
 
 **Критичный момент при деплое:**
-При обновлении PHP-файлов OPcache не знает об изменениях
-пока не истечёт `opcache.revalidate_freq` (по умолчанию 2 сек).
-В production нужно явно сбрасывать кэш:
+OPcache не знает об обновлённых файлах до истечения
+`opcache.revalidate_freq`. В production сбрасывай явно:
 
 ```php
-opcache_reset(); // программно
-// или
-opcache_invalidate('/path/to/file.php', true); // конкретный файл
+opcache_reset();
+// или точечно
+opcache_invalidate('/path/to/file.php', true);
 ```
 
 ### Управление памятью
 
-PHP имеет сборщик мусора с подсчётом ссылок (reference counting).
-Объект удаляется когда счётчик ссылок достигает нуля.
+PHP использует reference counting + циклический GC.
+Для долгоживущих CLI-процессов (обработка тысяч файлов):
 
 ```php
-$a = new HeavyObject(); // refcount = 1
-$b = $a;               // refcount = 2
-unset($a);             // refcount = 1, объект жив
-unset($b);             // refcount = 0, объект удалён, память освобождена
-```
-
-**Для долгоживущих CLI-процессов** (обработка тысяч файлов):
-
-```php
-// Явное управление памятью в циклах
 foreach ($files as $file) {
   $processor = new FileProcessor($file);
   $processor->process();
-  unset($processor); // явно освобождаем
-  gc_collect_cycles(); // принудительная сборка циклических ссылок
+  unset($processor);        // явно освобождаем
+  gc_collect_cycles();      // принудительная сборка циклических ссылок
 }
 ```
 
 ---
 
-## 3. Современный PHP 8.x
+## 3. Современный PHP 8.4 / 8.5
 
-### Именованные аргументы (PHP 8.0)
+### Property Hooks (PHP 8.4) — главная фича
 
-```php
-// До PHP 8.0 — позиционные, нужно помнить порядок
-array_slice($array, 0, 5, true);
-
-// PHP 8.0+ — именованные, порядок не важен, намерение ясно
-array_slice(array: $array, offset: 0, length: 5, preserve_keys: true);
-
-// Особенно полезно для функций с множеством опциональных параметров
-htmlspecialchars(string: $html, flags: ENT_QUOTES, encoding: 'UTF-8');
-```
-
-### Match Expression (PHP 8.0)
+Крупнейшее улучшение ООП со времён Constructor Promotion.
+Логика при чтении/записи свойства — прямо в объявлении свойства:
 
 ```php
-// switch — проверяет нестрого (==), нет exhaustiveness check
-switch ($status) {
-  case 'active':
-    $label = 'Активен'; break;
-  default:
-    $label = 'Неизвестно';
-}
+class User {
+  // Без Property Hooks — нужны геттер + сеттер
+  private string $firstName;
+  private string $lastName;
 
-// match — строгое сравнение (===), выражение, exhaustiveness
-$label = match($status) {
-  'active'  => 'Активен',
-  'pending' => 'Ожидает',
-  'closed'  => 'Закрыт',
-  // Если $status не совпадёт ни с чем → UnhandledMatchError
-  // Защита от необработанных кейсов как в TypeScript
-};
-```
-
-### Nullsafe Operator (PHP 8.0)
-
-```php
-// До PHP 8.0 — многоуровневая проверка
-$city = null;
-if ($user !== null) {
-  if ($user->getAddress() !== null) {
-    $city = $user->getAddress()->getCity();
+  public function getFullName(): string {
+    return $this->firstName . ' ' . $this->lastName;
+  }
+  public function setFullName(string $value): void {
+    [$this->firstName, $this->lastName] = explode(' ', $value, 2);
   }
 }
-
-// PHP 8.0+ — цепочка с ?->
-$city = $user?->getAddress()?->getCity();
-// Вернёт null на первом же null в цепочке
 ```
 
-### Constructor Promotion (PHP 8.0)
-
 ```php
-// Старый стиль — дублирование
-class Court {
-  public string $name;
-  public int $regionCode;
-  public ?string $website;
+// PHP 8.4 — всё в одном объявлении
+class User {
+  public string $fullName {
+    get => $this->firstName . ' ' . $this->lastName;
+    set {
+      [$this->firstName, $this->lastName] = explode(' ', $value, 2);
+    }
+  }
 
   public function __construct(
-    string $name,
-    int $regionCode,
-    ?string $website = null
-  ) {
-    $this->name = $name;
-    $this->regionCode = $regionCode;
-    $this->website = $website;
-  }
+    private string $firstName,
+    private string $lastName,
+  ) {}
 }
 
-// PHP 8.0+ Constructor Promotion — в 3 раза короче
-class Court {
+$user = new User('Alex', 'Kuzikov');
+echo $user->fullName;               // 'Alex Kuzikov' — вызывает get hook
+$user->fullName = 'Ivan Petrov';    // вызывает set hook
+```
+
+**Виртуальные свойства** — без backing value в объекте:
+
+```php
+class Circle {
+  public float $area {
+    get => M_PI * $this->radius ** 2;
+    // нет set — свойство только для чтения
+  }
+
   public function __construct(
-    public readonly string $name,
-    public readonly int    $regionCode,
-    public readonly ?string $website = null,
+    public readonly float $radius,
   ) {}
 }
 ```
 
-### Readonly Properties и Readonly Classes (PHP 8.1 / 8.2)
+**Свойства в интерфейсах** (новая возможность PHP 8.4):
 
 ```php
-// PHP 8.1 — readonly свойство
-class DocumentMeta {
-  public readonly string $hash;
+interface HasSlug {
+  // Интерфейс требует наличие публично читаемого свойства
+  public string $slug { get; }
+}
 
-  public function __construct(string $content) {
-    $this->hash = md5($content);
-    // После первого присваивания — нельзя изменить
+class Page implements HasSlug {
+  public string $slug {
+    get => strtolower(str_replace(' ', '-', $this->title));
+  }
+
+  public function __construct(
+    public readonly string $title,
+  ) {}
+}
+```
+
+### Asymmetric Visibility (PHP 8.4)
+
+Разные права доступа на чтение и запись:
+
+```php
+class Config {
+  // Публично читается, но записывается только внутри класса
+  public private(set) string $environment = 'production';
+
+  // Публично читается, записывается только в классе и наследниках
+  public protected(set) int $version = 1;
+
+  public function setEnvironment(string $env): void {
+    $this->environment = $env; // ✅ изнутри класса — можно
   }
 }
 
+$config = new Config();
+echo $config->environment;       // ✅ публичное чтение
+$config->environment = 'dev';    // ❌ ошибка — private(set) снаружи
+```
+
+**Для архитектора:** это заменяет паттерн readonly + метод-мутатор
+там, где объект должен быть частично изменяемым.
+
+### Новый без скобок (PHP 8.4)
+
+```php
+// До PHP 8.4 — обязательные скобки
+$result = (new HtmlBuilder())->setTitle('Hello')->build();
+
+// PHP 8.4 — скобки не нужны
+$result = new HtmlBuilder()->setTitle('Hello')->build();
+```
+
+### Нативный HTML5 парсер — Dom\HTMLDocument (PHP 8.4)
+
+До PHP 8.4 встроенный DOMDocument не поддерживал HTML5 спецификацию.
+Теперь есть новые классы в пространстве `Dom\`:
+
+```php
+// Старый путь — не понимает HTML5 семантику
+$dom = new DOMDocument();
+@$dom->loadHTML($html); // @ нужен чтобы заглушить предупреждения
+
+// PHP 8.4 — полноценный HTML5 парсер
+$dom = Dom\HTMLDocument::createFromString($html);
+$dom = Dom\HTMLDocument::createFromFile('page.html');
+
+// Работает корректно с HTML5 элементами
+$articles = $dom->querySelectorAll('article.post');
+foreach ($articles as $article) {
+  $title = $article->querySelector('h2')?->textContent;
+}
+```
+
+**Для WebForge критично:** можно парсить и проверять
+сгенерированный HTML без внешних зависимостей.
+
+### Новые функции массивов (PHP 8.4)
+
+```php
+$products = [
+  ['name' => 'Шуруп', 'price' => 5],
+  ['name' => 'Дрель', 'price' => 3500],
+  ['name' => 'Гвоздь', 'price' => 2],
+];
+
+// array_find — первый элемент, удовлетворяющий условию
+$expensive = array_find($products, fn($p) => $p['price'] > 1000);
+// ['name' => 'Дрель', 'price' => 3500]
+
+// array_find_key — ключ первого совпадения
+$key = array_find_key($products, fn($p) => $p['price'] > 1000);
+// 1
+
+// array_any — есть ли хоть один удовлетворяющий
+$hasExpensive = array_any($products, fn($p) => $p['price'] > 1000);
+// true
+
+// array_all — все ли удовлетворяют
+$allCheap = array_all($products, fn($p) => $p['price'] < 100);
+// false
+```
+
+### Lazy Objects (PHP 8.4)
+
+Объект не инициализируется до первого обращения к нему:
+
+```php
+$reflector = new ReflectionClass(HeavyService::class);
+
+$proxy = $reflector->newLazyProxy(function() {
+  return new HeavyService(
+    new DatabaseConnection(),
+    new CacheClient(),
+  );
+});
+
+// HeavyService и его зависимости НЕ созданы
+// Будут созданы только при первом обращении к $proxy
+if ($needsService) {
+  $proxy->doWork(); // вот здесь создаётся
+}
+```
+
+**Практическое значение:** Снижение потребления памяти и ускорение
+инициализации в проектах с большим количеством сервисов.
+
+### Pipe Operator (PHP 8.5)
+
+Один из самых ожидаемых операторов — функциональные цепочки
+без вложенности:
+
+```php
+// Без pipe — читается справа налево
+$result = array_filter(
+  array_map(
+    fn($x) => $x * 2,
+    array_values($data)
+  ),
+  fn($x) => $x > 10
+);
+
+// PHP 8.5 pipe operator — читается слева направо
+$result = $data
+  |> array_values(...)
+  |> array_map(fn($x) => $x * 2, ...)
+  |> array_filter(fn($x) => $x > 10, ...);
+```
+
+**Для WebForge build pipeline** это прямое архитектурное улучшение —
+шаги сборки станут читаемее без добавления классов-обёрток.
+
+### array_first / array_last (PHP 8.5)
+
+```php
+$items = ['a', 'b', 'c', 'd'];
+
+// До PHP 8.5 — громоздко
+$first = reset($items);
+$last  = end($items);
+
+// PHP 8.5 — нативно
+$first = array_first($items); // 'a'
+$last  = array_last($items);  // 'd'
+```
+
+### #[\NoDiscard] атрибут (PHP 8.5)
+
+```php
+class FileWriter {
+  #[\NoDiscard]
+  public function write(string $content): bool {
+    // Возвращает false при ошибке
+    return file_put_contents($this->path, $content) !== false;
+  }
+}
+
+$writer->write($content);
+// ⚠️ Предупреждение: возвращаемое значение #[NoDiscard] функции игнорируется
+```
+
+**Для архитектора:** помечай методы, возвращаемые значения которых
+**нельзя игнорировать**. Особенно полезно для методов записи файлов,
+транзакций, отправки запросов.
+
+### Constructor Promotion и Readonly (PHP 8.2+)
+
+```php
 // PHP 8.2 — readonly класс (все свойства readonly автоматически)
 readonly class PageConfig {
   public function __construct(
-    public string $template,
+    public string $slug,
     public string $title,
-    public array  $meta,
+    public string $template,
+    public array  $meta    = [],
+    public bool   $noindex = false,
   ) {}
 }
 ```
 
-**Readonly для Value Objects** — идеальная пара.
-Конфигурация, метаданные, результаты парсинга — всё
-что должно быть неизменным после создания.
-
-### Fibers (PHP 8.1)
+### Enums (PHP 8.1+)
 
 ```php
-// Fiber — кооперативная многозадачность
-$fiber = new Fiber(function(): void {
-  $value = Fiber::suspend('первое значение');
-  echo "Fiber получил: {$value}\n";
-  Fiber::suspend('второе значение');
-});
-
-$first = $fiber->start();        // запускаем, fiber останавливается на первом suspend
-echo $first . "\n";              // 'первое значение'
-$second = $fiber->resume('привет'); // возобновляем, передаём значение
-echo $second . "\n";             // 'второе значение'
-```
-
-**Практическое значение Fibers:**
-Сами по себе Fibers — низкоуровневый примитив.
-Их значение — в библиотеках над ними: ReactPHP 3, Revolt, Amp v3.
-Они превращают PHP в платформу для async-приложений.
-
-**Для WebForge это не нужно** — сборщик работает синхронно.
-Но для долгоживущих PHP-сервисов (очереди, боты) — это важно знать.
-
-### Enums (PHP 8.1)
-
-```php
-// Backed Enum — со значениями
 enum DocumentStatus: string {
   case Pending   = 'pending';
   case Processed = 'processed';
@@ -295,18 +437,25 @@ enum DocumentStatus: string {
 
   public function label(): string {
     return match($this) {
-      DocumentStatus::Pending   => 'Ожидает обработки',
-      DocumentStatus::Processed => 'Обработан',
-      DocumentStatus::Failed    => 'Ошибка',
+      self::Pending   => 'Ожидает',
+      self::Processed => 'Обработан',
+      self::Failed    => 'Ошибка',
     };
   }
 }
 
-$status = DocumentStatus::from('pending');       // из строки
-$status = DocumentStatus::tryFrom('unknown');    // null если не найдено
-echo $status->value;                             // 'pending'
-echo $status->label();                           // 'Ожидает обработки'
+$status = DocumentStatus::from('pending');
+$status = DocumentStatus::tryFrom('unknown'); // null если не найдено
+echo $status->label(); // 'Ожидает'
 ```
+
+### Fibers (PHP 8.1+)
+
+Кооперативная многозадачность — основа async-библиотек
+(ReactPHP 3, Revolt, Amp v3). Сами по себе низкоуровневый примитив.
+
+**Для WebForge не нужно** — сборщик работает синхронно.
+Но для долгоживущих PHP-сервисов (очереди, телеграм-боты) — важно знать.
 
 ---
 
@@ -314,22 +463,22 @@ echo $status->label();                           // 'Ожидает обрабо
 
 ### Шаблонизация — нативная суперсила PHP
 
-PHP изначально создавался как язык шаблонов для HTML.
-Это его реальное преимущество перед любым шаблонизатором
-в Node.js (Handlebars, EJS, Nunjucks):
+PHP изначально создавался как шаблонный язык для HTML.
+Это его реальное преимущество перед любым шаблонизатором Node.js:
 
 ```php
 <?php
-// component: card.php
 function renderCard(array $data): string {
   ob_start(); ?>
 
-  <article class="card <?= htmlspecialchars($data['modifier'] ?? '') ?>">
-    <h2 class="card__title"><?= htmlspecialchars($data['title']) ?></h2>
+  <article class="card <?= htmlspecialchars($data['modifier'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+    ```
+    <h2 class="card__title"><?= htmlspecialchars($data['title'], ENT_QUOTES, 'UTF-8') ?></h2>
+    ```
     <?php if (!empty($data['image'])): ?>
       <img
-        src="<?= htmlspecialchars($data['image']['src']) ?>"
-        alt="<?= htmlspecialchars($data['image']['alt']) ?>"
+        src="<?= htmlspecialchars($data['image']['src'], ENT_QUOTES, 'UTF-8') ?>"
+        alt="<?= htmlspecialchars($data['image']['alt'], ENT_QUOTES, 'UTF-8') ?>"
         width="<?= (int)$data['image']['width'] ?>"
         height="<?= (int)$data['image']['height'] ?>"
         loading="lazy"
@@ -348,10 +497,10 @@ function renderCard(array $data): string {
 Всё что выводится между ними — захватывается в строку.
 Это основа компонентной архитектуры WebForge.
 
-### Компонентная архитектура статического генератора
+### Архитектура статического генератора
 
 ```
-WebForge сборка:
+WebForge:
 
 config/
   site.json         ← глобальная конфигурация
@@ -365,11 +514,10 @@ templates/
   components/
     header.php
     card.php
-    hero.php
   pages/
     index.php       ← шаблон страницы
 
-build.php           ← точка входа сборщика
+build.php           ← точка входа
 dist/               ← результат
   index.html
   about/
@@ -377,46 +525,48 @@ dist/               ← результат
 ```
 
 ```php
-// build.php — ядро сборщика
-$config  = json_decode(file_get_contents('config/site.json'), true);
-$pages   = glob('config/pages/*.json');
+// build.php — ядро сборщика с pipe operator (PHP 8.5)
+$config = json_decode(file_get_contents('config/site.json'), true);
+$pages  = glob('config/pages/*.json');
 
 foreach ($pages as $pageConfig) {
-  $data     = json_decode(file_get_contents($pageConfig), true);
-  $slug     = basename($pageConfig, '.json');
-  $template = "templates/pages/{$slug}.php";
-
-  $html     = renderPage($template, array_merge($config, $data));
-  $outDir   = $slug === 'index' ? 'dist' : "dist/{$slug}";
+  $data   = PageConfig::fromJson($pageConfig);
+  $html   = renderPage($data, $config);
+  $outDir = $data->slug === 'index' ? 'dist' : "dist/{$data->slug}";
 
   @mkdir($outDir, 0755, true);
-  file_put_contents("{$outDir}/index.html", $html);
+  writeFileAtomic("{$outDir}/index.html", $html);
 
-  echo "✓ Built: {$slug}\n";
+  echo "✓ Built: {$data->slug}\n";
 }
 ```
 
-### Обработка данных для генерации
+### Валидация сгенерированного HTML через Dom\HTMLDocument (PHP 8.4)
 
 ```php
-// Чтение и обработка конфига — это PHP делает отлично
-function loadPageData(string $slug, array $siteConfig): array {
-  $pageFile = "content/{$slug}/index.json";
+function validateGeneratedHtml(string $html): array {
+  $errors = [];
+  $dom = Dom\HTMLDocument::createFromString($html);
 
-  if (!file_exists($pageFile)) {
-    throw new \RuntimeException("Страница не найдена: {$slug}");
+  // Проверка title
+  if ($dom->querySelector('title') === null) {
+    $errors[] = 'Отсутствует тег <title>';
   }
 
-  $pageData = json_decode(file_get_contents($pageFile), true);
-
-  if (json_last_error() !== JSON_ERROR_NONE) {
-    throw new \RuntimeException(
-      "Ошибка JSON в {$pageFile}: " . json_last_error_msg()
-    );
+  // Проверка мета-описания
+  $metaDesc = $dom->querySelector('meta[name="description"]');
+  if ($metaDesc === null) {
+    $errors[] = 'Отсутствует meta description';
   }
 
-  // Мерж с дефолтами из глобального конфига
-  return array_merge($siteConfig['defaults'] ?? [], $pageData);
+  // Проверка alt у изображений
+  foreach ($dom->querySelectorAll('img') as $img) {
+    if (!$img->hasAttribute('alt')) {
+      $errors[] = "Img без alt: " . $img->getAttribute('src');
+    }
+  }
+
+  return $errors;
 }
 ```
 
@@ -425,33 +575,43 @@ function loadPageData(string $slug, array $siteConfig): array {
 ```php
 // Вызов локального LLM для генерации SEO-контента
 function generateMetaDescription(string $content): string {
-  $prompt = "Напиши мета-описание до 160 символов для: {$content}";
+  $payload = json_encode([
+    'model'  => 'qwen3:8b',
+    'prompt' => "Напиши мета-описание до 160 символов для: {$content}",
+    'stream' => false,
+  ], JSON_UNESCAPED_UNICODE);
 
-  $response = json_decode(
-    shell_exec("curl -s -X POST http://localhost:11434/api/generate " .
-      "-d " . escapeshellarg(json_encode([
-        'model'  => 'qwen3:8b',
-        'prompt' => $prompt,
-        'stream' => false,
-      ]))),
-    true
+  // proc_open даёт контроль над stdin/stdout/stderr
+  $proc = proc_open(
+    'curl -s -X POST http://localhost:11434/api/generate -d @-',
+    [
+      0 => ['pipe', 'r'],  // stdin
+      1 => ['pipe', 'w'],  // stdout
+      2 => ['pipe', 'w'],  // stderr
+    ],
+    $pipes
   );
 
+  fwrite($pipes, $payload);
+  fclose($pipes);
+
+  $output = stream_get_contents($pipes);[^1]
+  fclose($pipes);[^1]
+  fclose($pipes);[^2]
+  proc_close($proc);
+
+  $response = json_decode($output, true);
   return $response['response'] ?? '';
 }
 ```
-
-**Альтернатива через `proc_open`** даёт больше контроля
-над stdin/stdout/stderr — для долгих LLM-запросов предпочтительнее.
 
 ---
 
 ## 5. Работа с файлами и потоками
 
-### Файловые операции — надёжные паттерны
+### Атомарная запись файла
 
 ```php
-// Атомарная запись файла — через временный файл
 function writeFileAtomic(string $path, string $content): void {
   $tmpFile = $path . '.tmp.' . uniqid();
 
@@ -465,17 +625,17 @@ function writeFileAtomic(string $path, string $content): void {
   }
 }
 // rename() — атомарная операция в пределах одной файловой системы
-// Если процесс прерван — либо старый файл, либо новый. Никогда наполовину.
+// Либо старый файл, либо новый — никогда наполовину
 ```
 
 ### Рекурсивный обход директорий
 
 ```php
-// SPL RecursiveIterator — эффективнее рекурсивных функций
 function scanTemplates(string $dir): array {
-  $files = [];
+  $files    = [];
   $iterator = new \RecursiveIteratorIterator(
-    new \RecursiveDirectoryIterator($dir,
+    new \RecursiveDirectoryIterator(
+      $dir,
       \RecursiveDirectoryIterator::SKIP_DOTS
     )
   );
@@ -490,10 +650,9 @@ function scanTemplates(string $dir): array {
 }
 ```
 
-### Работа с большими файлами через генераторы
+### Большие файлы через Generator
 
 ```php
-// Обработка большого CSV без загрузки в память
 function readCsvRows(string $path): \Generator {
   $handle = fopen($path, 'r');
 
@@ -508,11 +667,11 @@ function readCsvRows(string $path): \Generator {
       yield array_combine($headers, $row);
     }
   } finally {
-    fclose($handle); // всегда закрываем, даже при исключении
+    fclose($handle); // всегда закрываем — даже при исключении
   }
 }
 
-// Использование — память постоянная, не зависит от размера файла
+// Память постоянная — не зависит от размера файла
 foreach (readCsvRows('courts.csv') as $row) {
   processRow($row);
 }
@@ -521,18 +680,17 @@ foreach (readCsvRows('courts.csv') as $row) {
 ### Streams в PHP
 
 ```php
-// php://memory — работа с данными в памяти как с файлом
+// php://memory — работа в памяти как с файлом
 $handle = fopen('php://memory', 'r+');
 fwrite($handle, $generatedHtml);
 rewind($handle);
 $html = stream_get_contents($handle);
 fclose($handle);
 
-// php://temp — как memory, но при превышении лимита
-// автоматически переключается на временный файл
+// php://temp — переключается на файл при превышении лимита памяти
 $handle = fopen('php://temp/maxmemory:' . (5 * 1024 * 1024), 'r+');
 
-// Сжатие на лету
+// Сжатие на лету через stream filter
 $output = fopen('output.gz', 'wb');
 stream_filter_append($output, 'zlib.deflate', STREAM_FILTER_WRITE);
 fwrite($output, $largeContent);
@@ -543,41 +701,39 @@ fclose($output);
 
 ## 6. Архитектурные паттерны
 
-### Service Locator vs Dependency Injection
+### Dependency Injection — явные зависимости
 
 ```php
 // ❌ Service Locator — скрытые зависимости
 class PageBuilder {
   public function build(string $slug): string {
-    $config    = Container::get('config');    // скрытая зависимость
-    $renderer  = Container::get('renderer'); // не видна в сигнатуре
-    // ...
+    $config   = Container::get('config');    // скрытая зависимость
+    $renderer = Container::get('renderer'); // не видна в сигнатуре
   }
 }
 
-// ✅ Dependency Injection — явные зависимости
+// ✅ DI — явные зависимости, тестируемые, заменяемые
 class PageBuilder {
   public function __construct(
-    private readonly SiteConfig   $config,
+    private readonly SiteConfig       $config,
     private readonly TemplateRenderer $renderer,
   ) {}
 
-  public function build(string $slug): string {
-    // зависимости явные, тестируемые, заменяемые
-  }
+  public function build(string $slug): string { ... }
 }
 ```
 
-### Pipeline через замыкания
+### Pipeline через замыкания (PHP 8.5 — с pipe operator)
 
 ```php
+// PHP 8.4 — через класс
 class BuildPipeline {
   private array $stages = [];
 
   public function pipe(callable $stage): static {
     $clone = clone $this;
     $clone->stages[] = $stage;
-    return $clone; // immutable — каждый pipe возвращает новый экземпляр
+    return $clone; // immutable
   }
 
   public function process(array $context): array {
@@ -589,28 +745,35 @@ class BuildPipeline {
   }
 }
 
-// Использование
-$pipeline = (new BuildPipeline())
+$result = (new BuildPipeline())
   ->pipe(fn($ctx) => loadConfig($ctx))
   ->pipe(fn($ctx) => loadContent($ctx))
   ->pipe(fn($ctx) => renderTemplates($ctx))
   ->pipe(fn($ctx) => optimizeOutput($ctx))
-  ->pipe(fn($ctx) => writeFiles($ctx));
-
-$result = $pipeline->process(['slug' => 'index']);
+  ->pipe(fn($ctx) => writeFiles($ctx))
+  ->process(['slug' => 'index']);
 ```
 
-### Value Objects для конфигурации
+```php
+// PHP 8.5 — pipe operator делает это нативно
+$result = ['slug' => 'index']
+  |> loadConfig(...)
+  |> loadContent(...)
+  |> renderTemplates(...)
+  |> optimizeOutput(...)
+  |> writeFiles(...);
+```
+
+### Value Objects через readonly class
 
 ```php
-// Вместо массивов — типизированные объекты
 readonly class PageConfig {
   public function __construct(
-    public string  $slug,
-    public string  $title,
-    public string  $template,
-    public array   $meta     = [],
-    public bool    $noindex  = false,
+    public string $slug,
+    public string $title,
+    public string $template,
+    public array  $meta    = [],
+    public bool   $noindex = false,
   ) {}
 
   public static function fromJson(string $path): self {
@@ -626,25 +789,21 @@ readonly class PageConfig {
       slug:     $data['slug'],
       title:    $data['title'],
       template: $data['template'],
-      meta:     $data['meta']     ?? [],
-      noindex:  $data['noindex']  ?? false,
+      meta:     $data['meta']    ?? [],
+      noindex:  $data['noindex'] ?? false,
     );
   }
 }
 ```
 
-### Обработка ошибок — иерархия исключений
+### Иерархия исключений
 
 ```php
-// Базовое исключение приложения
-class WebForgeException extends \RuntimeException {}
-
-// Специфичные
+class WebForgeException      extends \RuntimeException {}
 class TemplateNotFoundException extends WebForgeException {}
 class InvalidConfigException    extends WebForgeException {}
 class BuildFailedException      extends WebForgeException {}
 
-// Обработчик в точке входа
 try {
   $builder->buildAll();
 } catch (InvalidConfigException $e) {
@@ -663,41 +822,20 @@ try {
 
 ## 7. Производительность и граничные случаи
 
-### Что медленно в PHP и как это обойти
+### Конкатенация строк в цикле — O(n²) vs O(n)
 
-**Медленно: многократное чтение одного файла**
 ```php
-// ❌ Читает файл при каждом вызове
-function getConfig(): array {
-  return json_decode(file_get_contents('config.json'), true);
-}
-
-// ✅ Читает один раз, кэширует в static переменной
-function getConfig(): array {
-  static $config = null;
-  if ($config === null) {
-    $config = json_decode(file_get_contents('config.json'), true);
-  }
-  return $config;
-}
-```
-
-**Медленно: конкатенация строк в цикле**
-```php
-// ❌ Создаёт новую строку на каждой итерации O(n²)
+// ❌ Создаёт новую строку на каждой итерации — O(n²)
 $html = '';
 foreach ($items as $item) {
   $html .= renderItem($item);
 }
 
-// ✅ Собрать в массив, объединить один раз O(n)
-$parts = [];
-foreach ($items as $item) {
-  $parts[] = renderItem($item);
-}
-$html = implode("\n", $parts);
+// ✅ Собрать в массив, объединить один раз — O(n)
+$parts = array_map(fn($item) => renderItem($item), $items);
+$html  = implode("\n", $parts);
 
-// ✅ Или через ob_start() для сложных шаблонов
+// ✅ Через ob_start() для сложных шаблонов
 ob_start();
 foreach ($items as $item) {
   echo renderItem($item);
@@ -705,73 +843,86 @@ foreach ($items as $item) {
 $html = ob_get_clean();
 ```
 
-### Граничный случай: glob() и большие директории
+### glob() и большие директории
 
 ```php
 // glob() загружает ВСЕ совпадения в память сразу
-$files = glob('content/**/*.json'); // может быть тысячи файлов
+$files = glob('content/**/*.json'); // тысячи файлов — всё в RAM
 
-// Для больших директорий — DirectoryIterator ленивее
+// DirectoryIterator — ленивый, по одному файлу
 $iterator = new \RecursiveIteratorIterator(
   new \RecursiveDirectoryIterator('content/')
 );
-// Обрабатывает по одному файлу без загрузки всего списка
 ```
 
-### Граничный случай: JSON и кодировка
+### JSON и кодировка — критично для кириллицы
 
 ```php
-// PHP по умолчанию экранирует Unicode в JSON
+// По умолчанию PHP экранирует Unicode
 json_encode(['name' => 'Москва']);
-// → {"name":"\u041c\u043e\u0441\u043a\u0432\u0430"}
+// {"name":"\u041c\u043e\u0441\u043a\u0432\u0430"}
 
-// Для читаемого JSON с кириллицей
-json_encode(['name' => 'Москва'], JSON_UNESCAPED_UNICODE);
-// → {"name":"Москва"}
-
-// Полный набор флагов для красивого JSON
-json_encode(
-  $data,
+// Правильно для читаемого JSON
+json_encode($data,
   JSON_UNESCAPED_UNICODE |
   JSON_UNESCAPED_SLASHES |
   JSON_PRETTY_PRINT
 );
+// {"name":"Москва"}
 ```
 
-### Граничный случай: htmlspecialchars и контекст
+### htmlspecialchars — контекст имеет значение
 
 ```php
-// Разные контексты требуют разного экранирования
-
-// В HTML-атрибутах — обязателен ENT_QUOTES
+// В HTML-атрибутах — ENT_QUOTES обязателен
 <input value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>">
 
-// В HTML-контенте — достаточно ENT_HTML5
+// В HTML-контенте
 ```
 <p><?= htmlspecialchars($text, ENT_HTML5, 'UTF-8') ?></p>
 ```
 
-// В JavaScript-строках — htmlspecialchars НЕ ПОМОЖЕТ
-// Нужен json_encode
-```
-<script>const data = <?= json_encode($data, JSON_HEX_TAG) ?>;</script>
+// В JavaScript-контексте — htmlspecialchars НЕ ПОМОЖЕТ
+// Нужен json_encode с JSON_HEX_TAG
+<script>const data = <?= json_encode($data, JSON_HEX_TAG | JSON_UNESCAPED_UNICODE) ?>;</script>
+
+// Частая ошибка AI-кодеров: htmlspecialchars везде без учёта контекста
 ```
 
-// Частая ошибка AI-кодеров: использовать htmlspecialchars везде
-// не думая о контексте вывода
-```
-
-### Граничный случай: register_shutdown_function
+### mb_trim, mb_ltrim, mb_rtrim (PHP 8.4)
 
 ```php
-// Выполняется при завершении скрипта — даже при fatal error
+// До PHP 8.4 — trim() не работает корректно с многобайтовыми символами
+$clean = trim($string, "\u{00A0}"); // неразрывный пробел — не работает
+
+// PHP 8.4 — нативная многобайтовая обрезка
+$clean = mb_trim($string);         // обрезает все Unicode пробелы
+$clean = mb_ltrim($string, ' ');   // только слева
+$clean = mb_rtrim($string, '\n');  // только справа
+```
+
+**Для WebForge:** критично при работе с контентом из CMS,
+где пользователи вставляют текст с разными видами пробелов.
+
+### register_shutdown_function — перехват fatal errors
+
+```php
 register_shutdown_function(function() {
   $error = error_get_last();
   if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR])) {
-    echo "💥 Fatal error: {$error['message']} в {$error['file']}:{$error['line']}\n";
-    // Записать в лог, отправить уведомление
+    echo "💥 Fatal: {$error['message']} в {$error['file']}:{$error['line']}\n";
   }
 });
+```
+
+### max_memory_limit (PHP 8.5)
+
+```ini
+; Новая директива в PHP 8.5
+; Устанавливает потолок для memory_limit
+; Скрипт не может поднять лимит выше этого значения
+max_memory_limit = 1G
+memory_limit = 256M
 ```
 
 ---
@@ -780,14 +931,14 @@ register_shutdown_function(function() {
 
 ### Что AI делает хорошо в PHP
 
-- Генерирует шаблонный HTML с правильным экранированием
+- Генерирует шаблонный HTML с экранированием
 - Пишет CRUD-операции с файлами
 - Создаёт Value Objects и DTO-классы
 - Конвертирует массивы ↔ объекты
 
 ### Где AI систематически ошибается
 
-**Устаревший стиль PHP 5.x:**
+**Устаревший стиль PHP 7.x:**
 ```php
 // ❌ AI часто генерирует старый стиль
 class Court {
@@ -798,9 +949,10 @@ class Court {
     $this->name = $name;
     $this->code = $code;
   }
+  public function getName() { return $this->name; }
 }
 
-// ✅ Современный PHP 8.2
+// ✅ Современный PHP 8.4
 readonly class Court {
   public function __construct(
     public string $name,
@@ -809,22 +961,38 @@ readonly class Court {
 }
 ```
 
+**Не использует Property Hooks там, где они нужны:**
+```php
+// ❌ AI пишет геттер + сеттер
+class Page {
+  private string $_slug;
+  public function getSlug(): string { return $this->_slug; }
+  public function setSlug(string $v): void { $this->_slug = strtolower($v); }
+}
+
+// ✅ PHP 8.4 Property Hook
+class Page {
+  public string $slug {
+    set => strtolower($value);
+  }
+}
+```
+
 **Игнорирует strict_types:**
 ```php
 // AI часто не добавляет в начало файла
 declare(strict_types=1);
-// Без этого PHP делает неявное приведение типов:
-// function add(int $a, int $b) принимает '5' как 5 — молча
+// Без этого PHP делает неявное приведение типов — молча
 ```
 
-**Не обрабатывает возвращаемое значение file_put_contents:**
+**Не проверяет возвращаемое значение file_put_contents:**
 ```php
 // ❌ Молчит при ошибке записи
 file_put_contents($path, $content);
 
-// ✅ Проверяет результат
+// ✅ Проверяет — или используй #[NoDiscard] (PHP 8.5)
 if (file_put_contents($path, $content) === false) {
-  throw new \RuntimeException("Не удалось записать файл: {$path}");
+  throw new \RuntimeException("Не удалось записать: {$path}");
 }
 ```
 
@@ -834,13 +1002,13 @@ if (file_put_contents($path, $content) === false) {
 > «Напиши PHP класс для рендеринга шаблонов»
 
 Хорошо:
-> «Напиши PHP 8.2 класс TemplateRenderer.
+> «Напиши PHP 8.4 readonly class TemplateRenderer.
 > Конструктор принимает string $templatesDir.
 > Метод render(string $template, array $data): string.
-> Использует ob_start()/ob_get_clean() для захвата вывода.
+> ob_start()/ob_get_clean() для захвата вывода.
 > Бросает TemplateNotFoundException если файл не найден.
-> declare(strict_types=1) обязателен.
-> Readonly class. Без зависимостей.»
+> declare(strict_types=1) обязателен. Без зависимостей.
+> Используй Dom\HTMLDocument для валидации результата.»
 
 ---
 
@@ -848,33 +1016,43 @@ if (file_put_contents($path, $content) === false) {
 
 ### Конфигурация и окружение
 - [ ] `declare(strict_types=1)` в начале каждого файла
-- [ ] OPcache включён и настроен в production
+- [ ] `"php": ">=8.4"` в `composer.json`
+- [ ] OPcache + JIT включены и настроены в production
 - [ ] `display_errors = Off` в production, логирование включено
-- [ ] Версия PHP явно указана в `composer.json` (`"php": ">=8.2"`)
 
-### Качество кода
-- [ ] Readonly классы/свойства для Value Objects и конфигов
+### Качество кода (PHP 8.4)
+- [ ] Readonly классы/свойства для Value Objects
 - [ ] Constructor Promotion везде где применимо
+- [ ] Property Hooks вместо геттеров/сеттеров
+- [ ] Asymmetric Visibility вместо readonly + мутатор
 - [ ] Match вместо switch для строгих сравнений
-- [ ] Типизированы все параметры и возвращаемые значения
+- [ ] Typed properties везде — нет нетипизированных свойств
+
+### PHP 8.5
+- [ ] `array_first()` / `array_last()` вместо `reset()` / `end()`
+- [ ] `array_find()` / `array_any()` / `array_all()` вместо ручных циклов
+- [ ] `#[\NoDiscard]` на методах с важным возвращаемым значением
+- [ ] Pipe operator для linear build pipelines
 
 ### Работа с файлами
 - [ ] Атомарная запись через временный файл + rename()
 - [ ] `file_put_contents` возвращаемое значение проверяется
-- [ ] Большие данные обрабатываются через Generator или Stream
+- [ ] Большие данные обрабатываются через Generator
 - [ ] Файловые дескрипторы закрываются в блоке `finally`
 
 ### Генерация HTML
 - [ ] `htmlspecialchars()` с `ENT_QUOTES, 'UTF-8'` в атрибутах
 - [ ] `JSON_UNESCAPED_UNICODE` при генерации JSON с кириллицей
 - [ ] `JSON_HEX_TAG` при вставке JSON в JavaScript-контекст
-- [ ] ob_start()/ob_get_clean() для компонентной шаблонизации
+- [ ] `mb_trim()` вместо `trim()` для многобайтовых строк
+- [ ] `Dom\HTMLDocument` для парсинга и валидации HTML (PHP 8.4)
 
 ### AI-код ревью
-- [ ] Нет старого синтаксиса PHP 5.x/7.x где применим 8.x
+- [ ] Нет старого синтаксиса PHP 7.x там где применим 8.4
 - [ ] Возвращаемые значения файловых функций проверяются
-- [ ] strict_types добавлен
-- [ ] Отсутствует `@` оператор подавления ошибок
+- [ ] `strict_types` добавлен
+- [ ] Нет `@` оператора подавления ошибок
+- [ ] Геттеры/сеттеры заменены на Property Hooks где это уместно
 
 ---
 
@@ -884,10 +1062,12 @@ if (file_put_contents($path, $content) === false) {
 |---------|-----------------|
 | ob_start() шаблонизация | WebForge — компонентный рендеринг |
 | Readonly Value Objects | WebForge PageConfig, SiteConfig |
-| Pipeline через замыкания | WebForge BuildPipeline |
-| Generator для файлов | FIAS-parser если переписать на PHP |
-| Атомарная запись файлов | WebForge dist/ output |
-| shell_exec + Ollama | WebForge AI-контентный pipeline |
+| Pipeline + pipe operator | WebForge BuildPipeline (PHP 8.5) |
+| Property Hooks | WebForge — Page, Asset объекты |
+| Dom\HTMLDocument | WebForge — валидация сгенерированного HTML |
+| Generator для файлов | FIAS-parser при работе с большими реестрами |
+| Атомарная запись | WebForge dist/ output |
+| proc_open + Ollama | WebForge AI-контентный pipeline |
 
 ---
 

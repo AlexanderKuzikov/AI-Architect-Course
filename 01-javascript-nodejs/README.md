@@ -17,6 +17,20 @@
 
 ---
 
+## Актуальные версии (март 2026)
+
+| Версия | Статус | Поддержка до |
+|--------|--------|-------------|
+| Node.js 22 | **LTS (рекомендуется)** | Апрель 2027 |
+| Node.js 23 | Maintenance | — |
+| Node.js 24 | Current | — |
+| Node.js 25 | Current | — |
+
+**Важно:** с Node.js 27 переход на одну мажорную версию в год вместо двух.
+Планируй миграции заранее.
+
+---
+
 ## 1. Как работает JS под капотом
 
 ### Event Loop — главная идея платформы
@@ -62,8 +76,8 @@ JavaScript однопоточный. Это означает: в каждый м
 
 ### Heap
 
-Область памяти, где хранятся объекты. Управляется сборщиком мусора
-V8 (движок JS). Архитектору важно знать два момента:
+Область памяти V8, где хранятся объекты. Управляется сборщиком мусора.
+Архитектору важно знать два момента:
 
 - **Утечки памяти** в Node.js почти всегда — это объекты в Heap,
   на которые остаётся ссылка дольше нужного (глобальные переменные,
@@ -71,6 +85,16 @@ V8 (движок JS). Архитектору важно знать два мом
 - **--max-old-space-size** — флаг запуска Node.js, который
   ограничивает размер Heap. По умолчанию ~1.5GB. При обработке
   больших файлов нужно увеличивать явно
+
+### V8 в Node.js 22+
+
+Node.js 22 включает V8 12.x с улучшенным Maglev JIT-компилятором:
+- Быстрее компиляция и оптимизация байткода
+- Улучшенная сборка мусора с меньшими паузами
+- Снижение латентности холодного старта
+
+Для архитектора это означает: CPU-интенсивный код в Node.js 22+
+работает значительно быстрее без изменений в исходниках.
 
 ### Microtasks vs Macrotasks — практическая разница
 
@@ -101,7 +125,8 @@ Node.js использует библиотеку **libuv** для всех I/O 
 - Файловой системой (fs)
 - Сетевыми операциями
 - Таймерами
-- Thread Pool для операций, которые нельзя сделать асинхронно (например, DNS lookup, некоторые операции fs)
+- Thread Pool для операций, которые нельзя сделать асинхронно
+  (например, DNS lookup, некоторые операции fs)
 
 Thread Pool libuv по умолчанию = **4 потока**. При интенсивной
 работе с файлами это узкое место. Настраивается через:
@@ -240,6 +265,25 @@ await Promise.all(items.map(item => process(item)));
 Это одна из самых частых ошибок в AI-генерированном коде.
 Всегда проверяй циклы с async-операциями.
 
+### Explicit Resource Management (Node.js 22+)
+
+Новый синтаксис `using` / `await using` для автоматической
+очистки ресурсов — аналог `using` в C# и `with` в Python:
+
+```javascript
+// ✅ Файл закроется автоматически при выходе из блока
+{
+  await using fileHandle = await fs.promises.open('file.txt', 'r');
+  const content = await fileHandle.readFile('utf8');
+  // fileHandle.close() вызывается автоматически
+}
+
+// Работает даже при исключениях — гарантированная очистка
+```
+
+Для архитектора: это решает класс ошибок с незакрытыми дескрипторами,
+которые AI-кодеры часто упускают в ветках с исключениями.
+
 ---
 
 ## 3. Модульная система и ESM
@@ -272,6 +316,20 @@ ESM импорты **статические** — движок знает все
 - Расширение файла `.mjs`
 - Поле `"type": "module"` в `package.json`
 
+### `require()` ESM-модулей в Node.js 22+
+
+Начиная с Node.js 22 LTS — `require()` синхронных ESM-модулей
+стал **стабильным** (ранее был экспериментальным):
+
+```javascript
+// Node.js 22+ — теперь работает стабильно
+const esModule = require('./sync-esm-module.js');
+```
+
+Ограничение: работает только с синхронными ESM-модулями
+(без top-level `await`). Для модулей с top-level `await`
+по-прежнему нужен динамический `import()`.
+
 ### Ключевые отличия для архитектора
 
 | Аспект | CommonJS | ESM |
@@ -281,23 +339,9 @@ ESM импорты **статические** — движок знает все
 | Top-level `await` | Нет | Да |
 | `__dirname`, `__filename` | Есть | Нет (нужен `import.meta.url`) |
 | Совместимость | Везде | Node.js 12+, современные бандлеры |
+| `require()` ESM | Нет | Стабильно в Node.js 22+ (только sync) |
 
 ### Граничные случаи — где ломается
-
-**Нельзя `require()` ESM-модуль из CommonJS напрямую:**
-```javascript
-// ❌ Это выбросит ошибку
-const esModule = require('./esm-module.mjs');
-
-// ✅ Нужен dynamic import
-const esModule = await import('./esm-module.mjs');
-```
-
-**Смешанные проекты — распространённая боль:**
-Когда в одном проекте часть файлов `.js` (CommonJS по умолчанию),
-а часть `.mjs` — AI-кодер часто путает контекст и генерирует
-несовместимый код. Архитектурное решение: **сразу определить
-стандарт модулей для всего проекта** и зафиксировать в `package.json`.
 
 **`__dirname` в ESM:**
 ```javascript
@@ -309,6 +353,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 ```
 Это часто забывается AI-кодерами при переходе на ESM.
+
+**Смешанные проекты — распространённая боль:**
+Когда в одном проекте часть файлов `.js` (CommonJS по умолчанию),
+а часть `.mjs` — AI-кодер часто путает контекст и генерирует
+несовместимый код. Архитектурное решение: **сразу определить
+стандарт модулей для всего проекта** и зафиксировать в `package.json`.
 
 ### Circular dependencies — скрытая проблема
 
@@ -345,17 +395,38 @@ Stream — это абстракция над последовательност
 - **Duplex** — и то, и другое (TCP socket)
 - **Transform** — преобразование данных (gzip, шифрование)
 
+**`stream.compose()` в Node.js 22+:**
+
+```javascript
+import { compose } from 'stream';
+
+// Объединение нескольких transform-потоков в один
+const pipeline = compose(
+  createGzipTransform(),
+  createEncryptTransform(),
+  createBase64Transform()
+);
+
+readable.pipe(pipeline).pipe(writable);
+```
+
 **Pipe — основной паттерн работы со Streams:**
 ```javascript
 // Читаем → сжимаем → пишем. Всё в потоке, память не накапливается
-fs.createReadStream('large-file.txt')
-  .pipe(zlib.createGzip())
-  .pipe(fs.createWriteStream('large-file.txt.gz'));
+import { pipeline } from 'stream/promises';
+
+await pipeline(
+  fs.createReadStream('large-file.txt'),
+  zlib.createGzip(),
+  fs.createWriteStream('large-file.txt.gz')
+);
+// stream/promises автоматически обрабатывает ошибки и cleanup
 ```
 
 **Граничный случай — backpressure:**
 Если Readable генерирует данные быстрее, чем Writable их потребляет —
-буфер переполняется. `.pipe()` управляет этим автоматически.
+буфер переполняется. `pipeline()` из `stream/promises` управляет
+этим автоматически и корректно обрабатывает ошибки.
 При ручной работе со Streams нужно проверять возвращаемое значение
 `.write()` и ждать событие `'drain'`. AI-кодеры это часто упускают.
 
@@ -392,8 +463,15 @@ worker.postMessage(
 );
 ```
 
-Именно этот механизм используется в Image-Converter для
-zero-copy передачи изображений в Piscina Workers.
+**`structuredClone()` — стандартный способ глубокого копирования:**
+
+```javascript
+// Node.js 17+ — встроенный глубокий клон без зависимостей
+const copy = structuredClone(complexObject);
+
+// Работает с Map, Set, Date, ArrayBuffer, TypedArray
+// Не работает с функциями и DOM-узлами
+```
 
 ### Piscina — пул Worker Threads
 
@@ -446,10 +524,86 @@ proc.stdout.pipe(outputStream);
 
 ## 5. Node.js как платформа
 
+### Permission Model (Node.js 22+ Stable)
+
+Начиная с Node.js 22.13.0 / 23.5.0 — Permission Model переведён
+в **стабильный** статус. Это механизм гранулярного контроля доступа:
+
+```bash
+# Только файловая система (чтение)
+node --permission --allow-fs-read=./data app.js
+
+# Файловая система + сеть к конкретным хостам
+node --permission \
+  --allow-fs-read=./data \
+  --allow-fs-write=./output \
+  --allow-net=api.example.com:443,localhost:11434 \
+  app.js
+
+# Разрешить Worker Threads и Child Processes
+node --permission --allow-worker --allow-child-process app.js
+```
+
+**Практическое значение для AI-архитектора:**
+Изолируй сервисы, работающие с внешними API (Groq, Gemini),
+от доступа к файловой системе и наоборот. При утечке ключей
+или компрометации зависимости — радиус поражения ограничен.
+
+**Важный граничный случай:**
+`--allow-net` не покрывает Unix Domain Sockets (UDS) —
+локальные сокеты не блокируются даже с ограниченными сетевыми
+правами. Учитывай при проектировании изоляции.
+
+### Встроенный fetch() — стабильный в Node.js 22
+
+```javascript
+// Нативный fetch без node-fetch и axios
+const res = await fetch('https://api.example.com/data');
+const data = await res.json();
+
+// Полная совместимость с Web Fetch API
+// RequestInit, Headers, Response — всё как в браузере
+```
+
+Для архитектора: убирает зависимость `node-fetch` / `axios`
+для простых HTTP-запросов. Для сложных сценариев (retry, interceptors)
+по-прежнему нужны библиотеки типа `ky` или `got`.
+
+### Встроенный WebSocket Client (Node.js 22+)
+
+```javascript
+// Нативный WebSocket без зависимостей
+const ws = new WebSocket('wss://api.example.com/stream');
+
+ws.addEventListener('message', (event) => {
+  console.log(event.data);
+});
+
+ws.send(JSON.stringify({ type: 'subscribe', channel: 'prices' }));
+```
+
+### Встроенный Test Runner (стабильный в Node.js 22+)
+
+```javascript
+import { test, describe, it, mock } from 'node:test';
+import assert from 'node:assert/strict';
+
+describe('Pipeline', () => {
+  it('должен обработать документ', async () => {
+    const result = await processDocument(mockDoc);
+    assert.equal(result.status, 'processed');
+  });
+});
+```
+
+Запуск: `node --test` или `node --test **/*.test.js`
+
+Для большинства задач Jest больше не нужен — встроенный runner
+покрывает 90% сценариев без зависимостей.
+
 ### fs — файловая система
 
 ```javascript
-import fs from 'fs';
 import { promises as fsp } from 'fs';
 
 // Синхронно — блокирует Event Loop. Только для инициализации
@@ -464,14 +618,14 @@ const data = await fsp.readFile('data.json', 'utf8');
 | Задача | Правильный метод |
 |--------|-----------------|
 | Создать директорию рекурсивно | `fs.mkdir(path, { recursive: true })` |
-| Проверить существование файла | `fs.access()` или `try/catch` на `fs.stat()` |
+| Проверить существование файла | `try/catch` на `fs.stat()` |
 | Скопировать файл | `fs.copyFile()` — атомарная операция |
 | Переместить файл | `fs.rename()` — атомарно в пределах одного диска |
 | Удалить директорию рекурсивно | `fs.rm(path, { recursive: true, force: true })` |
 
 **Граничный случай — race condition:**
 ```javascript
-// ❌ Проверка + действие — не атомарны, между ними файл может исчезнуть
+// ❌ Проверка + действие — не атомарны
 if (await fileExists(path)) {
   await readFile(path); // может упасть
 }
@@ -591,8 +745,6 @@ async function pipeline(data, steps) {
 - Шаг не знает о других шагах
 - Шаг можно отключить, заменить, протестировать изолированно
 
-Именно эта архитектура используется в DocOrchestrator и OptimizatorNG.
-
 ### Config-driven design
 
 Логика определяется конфигурацией, не кодом.
@@ -601,8 +753,6 @@ async function pipeline(data, steps) {
 // ❌ Логика в коде — нужна перекомпиляция для изменения
 if (documentType === 'passport') {
   fields = ['series', 'number', 'issued_by'];
-} else if (documentType === 'inn') {
-  fields = ['number', 'date'];
 }
 
 // ✅ Логика в конфиге — меняется без кода
@@ -613,19 +763,7 @@ const config = {
 const fields = config[documentType].fields;
 ```
 
-**Когда config-driven подход оправдан:**
-- Много однотипных сущностей с разными параметрами
-- Нетехнические пользователи должны менять поведение
-- Поведение меняется часто
-
-**Когда не оправдан:**
-- Сложная бизнес-логика с ветвлениями — конфиг становится кодом в JSON
-- Небольшой проект с 2-3 вариантами — избыточная абстракция
-
 ### Graceful Shutdown
-
-Корректное завершение процесса — сохранение данных,
-закрытие соединений, дописывание файлов.
 
 ```javascript
 let isShuttingDown = false;
@@ -636,44 +774,32 @@ async function shutdown(signal) {
 
   console.log(`Получен ${signal}, завершаем...`);
 
-  // 1. Перестать принимать новые задачи
   server.close();
-
-  // 2. Завершить текущие операции
   await processingQueue.drain();
-
-  // 3. Закрыть соединения
   await database.close();
-
-  // 4. Сохранить состояние
   await state.save();
 
   process.exit(0);
 }
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT',  () => shutdown('SIGINT'));  // Ctrl+C
+process.on('SIGINT',  () => shutdown('SIGINT'));
+
+// Таймаут принудительного завершения — обязательно
+setTimeout(() => {
+  console.error('Принудительное завершение по таймауту');
+  process.exit(1);
+}, 10000).unref(); // .unref() — не держит процесс если всё завершилось
 ```
 
 **Типичные ошибки AI-кодеров в graceful shutdown:**
 - Не обрабатывают `SIGTERM` (Docker stop)
 - Не ждут завершения текущих операций
-- Нет таймаута — процесс зависает навсегда
-
-Добавляй таймаут принудительного завершения:
-```javascript
-setTimeout(() => {
-  console.error('Принудительное завершение по таймауту');
-  process.exit(1);
-}, 10000); // 10 секунд максимум
-```
+- Забывают `.unref()` на таймауте — процесс зависает
 
 ### Error Classes Hierarchy
 
-Типизированные ошибки вместо строковых сообщений:
-
 ```javascript
-// Базовый класс
 class AppError extends Error {
   constructor(message, code, statusCode = 500) {
     super(message);
@@ -683,7 +809,6 @@ class AppError extends Error {
   }
 }
 
-// Специфичные классы
 class ValidationError extends AppError {
   constructor(message, field) {
     super(message, 'VALIDATION_ERROR', 400);
@@ -695,19 +820,6 @@ class ApiError extends AppError {
   constructor(message, apiName, statusCode) {
     super(message, 'API_ERROR', statusCode);
     this.apiName = apiName;
-  }
-}
-
-// В обработчике
-try {
-  await callExternalApi();
-} catch (err) {
-  if (err instanceof ApiError && err.statusCode === 429) {
-    await sleep(retryAfter);
-    // retry
-  } else if (err instanceof ValidationError) {
-    // не ретраим — данные неверны
-    throw err;
   }
 }
 ```
@@ -722,7 +834,10 @@ try {
 
 ## 7. Чеклист архитектора
 
-Перед тем как принять решение или верифицировать AI-код:
+### Версия и конфигурация
+- [ ] Node.js 22 LTS — текущая рекомендуемая версия
+- [ ] `"engines": { "node": ">=22" }` в `package.json`
+- [ ] Permission Model настроен для production-сервисов
 
 ### Event Loop и производительность
 - [ ] Нет тяжёлых синхронных операций в hot path (циклы > 100ms)
@@ -733,7 +848,7 @@ try {
 - [ ] Независимые async операции запускаются параллельно через `Promise.all`
 - [ ] `forEach` не используется с async callback
 - [ ] Есть `process.on('unhandledRejection')` глобальный обработчик
-- [ ] `.catch()` есть на каждой Promise-цепочке или есть try/catch
+- [ ] `await using` используется для ресурсов с явным lifecycle
 
 ### Модули
 - [ ] Стандарт модулей (CJS или ESM) определён для всего проекта
@@ -741,15 +856,20 @@ try {
 - [ ] В ESM-проекте `__dirname` заменён на `import.meta.url`
 
 ### Память и ресурсы
-- [ ] Большие файлы обрабатываются через Streams, не `readFile`
+- [ ] Большие файлы обрабатываются через `stream/promises` pipeline
 - [ ] EventEmitter обработчики удаляются когда не нужны
 - [ ] Worker Threads получают данные через transferList для больших буферов
+- [ ] `structuredClone()` используется вместо JSON round-trip для глубокого копирования
 
 ### Завершение и ошибки
 - [ ] Graceful shutdown обрабатывает SIGTERM и SIGINT
-- [ ] Есть таймаут принудительного завершения
+- [ ] Есть таймаут с `.unref()` для принудительного завершения
 - [ ] Ошибки типизированы — не просто `new Error(string)`
-- [ ] Логируется достаточно контекста для диагностики без дебаггера
+
+### Встроенные возможности (не нужны зависимости)
+- [ ] `fetch()` вместо `node-fetch` / `axios` для простых запросов
+- [ ] `WebSocket` нативный вместо пакета `ws` для клиентских подключений
+- [ ] `node:test` вместо Jest для простых тест-сьютов
 
 ---
 
@@ -760,10 +880,12 @@ try {
 
 Хорошая формулировка — с архитектурными ограничениями:
 > «Напиши функцию пакетного чтения файлов через Streams.
-> Файлы могут быть до 10GB. Используй pipeline из fs.createReadStream
-> и Transform stream. Обработай backpressure. Верни AsyncIterator.»
+> Используй `pipeline` из `stream/promises`.
+> Файлы могут быть до 10GB.
+> Используй `await using` для управления файловыми дескрипторами.
+> Верни AsyncIterator. Node.js 22+.»
 
-Формула: **что делает** + **ограничения** + **конкретные технологии** + **формат результата**
+Формула: **что делает** + **ограничения** + **конкретные API** + **версия платформы**
 
 ---
 

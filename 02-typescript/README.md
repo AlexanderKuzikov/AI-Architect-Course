@@ -19,6 +19,18 @@
 
 ---
 
+## Актуальные версии (март 2026)
+
+| Версия | Дата | Ключевые изменения |
+|--------|------|-------------------|
+| TypeScript 5.7 | Ноябрь 2024 | Улучшенный error reporting, `--module node18` stable |
+| TypeScript 5.8 | Февраль 2025 | `--erasableSyntaxOnly`, `require()` ESM в `--module nodenext` |
+| **TypeScript 5.9** | **Июль 2025** | **`import defer`, `strictInference` в `strict`, stable Decorator Metadata** |
+
+Актуальная версия для нового проекта: **TypeScript 5.9**
+
+---
+
 ## 1. Зачем TypeScript архитектору
 
 ### Типы как документация
@@ -32,7 +44,6 @@
 // Читая сигнатуру, архитектор понимает:
 // - что принимает (Court с обязательным address)
 // - что возвращает (Promise с возможным null — суд может не найтись)
-// - что может пойти не так (throws ApiError)
 async function resolveCourtAddress(
   court: Court & { address: string }
 ): Promise<ResolvedCourt | null>
@@ -169,6 +180,27 @@ function render<T>(state: RequestState<T>) {
 }
 ```
 
+### Улучшенное сужение типов в TypeScript 5.9
+
+TypeScript 5.9 улучшил narrowing для сложных union-паттернов
+с дженериками — меньше ручных приведений типов:
+
+```typescript
+// TypeScript 5.8 — требовался ручной cast
+function handle<T>(res: ApiResponse<T>) {
+  if (res.status === 'success') {
+    return (res as Extract<typeof res, { status: 'success' }>).data;
+  }
+}
+
+// TypeScript 5.9 — сужает корректно без cast
+function handle<T>(res: ApiResponse<T>) {
+  if (res.status === 'success') {
+    return res.data; // TypeScript выводит T корректно
+  }
+}
+```
+
 ### Generics — параметризованные типы
 
 ```typescript
@@ -216,16 +248,19 @@ interface User {
   password: string;
 }
 
-Partial<User>          // все поля опциональны { id?: number; name?: string; ... }
-Required<User>         // все поля обязательны
-Readonly<User>         // нельзя изменять поля
+Partial<User>              // все поля опциональны
+Required<User>             // все поля обязательны
+Readonly<User>             // нельзя изменять поля
 Pick<User, 'id'|'name'>   // только выбранные поля
 Omit<User, 'password'>    // все кроме указанных
-Record<string, User>   // словарь { [key: string]: User }
+Record<string, User>       // словарь { [key: string]: User }
 
-ReturnType<typeof fn>  // тип возвращаемого значения функции
-Parameters<typeof fn>  // кортеж типов параметров функции
-Awaited<Promise<User>> // разворачивает Promise → User
+ReturnType<typeof fn>      // тип возвращаемого значения функции
+Parameters<typeof fn>      // кортеж типов параметров функции
+Awaited<Promise<User>>     // разворачивает Promise → User
+
+// TypeScript 5.9+ — новые utility types
+NoInfer<T>                 // запрет на вывод T из этой позиции
 ```
 
 **Практическое применение в архитектуре:**
@@ -240,6 +275,86 @@ type UpdateUserDTO = Partial<Omit<User, 'id'>> & Pick<User, 'id'>;
 // Публичный профиль — без пароля
 type PublicUser = Omit<User, 'password'>;
 ```
+
+### satisfies — валидация без потери типа
+
+Оператор `satisfies` (TypeScript 4.9+, широкое применение в 5.x)
+решает классическую дилемму: проверить тип объекта,
+но сохранить его специфичность.
+
+```typescript
+// ❌ as — теряет специфичность, нет проверки
+const config = {
+  port: 3000,
+  host: 'localhost',
+} as ServerConfig;
+// тип теперь ServerConfig — потеряли знание что port === 3000
+
+// ❌ явная аннотация — тоже теряет специфичность
+const config: ServerConfig = {
+  port: 3000,
+  host: 'localhost',
+};
+
+// ✅ satisfies — валидирует И сохраняет специфичность
+const config = {
+  port: 3000,
+  host: 'localhost',
+} satisfies ServerConfig;
+// тип: { port: number, host: string } — специфичный
+// но компилятор проверил соответствие ServerConfig
+```
+
+**Практическое применение:**
+
+```typescript
+// Конфиг роутов с сохранением литеральных типов
+const routes = {
+  home:    { url: '/',       auth: false },
+  profile: { url: '/profile', auth: true  },
+  admin:   { url: '/admin',  auth: true  },
+} satisfies Record<string, { url: string; auth: boolean }>;
+
+// routes.home.url имеет тип '/' — не просто string
+// Автокомплит и проверки работают точно
+```
+
+### import defer (TypeScript 5.9)
+
+Ленивая загрузка модулей — выполнение откладывается до первого
+обращения к экспортам:
+
+```typescript
+// import defer — модуль загружается, но не выполняется сразу
+import defer * as heavyModule from './heavy-processing';
+
+// ... другой код ...
+
+// Модуль выполняется только здесь — при первом обращении
+const result = heavyModule.process(data);
+```
+
+**Практическое значение:**
+Ускоряет холодный старт приложений с большим количеством импортов.
+Особенно полезно для CLI-инструментов и Electron-приложений,
+где время запуска критично.
+
+### --erasableSyntaxOnly (TypeScript 5.8)
+
+Флаг для совместимости с Node.js `--experimental-strip-types`
+и runtime-исполнения TypeScript без компиляции:
+
+```bash
+# Node.js 22+ может запускать .ts файлы напрямую
+node --experimental-strip-types app.ts
+```
+
+При `--erasableSyntaxOnly: true` TypeScript запрещает конструкции
+с runtime-семантикой (enum, namespace, параметрические декораторы
+старого стиля) — остаётся только «стираемый» синтаксис типов.
+
+**Архитектурное значение:** Упрощает toolchain — можно запускать
+TypeScript напрямую в Node.js 22+ без tsc или ts-node для dev-окружения.
 
 ### Conditional Types
 
@@ -270,10 +385,8 @@ type UserType = Awaited<ReturnType<typeof fetchUser>>;
 ```typescript
 // Создаём новый тип, итерируя по ключам существующего
 type Optional<T> = {
-  [K in keyof T]?: T[K];  // ? делает каждое поле опциональным
+  [K in keyof T]?: T[K];
 };
-
-// Это то, что делает встроенный Partial<T>
 
 // Расширенный пример — добавить валидацию к каждому полю
 type WithValidation<T> = {
@@ -285,21 +398,15 @@ type WithValidation<T> = {
 };
 
 type UserForm = WithValidation<User>;
-// { id: { value: number, isValid: boolean, error?: string }, ... }
 ```
 
 ### Template Literal Types
 
 ```typescript
-// Типы из строковых шаблонов
 ```
 type EventName<T extends string> = `on${Capitalize<T>}`;
 ```
 
-type ClickEvent = EventName<'click'>;   // 'onClick'
-type ChangeEvent = EventName<'change'>; // 'onChange'
-
-// Практическое применение — типизация конфига событий
 type DOMEvents = EventName<'click' | 'change' | 'submit'>;
 // 'onClick' | 'onChange' | 'onSubmit'
 ```
@@ -308,62 +415,59 @@ type DOMEvents = EventName<'click' | 'change' | 'submit'>;
 
 ## 4. tsconfig — архитектурные решения
 
-### Ключевые опции и их смысл
+### Актуальная базовая конфигурация (TypeScript 5.9)
 
 ```json
 {
   "compilerOptions": {
-
-    // Целевая версия JS на выходе
-    // ES2022+ для Node.js 18+ — нет нужды транспилировать всё
     "target": "ES2022",
-
-    // Модульная система на выходе
-    // NodeNext — правильный выбор для современного Node.js с ESM
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
-    // Строгий режим — ВСЕГДА включать в новых проектах
     "strict": true,
 
-    // Генерировать .d.ts файлы для библиотек
-    "declaration": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
 
-    // Инкрементальная компиляция — ускоряет повторные сборки
+    "declaration": true,
+    "sourceMap": true,
     "incremental": true,
 
-    // Source maps для отладки
-    "sourceMap": true,
-
-    // Алиасы путей — вместо '../../../core' пишем '@core'
     "paths": {
-      "@core/*": ["./src/core/*"],
+      "@core/*":   ["./src/core/*"],
       "@config/*": ["./src/config/*"]
     }
   }
 }
 ```
 
-### strict: true — что включает
+**Новый `tsc --init` в TypeScript 5.9** генерирует компактный
+современный tsconfig вместо файла с сотнями закомментированных строк.
+Включает `noUncheckedIndexedAccess` и `exactOptionalPropertyTypes`
+по умолчанию.
+
+### strict: true в TypeScript 5.9 — полный состав
 
 ```
-strict: true = включает сразу:
-  ├── strictNullChecks    — null/undefined не совместимы с другими типами
-  ├── noImplicitAny       — запрет на неявный any
-  ├── strictFunctionTypes — строгая проверка типов параметров функций
-  ├── strictBindCallApply — проверка .bind(), .call(), .apply()
-  ├── strictPropertyInit  — все поля класса должны быть инициализированы
-  └── useUnknownInCatchVariables — переменная в catch имеет тип unknown
+strict: true = включает:
+  ├── strictNullChecks              — null/undefined отдельные типы
+  ├── noImplicitAny                 — запрет неявного any
+  ├── strictFunctionTypes           — строгая проверка параметров функций
+  ├── strictBindCallApply           — проверка .bind(), .call(), .apply()
+  ├── strictPropertyInitialization  — поля класса должны быть инициализированы
+  ├── useUnknownInCatchVariables    — err в catch имеет тип unknown
+  └── strictInference               — НОВОЕ в 5.9: строже проверяет
+                                      unchecked generics и conditional types
 ```
 
 **Граничный случай — strict и catch:**
 
 ```typescript
-// С strict: true — нельзя напрямую использовать err
+// С strict: true — err имеет тип unknown
 try {
   await fetchData();
 } catch (err) {
-  // ❌ err имеет тип unknown, нельзя обращаться к .message
+  // ❌ нельзя обращаться к .message напрямую
   console.error(err.message);
 
   // ✅ нужна проверка
@@ -373,15 +477,29 @@ try {
 }
 ```
 
-### Разные tsconfig для разных окружений
+### --module node18 (TypeScript 5.8)
 
-В сложных проектах нужны несколько конфигов:
+Стабильный флаг для проектов зафиксированных на Node.js 18:
+
+```json
+{
+  "compilerOptions": {
+    "module": "node18",
+    "moduleResolution": "node18"
+  }
+}
+```
+
+Для Node.js 22+ используй `NodeNext` — он всегда указывает
+на актуальную семантику.
+
+### Разные tsconfig для разных окружений
 
 ```
 tsconfig.json           ← базовый (общие настройки)
 tsconfig.main.json      ← для main процесса Electron
 tsconfig.renderer.json  ← для renderer процесса Electron
-tsconfig.test.json      ← для тестов (другой module resolution)
+tsconfig.test.json      ← для тестов
 ```
 
 ```json
@@ -389,14 +507,25 @@ tsconfig.test.json      ← для тестов (другой module resolution)
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS"  // Electron main нужен CJS
+    "module": "CommonJS"
   },
   "include": ["src/main.ts", "src/preload.ts"]
 }
 ```
 
-Именно такая архитектура используется в OptimizatorNG.
+### --erasableSyntaxOnly в tsconfig
+
+```json
+{
+  "compilerOptions": {
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true
+  }
+}
+```
+
+Комбинация этих двух флагов готовит проект к запуску через
+`node --experimental-strip-types` без отдельного шага компиляции.
 
 ---
 
@@ -411,19 +540,16 @@ function processDocument(type: DocumentType) {
   switch (type) {
     case 'passport': return handlePassport();
     case 'inn':      return handleInn();
-    // snils не обработан!
+    case 'snils':    return handleSnils();
 
     default:
-      // Если добавить новый тип в DocumentType и забыть
-      // добавить case — TypeScript выдаст ошибку здесь
+      // При добавлении нового типа в DocumentType —
+      // TypeScript выдаст ошибку здесь
       const _exhaustive: never = type;
       throw new Error(`Необработанный тип: ${_exhaustive}`);
   }
 }
 ```
-
-Это архитектурная страховка: при добавлении нового значения
-в union тип — компилятор **заставит** обновить все switch/if.
 
 ### Builder Pattern с типами
 
@@ -441,7 +567,6 @@ class QueryBuilder<T extends object> {
   }
 }
 
-// TypeScript знает типы значений для каждого ключа
 const query = new QueryBuilder<User>()
   .where('name', 'Alex')   // ✅ string
   .where('id', 42)         // ✅ number
@@ -453,19 +578,30 @@ const query = new QueryBuilder<User>()
 
 ```typescript
 // Проблема: string везде одинаковый — легко перепутать
-function findCourt(id: string) { ... }
-function findRegion(id: string) { ... }
-
-findCourt(regionId); // ✅ компилируется, ❌ логическая ошибка
-
-// Решение: branded types
-type CourtId = string & { readonly __brand: 'CourtId' };
+type CourtId  = string & { readonly __brand: 'CourtId' };
 type RegionId = string & { readonly __brand: 'RegionId' };
 
 function findCourt(id: CourtId) { ... }
 function findRegion(id: RegionId) { ... }
 
-findCourt(regionId as RegionId); // ❌ ошибка компиляции
+declare const courtId: CourtId;
+declare const regionId: RegionId;
+
+findCourt(regionId); // ❌ ошибка компиляции — защита работает
+```
+
+### satisfies + as const — мощная комбинация
+
+```typescript
+// Строгая типизация конфига с сохранением литеральных значений
+const MODEL_LIMITS = {
+  'qwen/qwen3-32b':      { rpm: 30,  tpd: 500_000  },
+  'openai/gpt-oss-120b': { rpm: 20,  tpd: 1_000_000 },
+  'kimi/k2':             { rpm: 15,  tpd: 750_000  },
+} as const satisfies Record<string, { rpm: number; tpd: number }>;
+
+// MODEL_LIMITS['qwen/qwen3-32b'].rpm имеет тип 30 — не просто number
+// Компилятор проверил структуру каждой записи
 ```
 
 ### Зодификация — runtime валидация + compile-time типы
@@ -473,7 +609,6 @@ findCourt(regionId as RegionId); // ❌ ошибка компиляции
 ```typescript
 import { z } from 'zod';
 
-// Одно описание → и валидация, и тип
 const CourtSchema = z.object({
   code:    z.string().regex(/^\d{2}[A-Z]{2}\d{4}$/),
   name:    z.string().min(1),
@@ -481,15 +616,15 @@ const CourtSchema = z.object({
   website: z.string().url().optional(),
 });
 
-// Тип выводится автоматически — не нужно дублировать
+// Тип выводится автоматически
 type Court = z.infer<typeof CourtSchema>;
 
 // Валидация данных из API
 const result = CourtSchema.safeParse(apiResponse);
 if (result.success) {
-  const court = result.data; // тип Court, безопасно использовать
+  const court = result.data; // тип Court
 } else {
-  console.error(result.error.issues); // детализированные ошибки
+  console.error(result.error.issues);
 }
 ```
 
@@ -504,7 +639,7 @@ if (result.success) {
 ### Ловушка 1 — Type Assertion вместо Guard
 
 ```typescript
-// ❌ Опасно — просто убеждаем компилятор, реальной проверки нет
+// ❌ Опасно — компилятор доверяет нам, реальной проверки нет
 const user = response.data as User;
 user.name.toUpperCase(); // упадёт если data не User
 
@@ -516,10 +651,6 @@ function isUser(data: unknown): data is User {
     'name' in data &&
     typeof (data as User).name === 'string'
   );
-}
-
-if (isUser(response.data)) {
-  response.data.name.toUpperCase(); // безопасно
 }
 ```
 
@@ -539,73 +670,59 @@ const count = 0;
 const name = 'Alex';
 ```
 
-AI-кодеры из статически типизированных языков часто
-добавляют явные аннотации везде. Это шум, не безопасность.
-
-### Ловушка 3 — Мутация readonly данных через assertion
-
-```typescript
-const config = {
-  apiUrl: 'https://api.example.com',
-  timeout: 5000,
-} as const;
-
-// ❌ TypeScript это пропустит — as any убивает проверки
-(config as any).apiUrl = 'hacked';
-
-// Защиты от этого на уровне типов нет
-// Защита — архитектурная: не передавать конфиг туда, где он может мутировать
-```
-
-### Ловушка 4 — Enum генерирует лишний код
+### Ловушка 3 — Enum генерирует лишний код
 
 ```typescript
 // ❌ Enum — генерирует реальный JS объект
 enum Status {
   Pending = 'pending',
   Active  = 'active',
-  Closed  = 'closed',
 }
-// В скомпилированном JS появится объект Status
 
 // ✅ as const — только типы, никакого лишнего кода
 const Status = {
   Pending: 'pending',
   Active:  'active',
-  Closed:  'closed',
 } as const;
 
 type Status = typeof Status[keyof typeof Status];
-// тип: 'pending' | 'active' | 'closed'
+// 'pending' | 'active'
 ```
 
-### Ловушка 5 — Declaration merging неожиданно меняет типы
+### Ловушка 4 — Declaration merging неожиданно меняет типы
 
 ```typescript
-interface Window {
-  myCustomProperty: string;
-}
-// Это не создаёт новый интерфейс — это РАСШИРЯЕТ глобальный Window
-// Если в двух местах проекта одинаково назвать интерфейс —
-// TypeScript молча объединит их. Может привести к
-// неожиданным ошибкам компиляции в несвязанных местах.
-```
+// Файл без export — TypeScript считает его глобальным скриптом
+interface Config { ... }  // ← глобальная, конфликтует со всем проектом
 
-### Ловушка 6 — Ошибки типов в d.ts файлах
-
-```typescript
-// Если в проекте есть файл без явного export/import —
-// TypeScript считает его глобальным скриптом, а не модулем
-// Все объявления становятся глобальными
-
-// Файл types.ts без export:
-interface Config { ... }  // ← глобальная, конфликтует со всеми
-
-// Исправление — добавить любой export
+// Исправление — сделать файл модулем
 export interface Config { ... }
-// или пустой export чтобы сделать файл модулем
-export {};
+// или
+export {}; // пустой export превращает файл в модуль
 ```
+
+### Ловушка 5 — noUncheckedIndexedAccess ломает старый код
+
+При включении `noUncheckedIndexedAccess: true` (рекомендуется в 5.9):
+
+```typescript
+const arr =;[^1][^2][^3]
+
+// ❌ С noUncheckedIndexedAccess тип arr = number | undefined
+const first: number = arr; // ошибка компиляции
+
+// ✅ Явная проверка
+const first = arr;
+if (first !== undefined) {
+  const doubled = first * 2;
+}
+
+// ✅ Или через деструктуризацию — тип чище
+const [first] = arr; // тип: number | undefined, явно
+```
+
+AI-кодеры часто не учитывают этот флаг и генерируют код,
+который не компилируется при включённом `noUncheckedIndexedAccess`.
 
 ---
 
@@ -614,9 +731,9 @@ export {};
 ### Что AI делает хорошо
 
 - Генерирует базовые интерфейсы по описанию структуры
-- Пишет utility types для стандартных трансформаций
+- Пишет Zod-схемы по описанию данных
+- Создаёт utility types для стандартных трансформаций
 - Добавляет типы к существующему JS-коду
-- Создаёт Zod-схемы по описанию данных
 
 ### Где AI систематически ошибается
 
@@ -644,11 +761,20 @@ function getUserName(user: User): string {
 
 **Использует any при затруднении:**
 ```typescript
-// AI при сложных типах часто отступает к
+// ❌ AI при сложных типах отступает к
 const result: any = complexOperation();
 
-// Правильно — разобраться с типом или использовать unknown
+// ✅ Правильно
 const result: unknown = complexOperation();
+```
+
+**Не использует satisfies там где нужно:**
+```typescript
+// ❌ AI теряет специфичность
+const config: AppConfig = { port: 3000, host: 'localhost' };
+
+// ✅ satisfies сохраняет литеральные типы
+const config = { port: 3000, host: 'localhost' } satisfies AppConfig;
 ```
 
 ### Как правильно ставить задачу AI-кодеру
@@ -658,28 +784,30 @@ const result: unknown = complexOperation();
 
 Хорошо:
 > «Напиши generic функцию `processDocument<T extends BaseDocument>`.
-> Она принимает документ и массив процессоров типа `Processor<T>[]`.
+> Принимает документ и массив процессоров типа `Processor<T>[]`.
 > Возвращает `Promise<ProcessResult<T>>` где ProcessResult содержит
 > поле result типа T и поле errors типа ValidationError[].
-> Используй strict null checks. Не используй any.»
-
-Формула: **сигнатура** + **generic constraints** + **возвращаемый тип** + **ограничения**
+> strict: true, noUncheckedIndexedAccess: true.
+> Не использовать any. satisfies для конфигов. TypeScript 5.9.»
 
 ---
 
 ## 8. Чеклист архитектора
 
 ### Базовая конфигурация
-- [ ] `strict: true` в tsconfig — всегда для нового кода
-- [ ] Стандарт модулей определён (`NodeNext` для Node.js, `ESNext` для браузера)
+- [ ] `strict: true` в tsconfig — обязательно для нового кода
+- [ ] `noUncheckedIndexedAccess: true` — защита от undefined при индексации
+- [ ] `exactOptionalPropertyTypes: true` — строже проверяет optional поля
+- [ ] Стандарт модулей определён (`NodeNext` для Node.js 22+)
 - [ ] Path aliases настроены — нет `../../../` в импортах
 - [ ] Отдельные tsconfig для разных окружений если проект сложный
 
 ### Типизация данных
-- [ ] Нет `any` в новом коде — только `unknown` там, где тип неизвестен
+- [ ] Нет `any` в новом коде — только `unknown` где тип неизвестен
 - [ ] Внешние данные (API, файлы, env) валидируются через Zod или type guard
 - [ ] Discriminated unions используются для моделирования состояний
 - [ ] Enum заменены на `as const` объекты
+- [ ] `satisfies` используется для конфигов и словарей
 
 ### Архитектурные паттерны
 - [ ] Exhaustiveness check в switch по discriminated union
@@ -687,11 +815,17 @@ const result: unknown = complexOperation();
 - [ ] Generic constraints (`extends`) используются — не голые `<T>`
 - [ ] Type assertion (`as`) используется только с обоснованием
 
+### Новые возможности TypeScript 5.8–5.9
+- [ ] `import defer` для тяжёлых модулей с ленивой инициализацией
+- [ ] `erasableSyntaxOnly` если планируется запуск через node --strip-types
+- [ ] `strictInference` включён через `strict: true`
+
 ### AI-код ревью
 - [ ] Нет необоснованных `any`
 - [ ] Nullable значения обработаны явно
 - [ ] Типы параметров не шире необходимого
 - [ ] Return types явно указаны для публичных функций
+- [ ] `noUncheckedIndexedAccess` учтён при индексации массивов
 
 ---
 
@@ -701,9 +835,11 @@ const result: unknown = complexOperation();
 |---------|-----------------|
 | Несколько tsconfig | OptimizatorNG (main/renderer) |
 | Generic pipeline | DocOrchestrator, Floronym |
-| Discriminated union | Court-Harvester (статусы обновлений) |
+| Discriminated union | Court-Harvester (статусы) |
+| satisfies + as const | Floronym MODEL_LIMITS конфиг |
 | Zod-валидация | Рекомендуется добавить в Court-Harvester, FloraMaverick |
-| Branded types | Рекомендуется для CourtId / RegionId в FIAS-parser |
+| import defer | WebForge — ленивая загрузка тяжёлых модулей сборки |
+| Branded types | FIAS-parser — CourtId / RegionId |
 
 ---
 
