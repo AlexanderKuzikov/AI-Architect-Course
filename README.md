@@ -3,6 +3,9 @@
 > Курс по современному технологическому стеку для AI-архитекторов.
 > Архитектурное мышление, глубина технологий, работа с LLM-кодерами.
 
+**Автор:** [Alexander Kuzikov](https://github.com/AlexanderKuzikov)
+**Статус:** В активной разработке · 3 из 40 модулей готовы
+
 ---
 
 ## Для кого этот курс
@@ -33,102 +36,98 @@
 
 ---
 
-## Структура курса
-
-Курс состоит из **40 модулей**, сгруппированных по областям.
-Каждый модуль — это один день изучения.
-
-### Языки программирования
-
-| # | Модуль | Статус |
-|---|--------|--------|
-| 01 | [JavaScript / Node.js](./01-javascript-nodejs/README.md) | ✅ Готов |
-| 02 | TypeScript | 🔄 В работе |
-| 03 | PHP | ⏳ |
-| 04 | Python | ⏳ |
-| 05 | Go | ⏳ |
-
-### AI / ML
-
-| # | Модуль | Статус |
-|---|--------|--------|
-| 06 | Prompt Engineering (text) | ⏳ |
-| 07 | Prompt Engineering (VLM) | ⏳ |
-| 08 | Multi-model orchestration | ⏳ |
-| 09 | Local inference (LM Studio / Ollama) | ⏳ |
-| 10 | RAG — архитектура и паттерны | ⏳ |
-| 11 | Fine-tuning / LoRA | ⏳ |
-| 12 | Evaluator / benchmark design | ⏳ |
-| 13 | JSON Schema / structured output | ⏳ |
-
-### Обработка документов
-
-| # | Модуль | Статус |
-|---|--------|--------|
-| 14 | OOXML — raw XML внутри DOCX | ⏳ |
-| 15 | PDF internals | ⏳ |
-| 16 | PDFium (WASM) | ⏳ |
-| 17 | Sharp / libvips | ⏳ |
-| 18 | Image formats (WebP / AVIF) | ⏳ |
-| 19 | Resolution pyramid / DPI theory | ⏳ |
-| 20 | SAX streaming XML | ⏳ |
-
-### Веб и SEO
-
-| # | Модуль | Статус |
-|---|--------|--------|
-| 21 | Static site generation | ⏳ |
-| 22 | Core Web Vitals | ⏳ |
-| 23 | Critical CSS inlining | ⏳ |
-| 24 | Schema.org / structured data | ⏳ |
-| 25 | Mobile-First CSS | ⏳ |
-| 26 | SEO — технические аспекты | ⏳ |
-| 27 | HTTP/2, кэширование | ⏳ |
-
-### Системное программирование и инфраструктура
-
-| # | Модуль | Статус |
-|---|--------|--------|
-| 28 | Worker Threads / Piscina | ⏳ |
-| 29 | Rate limiting паттерны | ⏳ |
-| 30 | Retry / resilience паттерны | ⏳ |
-| 31 | Docker | ⏳ |
-| 32 | CI/CD (GitHub Actions) | ⏳ |
-| 33 | Logging / observability | ⏳ |
-
-### Данные и интеграции
-
-| # | Модуль | Статус |
-|---|--------|--------|
-| 34 | REST API design | ⏳ |
-| 35 | WooCommerce REST API | ⏳ |
-| 36 | Google Sheets API | ⏳ |
-| 37 | Telegram API (Telethon / MTProto) | ⏳ |
-| 38 | SQL / реляционные БД | ⏳ |
-| 39 | JSON как source of truth | ⏳ |
-| 40 | VLM internals | ⏳ |
-
----
-
 ## Формат каждого модуля
 
-Каждый модуль построен по одной схеме:
+Каждый модуль построен по одной схеме и рассчитан на **один день изучения**:
 
 1. **Механика** — как технология работает внутри
 2. **Архитектурные решения** — когда применять, trade-offs
 3. **Граничные случаи** — где ломается, что AI не предупредит
 4. **Задачи AI-кодеру** — как правильно формулировать
-5. **Чеклист архитектора** — что должен знать перед принятием решений
+5. **Чеклист архитектора** — что проверить перед принятием решений
+6. **Глоссарий** — справочник терминов модуля
 
 ---
 
-## Автор
+## Структура курса
 
-**Alexander Kuzikov** — AI-архитектор, системный разработчик.
-Проектирует и реализует сложные технические системы,
-используя LLM как инструмент исполнения.
+### Языки программирования
 
-GitHub: [@AlexanderKuzikov](https://github.com/AlexanderKuzikov)
+| # | Модуль | Глоссарий | Статус |
+|---|--------|-----------|--------|
+| 01 | [JavaScript / Node.js](./01-javascript-nodejs/README.md) | [Глоссарий](./01-javascript-nodejs/GLOSSARY.md) | ✅ Готов |
+| 02 | [TypeScript](./02-typescript/README.md) | [Глоссарий](./02-typescript/GLOSSARY.md) | ✅ Готов |
+| 03 | [PHP](./03-php/README.md) | [Глоссарий](./03-php/GLOSSARY.md) | ✅ Готов |
+| 04 | Python | — | 🔄 Следующий |
+| 05 | Go | — | ⏳ |
+
+### AI / ML
+
+| # | Модуль | Глоссарий | Статус |
+|---|--------|-----------|--------|
+| 06 | Prompt Engineering (text) | — | ⏳ |
+| 07 | Prompt Engineering (VLM) | — | ⏳ |
+| 08 | Multi-model orchestration | — | ⏳ |
+| 09 | Local inference (LM Studio / Ollama) | — | ⏳ |
+| 10 | RAG — архитектура и паттерны | — | ⏳ |
+| 11 | Fine-tuning / LoRA | — | ⏳ |
+| 12 | Evaluator / benchmark design | — | ⏳ |
+| 13 | JSON Schema / structured output | — | ⏳ |
+
+### Обработка документов
+
+| # | Модуль | Глоссарий | Статус |
+|---|--------|-----------|--------|
+| 14 | OOXML — raw XML внутри DOCX | — | ⏳ |
+| 15 | PDF internals | — | ⏳ |
+| 16 | PDFium (WASM) | — | ⏳ |
+| 17 | Sharp / libvips | — | ⏳ |
+| 18 | Image formats (WebP / AVIF) | — | ⏳ |
+| 19 | Resolution pyramid / DPI theory | — | ⏳ |
+| 20 | SAX streaming XML | — | ⏳ |
+
+### Веб и SEO
+
+| # | Модуль | Глоссарий | Статус |
+|---|--------|-----------|--------|
+| 21 | Static site generation | — | ⏳ |
+| 22 | Core Web Vitals | — | ⏳ |
+| 23 | Critical CSS inlining | — | ⏳ |
+| 24 | Schema.org / structured data | — | ⏳ |
+| 25 | Mobile-First CSS | — | ⏳ |
+| 26 | SEO — технические аспекты | — | ⏳ |
+| 27 | HTTP/2, кэширование | — | ⏳ |
+
+### Системное программирование и инфраструктура
+
+| # | Модуль | Глоссарий | Статус |
+|---|--------|-----------|--------|
+| 28 | Worker Threads / Piscina | — | ⏳ |
+| 29 | Rate limiting паттерны | — | ⏳ |
+| 30 | Retry / resilience паттерны | — | ⏳ |
+| 31 | Docker | — | ⏳ |
+| 32 | CI/CD (GitHub Actions) | — | ⏳ |
+| 33 | Logging / observability | — | ⏳ |
+
+### Данные и интеграции
+
+| # | Модуль | Глоссарий | Статус |
+|---|--------|-----------|--------|
+| 34 | REST API design | — | ⏳ |
+| 35 | WooCommerce REST API | — | ⏳ |
+| 36 | Google Sheets API | — | ⏳ |
+| 37 | Telegram API (Telethon / MTProto) | — | ⏳ |
+| 38 | SQL / реляционные БД | — | ⏳ |
+| 39 | JSON как source of truth | — | ⏳ |
+| 40 | VLM internals | — | ⏳ |
+
+---
+
+## Прогресс
+
+```
+█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 3 / 40 (7.5%)
+```
 
 ---
 
