@@ -6,7 +6,7 @@
 
 
 **Автор:** [Alexander Kuzikov](https://github.com/AlexanderKuzikov)
-**Статус:** В активной разработке · 5 из 40 модулей готовы
+**Статус:** В активной разработке · 10 из 40 модулей готовы
 
 
 ---
@@ -66,6 +66,53 @@
 ---
 
 
+## Структура репозитория
+
+
+```
+
+AI-Architect-Course/
+├── README.md                              \# Этот файл
+├── Prompt.md                              \# System prompt курса
+│
+├── 01-javascript-nodejs/
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 02-typescript/
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 03-php/
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 04-python/
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 05-go/
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 06-prompt-engineering/                 \# ✅ Готов
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 07-json-schema/                        \# ✅ Готов
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 08-local-inference/                    \# ✅ Готов
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 09-evaluator-benchmark/                \# ✅ Готов
+│   ├── README.md
+│   └── GLOSSARY.md
+├── 10-prompt-engineering-vlm/             \# ✅ Готов
+│   ├── README.md
+│   └── GLOSSARY.md
+└── [11..40]-название/                     \# ⏳ В разработке
+
+```
+
+
+---
+
+
 ## Структура курса
 
 
@@ -86,14 +133,14 @@
 
 | # | Модуль | Глоссарий | Статус |
 |---|--------|-----------|--------|
-| 06 | Prompt Engineering (text) | — | 🔄 Следующий |
-| 07 | Prompt Engineering (VLM) | — | ⏳ |
-| 08 | Multi-model orchestration | — | ⏳ |
-| 09 | Local inference (LM Studio / Ollama) | — | ⏳ |
-| 10 | RAG — архитектура и паттерны | — | ⏳ |
-| 11 | Fine-tuning / LoRA | — | ⏳ |
-| 12 | Evaluator / benchmark design | — | ⏳ |
-| 13 | JSON Schema / structured output | — | ⏳ |
+| 06 | [Prompt Engineering (text)](./06-prompt-engineering/README.md) | [Глоссарий](./06-prompt-engineering/GLOSSARY.md) | ✅ Готов |
+| 07 | [JSON Schema / structured output](./07-json-schema/README.md) | [Глоссарий](./07-json-schema/GLOSSARY.md) | ✅ Готов |
+| 08 | [Local Inference (LM Studio / Ollama)](./08-local-inference/README.md) | [Глоссарий](./08-local-inference/GLOSSARY.md) | ✅ Готов |
+| 09 | [Evaluator / Benchmark Design](./09-evaluator-benchmark/README.md) | [Глоссарий](./09-evaluator-benchmark/GLOSSARY.md) | ✅ Готов |
+| 10 | [Prompt Engineering (VLM)](./10-prompt-engineering-vlm/README.md) | [Глоссарий](./10-prompt-engineering-vlm/GLOSSARY.md) | ✅ Готов |
+| 11 | Multi-model Orchestration | — | 🔄 Следующий |
+| 12 | RAG — архитектура и паттерны | — | ⏳ |
+| 13 | Fine-tuning / LoRA | — | ⏳ |
 
 
 ### Обработка документов
@@ -158,7 +205,9 @@
 
 
 ```
-████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 5 / 40 (12.5%)
+
+██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 10 / 40 (25%)
+
 ```
 
 
