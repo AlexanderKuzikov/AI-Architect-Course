@@ -24,9 +24,9 @@
 |:--|:--|:--|
 | Node.js Active LTS | 24.x | март 2026 |
 | LM Studio | 0.4.8 | март 2026 |
-| Groq free tier — llama-3.3-70b-versatile | 30 RPM / 1 000 RPD / 100K TPD | март 2026 |
-| Groq free tier — llama-3.1-8b-instant | 30 RPM / 14 400 RPD / 500K TPD | март 2026 |
-| Groq free tier — qwen/qwen3-32b | 60 RPM / 1 000 RPD / 500K TPD | март 2026 |
+| Groq free tier — CURRENT_REASONING_MODEL large | 30 RPM / 1 000 RPD / 100K TPD | март 2026 |
+| Groq free tier — CURRENT_LOCAL_TEXT_MODEL compact | 30 RPM / 14 400 RPD / 500K TPD | март 2026 |
+| Groq free tier — CURRENT_TEXT_MODEL mid | 60 RPM / 1 000 RPD / 500K TPD | март 2026 |
 | DaData API free tier | 10 000 запросов/сутки на ключ | март 2026 |
 | Sharp | 0.34.x | март 2026 |
 
@@ -199,19 +199,19 @@ const results = await Promise.all(items.map(item => queue.add(() => callDaData(i
 
 ### Механика
 
-Model Rotation отличается от Key Rotation одним принципиальным фактором: **поведение модели меняется**. При переключении с `llama-3.3-70b-versatile` на `llama-3.1-8b-instant` ты получаешь другой уровень рассуждений, другую длину ответов, возможно другой формат при structured output.
+Model Rotation отличается от Key Rotation одним принципиальным фактором: **поведение модели меняется**. При переключении с `CURRENT_REASONING_MODEL large` на `CURRENT_LOCAL_TEXT_MODEL compact` ты получаешь другой уровень рассуждений, другую длину ответов, возможно другой формат при structured output.
 
 Это значит: нельзя просто подставить новую модель и считать задачу решённой.
 
 ```
-Groq free tier (март 2026):
+Groq free tier (перед публикацией проверить актуальные лимиты):
 ┌──────────────────────────────┬──────┬───────┬─────────┐
 │ Модель                       │ RPM  │ RPD   │ TPD     │
 ├──────────────────────────────┼──────┼───────┼─────────┤
-│ llama-3.3-70b-versatile      │ 30   │ 1 000 │ 100K    │
-│ qwen/qwen3-32b               │ 60   │ 1 000 │ 500K    │
+│ CURRENT_REASONING_MODEL large      │ 30   │ 1 000 │ 100K    │
+│ CURRENT_TEXT_MODEL mid               │ 60   │ 1 000 │ 500K    │
 │ moonshotai/kimi-k2-instruct  │ 60   │ 1 000 │ 300K    │
-│ llama-3.1-8b-instant         │ 30   │14 400 │ 500K    │
+│ CURRENT_LOCAL_TEXT_MODEL compact         │ 30   │14 400 │ 500K    │
 └──────────────────────────────┴──────┴───────┴─────────┘
 RPD = requests per day, TPD = tokens per day
 ```
@@ -294,7 +294,7 @@ class ModelRotator {
 
 const rotator = new ModelRotator([
   {
-    model: 'llama-3.3-70b-versatile',
+    model: process.env.CURRENT_REASONING_MODEL || "current-reasoning-model",
     baseURL: 'https://api.groq.com/openai/v1',
     apiKey: process.env.GROQ_API_KEY!,
     dailyLimit: 1_000,
@@ -302,7 +302,7 @@ const rotator = new ModelRotator([
     lastResetDate: '',
   },
   {
-    model: 'qwen/qwen3-32b',
+    model: 'CURRENT_TEXT_MODEL mid',
     baseURL: 'https://api.groq.com/openai/v1',
     apiKey: process.env.GROQ_API_KEY!,
     dailyLimit: 1_000,
@@ -313,7 +313,7 @@ const rotator = new ModelRotator([
   },
   {
     // ✅ Fallback: высокий RPD, низкое качество — для некритичных задач
-    model: 'llama-3.1-8b-instant',
+    model: process.env.CURRENT_LOCAL_TEXT_MODEL || "current-local-text-model",
     baseURL: 'https://api.groq.com/openai/v1',
     apiKey: process.env.GROQ_API_KEY!,
     dailyLimit: 14_400,
@@ -358,7 +358,7 @@ if (this.currentIndex !== 0) {
 }
 ```
 
-**thinking-токены в ответе.** Модели с reasoning (Qwen3, DeepSeek) при включённом thinking режиме возвращают `<think>...</think>` блок перед ответом. Это ломает JSON-парсинг и structured output.
+**thinking-токены в ответе.** Модели с reasoning при включённом thinking режиме возвращают `<think>...</think>` блок перед ответом. Это ломает JSON-парсинг и structured output.
 
 **Почему это важно архитектору:** В production нужно знать, на какой модели был обработан каждый запрос. Без этого невозможно отследить деградацию качества после ротации.
 
@@ -650,7 +650,7 @@ Rate limits обрабатываются на уровне gateway:
 
 ### Результат
 
-Qwen3.5 0.8B и 2B на GTX 1660:
+SLM gate и 2B на GTX 1660:
 - Детекция цен на ценниках с кириллицей — корректно
 - Рукописный курсив на ценниках — корректно
 - Latency: менее 2 секунд на изображение
@@ -681,7 +681,7 @@ Telegram posts folder
          │
          ▼
   ┌─────────────┐
-  │  Gate VLM   │  Qwen3.5 0.8B / 2B локально
+  │  Gate VLM   │  SLM gate локально
   │  LM Studio  │  «Есть ли цена на изображении?»
   └──────┬──────┘
          │
@@ -762,7 +762,7 @@ Telegram posts folder
 > «Добавь fallback на другую модель при ошибке»
 
 Хорошая формулировка:
-> «Реализуй `ModelRotator` для Groq API (OpenAI-compatible). Порядок моделей: `llama-3.3-70b-versatile` (лимит 1000 RPD) → `qwen/qwen3-32b` (лимит 1000 RPD) → `llama-3.1-8b-instant` (лимит 14400 RPD). Переключение при HTTP 429 и при исчерпании суточного счётчика. Для `qwen/qwen3-32b` добавь `outputNormalizer` который удаляет `<think>...</think>` блоки из ответа. Логируй каждое переключение модели с именем модели и причиной переключения.»
+> «Реализуй `ModelRotator` для Groq API (OpenAI-compatible). Порядок моделей: `CURRENT_REASONING_MODEL large` (лимит 1000 RPD) → `CURRENT_TEXT_MODEL mid` (лимит 1000 RPD) → `CURRENT_LOCAL_TEXT_MODEL compact` (лимит 14400 RPD). Переключение при HTTP 429 и при исчерпании суточного счётчика. Для `CURRENT_TEXT_MODEL mid` добавь `outputNormalizer` который удаляет `<think>...</think>` блоки из ответа. Логируй каждое переключение модели с именем модели и причиной переключения.»
 
 Формула: конкретные модели + лимиты из документации + normalizer + observability.
 

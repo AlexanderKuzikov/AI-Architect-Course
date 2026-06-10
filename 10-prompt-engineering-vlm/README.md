@@ -22,53 +22,55 @@
 
 ---
 
-## Актуальные версии (март 2026)
+## Актуальный VLM-стек и модельная свежесть
 
-### Open-source VLM топ (Vision Arena leaderboard, март 2026)
+VLM-модели, vision encoder, projector, context length и reasoning режимы меняются быстрее, чем успевают обновляться учебные таблицы. Поэтому в этом модуле нет статичного leaderboard. Перед использованием нужно проверить:
 
-| Модель | ELO | Ctx | VLM | VRAM Q4 | Локальный инференс |
-| :-- | :-- | :-- | :-- | :-- | :-- |
-| Qwen3.5-397B-A17B | ~1450 | 262K | ✅ Native | Multi-GPU | vLLM / NVIDIA NIM |
-| Kimi K2.5 (~1T MoE) | ~1438 | 262K | ✅ vLLM only | Multi-GPU | vLLM (GGUF — vision не работает) |
-| Qwen3.5-122B-A10B | — | 262K | ✅ Native | ~70 Гб Q4 | vLLM / сервер |
-| Qwen3.5-35B-A3B | — | 262K | ✅ Native | ~20 Гб Q4 | LM Studio / vLLM |
-| Qwen3.5-9B | — | 262K | ✅ Native | ~6 Гб Q4 | LM Studio ✅ GTX 1660 |
-| Qwen3.5-4B | — | 262K | ✅ Native | ~3 Гб Q4 | LM Studio ✅ |
-| Qwen3.5-2B | — | 262K | ✅ Native | ~2 Гб Q4 | LM Studio ✅ |
-| Qwen3.5-0.8B | — | 262K | ✅ Native | ~1 Гб Q4 | LM Studio ✅ |
+- LMArena / Vision Arena / независимые evals — качество на похожих задачах;
+- Hugging Face / Ollama / LM Studio — доступность модели, projector, tokenizer и license;
+- backend support — GGUF/VLM, chat template, dynamic resolution, grounding;
+- hardware envelope — VRAM/RAM, n_ctx, visual tokens, batch size;
+- cost/latency — cloud vs local vs hybrid.
 
-> **GTX 1660 6 Гб:** Qwen3.5-9B Q4\_K\_M — оптимум для VLM задач.
-> Qwen3.5-4B — быстрее при ограниченном бюджете токенов.
-> Qwen3.5-0.8B / 2B — для классификации, routing, pre-screening документов.
+### Model freshness policy
 
-### Ключевые архитектурные отличия Qwen3.5 VLM
+```text
+Не писать: "конкретный model name из старого leaderboard — актуальный топ"
+Писать: "перед запуском проверить текущую VLM-модель в LMArena/HF/Ollama/LM Studio"
+```
+
+В примерах используются плейсхолдеры:
+
+- `CURRENT_VLM_MODEL` — текущая VLM-модель, выбранная после проверки;
+- `LOCAL_VLM_MODEL` — текущая локальная GGUF/VLM-модель;
+- `CLOUD_VLM_MODEL` — текущая cloud VLM/reasoning model.
+
+### Ключевые архитектурные отличия современных VLM
 
 | Компонент | Механика |
-| :-- | :-- |
-| Vision encoder | DeepStack ViT — иерархический, Conv3d для видео нативно |
-| Fusion | Early fusion: мультимодальные токены с первого слоя обучения |
-| Positional | M-RoPE 3D: text (1D), image (2D), video (3D) |
-| Attention | Hybrid: Gated DeltaNet (линейная сложность) + Gated Attention |
-| Контекст | 262K нативно, расширяется до 1M |
-| Reasoning | `/think` / `/no_think` управление в user message |
+|:--|:--|
+| Vision encoder | image/video → visual tokens; архитектура зависит от модели |
+| Fusion | early/late/interleaved fusion; влияет на grounding и hallucination |
+| Positional | multimodal positional embeddings: text/image/video axes |
+| Attention | long-context attention patterns; проверяются на visual token budget |
+| Context | visual tokens конкурируют с text tokens за n_ctx |
+| Reasoning | reasoning mode может помогать, но увеличивает latency и может ломать schema |
 
 ### Инструменты
 
-| Инструмент | Версия | Примечание |
-| :-- | :-- | :-- |
-| LM Studio | 0.4.8 | GGUF VLM, Qwen3.5 поддерживается |
-| vLLM | 0.8.x | Production VLM serving, Kimi K2.5 vision |
-| transformers | git HEAD | Qwen3.5 VLM требует HEAD |
-| qwen-vl-utils | 0.1.x | Официальный helper |
-
----
+| Инструмент | Статус | Примечание |
+|:--|:--|:--|
+| LM Studio | текущий stable | GGUF/VLM support зависит от релиза |
+| vLLM | текущий stable | Production serving; support model/backend нужно проверять |
+| transformers | текущий stable | Processor/model compatibility зависит от выбранной VLM |
+| OCR / layout parsers | текущий stable | pytesseract, MarkItDown, layout models — проверять по задаче |
 
 ## 1. Как VLM видит изображение — механика visual tokens
 
 ### Vision Encoder → visual tokens
 
 VLM не «видит» изображение. Он получает последовательность visual tokens,
-сгенерированных vision encoder из пикселей. В Qwen3.5 это DeepStack ViT —
+сгенерированных vision encoder из пикселей. В CURRENT_VLM_MODEL это vision encoder текущей VLM —
 иерархический encoder с несколькими масштабами:
 
 ```
@@ -76,7 +78,7 @@ VLM не «видит» изображение. Он получает после
 Изображение
 │
 ▼
-DeepStack ViT (иерархический — несколько масштабов)
+vision encoder текущей VLM (иерархический — несколько масштабов)
 │  patch embedding: изображение → патчи P×P пикселей
 │  каждый патч → вектор (visual token)
 │  иерархия: крупные патчи → контекст, мелкие → детали
@@ -84,16 +86,16 @@ DeepStack ViT (иерархический — несколько масштаб�
 Проекция (MLP cross-attention)
 │  visual tokens → пространство LLM эмбеддингов
 ▼
-LLM backbone (Hybrid Attention)
+LLM backbone (attention backbone текущей VLM)
 │  visual tokens + text tokens → единая последовательность
-│  Gated DeltaNet: O(n) для длинных последовательностей
+│  long-context attention текущей VLM: O(n) для длинных последовательностей
 ▼
 Ответ
 
 ```
 
 Ключевое число: **количество visual tokens зависит от разрешения**.
-Для Qwen3.5 с patch size 32×32:
+Для конкретной VLM patch size нужно проверять в processor config:
 
 ```
 
@@ -110,9 +112,9 @@ tokens = (width / 32) × (height / 32)
 Это токены контекста — они конкурируют с text tokens за n\_ctx.
 Изображение 2048×2048 = 4096 visual tokens ≈ ~3000 слов текста.
 
-### M-RoPE 3D — позиционные эмбеддинги
+### multimodal positional embeddings — позиционные эмбеддинги
 
-Qwen3.5 использует Multimodal Rotary Position Embedding (M-RoPE) с тремя осями:
+Многие современные VLM используют multimodal positional embeddings с осями для текста/изображения/видео:
 
 ```
 
@@ -128,10 +130,10 @@ Video tokens:  3D координаты (frame, row, col)
 
 ```
 
-### Early Fusion — почему Qwen3.5 иначе чем предшественники
+### Early Fusion — почему CURRENT_VLM_MODEL иначе чем предшественники
 
 Предыдущие поколения: vision encoder обучается отдельно, затем стыкуется с LLM.
-Qwen3.5: мультимодальные токены присутствуют с первого шага обучения — нет
+CURRENT_VLM_MODEL: мультимодальные токены присутствуют с первого шага обучения — нет
 швов между текстовым и визуальным пониманием.
 
 ```
@@ -140,7 +142,7 @@ Qwen3.5: мультимодальные токены присутствуют с
 Vision Encoder (pretrained) → проекция → LLM (pretrained)
 Стык — источник галлюцинаций на нестандартных изображениях
 
-✅ Early fusion (Qwen3.5):
+✅ Early fusion (CURRENT_VLM_MODEL):
 Обучение на смешанных мультимодальных данных с нуля
 Модель не «переводит» картинку в текст — понимает нативно
 
@@ -186,17 +188,17 @@ def letterbox_resize(img: Image.Image, target_size: int) -> Image.Image:
 
 ## 2. Dynamic Resolution — управление токен-бюджетом
 
-### Механика dynamic resolution в Qwen3.5
+### Механика dynamic resolution в CURRENT_VLM_MODEL
 
-Qwen3.5 принимает произвольные разрешения — нет фиксированного resize до
+CURRENT_VLM_MODEL принимает произвольные разрешения — нет фиксированного resize до
 стандартного размера. Модель динамически нарезает на патчи и обрабатывает
-иерархически через DeepStack ViT:
+иерархически через vision encoder текущей VLM:
 
 ```python
 from transformers import AutoProcessor
 
 # ❌ Дефолт — нативное разрешение без ограничений
-processor = AutoProcessor.from_pretrained("Qwen/Qwen3.5-9B")
+processor = AutoProcessor.from_pretrained("os.environ.get("CURRENT_VLM_MODEL", "current-vlm")")
 # A4 скан 2480×3508 → (2480/32) × (3508/32) ≈ 77 × 109 = 8393 visual tokens
 # При n_ctx=8192 — не помещается вместе с текстом
 
@@ -205,7 +207,7 @@ min_pixels = 256 * 32 * 32    # 256 tokens минимум
 max_pixels = 1280 * 32 * 32   # 1280 tokens максимум
 
 processor = AutoProcessor.from_pretrained(
-    "Qwen/Qwen3.5-9B",
+    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
     min_pixels=min_pixels,
     max_pixels=max_pixels,
 )
@@ -253,7 +255,7 @@ print(calculate_visual_tokens(800, 600))    # Scan low  → ~468 tokens
 ```python
 # Стратегия 1: Высокое разрешение — для мелкого шрифта
 high_res_processor = AutoProcessor.from_pretrained(
-    "Qwen/Qwen3.5-9B",
+    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
     min_pixels=1024 * 32 * 32,
     max_pixels=4096 * 32 * 32,   # до 4096 tokens
 )
@@ -284,7 +286,7 @@ def tile_document(img: Image.Image, tiles: int = 4) -> list[Image.Image]:
 
 ```python
 # Слишком мало visual tokens → галлюцинации на мелком шрифте
-# Qwen3.5-9B с min_pixels=256 для документа 8pt → модель «домысливает» текст
+# CURRENT_VLM_MODEL с min_pixels=256 для документа 8pt → модель «домысливает» текст
 # Симптом: уверенный ответ с неверными данными
 
 # Правило: для OCR качества нужно ~1-2 visual tokens на символ
@@ -452,12 +454,12 @@ class DocumentRecord(BaseModel):
     confidence: dict[str, str] = {}  # поле → "high"/"medium"/"low"
 
 model = AutoModelForCausalLM.from_pretrained(
-    "Qwen/Qwen3.5-9B",
+    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
     torch_dtype=torch.float16,
     device_map="cuda",
 )
 processor = AutoProcessor.from_pretrained(
-    "Qwen/Qwen3.5-9B",
+    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
     min_pixels=512 * 32 * 32,
     max_pixels=2048 * 32 * 32,
 )
@@ -525,7 +527,7 @@ async def extract_document(image_path: str) -> dict | None:
     img_b64 = base64.b64encode(Path(image_path).read_bytes()).decode()
     try:
         response = await client.chat.completions.create(
-            model="lmstudio-community/Qwen3.5-9B-GGUF",
+            model="lmstudio-community/CURRENT_VLM_MODEL-GGUF",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
@@ -577,7 +579,7 @@ TABLE_SYSTEM = """Ты экстрактор данных из таблиц.
 ```python
 # Ротированные документы — critical failure
 # Документ под углом 90° → текст читается как столбцы, не строки
-# Qwen3.5 не автоматически корректирует ориентацию
+# CURRENT_VLM_MODEL не автоматически корректирует ориентацию
 
 # ✅ Pre-processing: auto-rotate через pytesseract OSD
 import pytesseract
@@ -638,7 +640,7 @@ Document → layout/OCR → semantic parsing → structured JSON → validation
 
 ### Bounding box extraction
 
-Qwen3.5 возвращает bounding boxes в нормализованном формате [0, 1000]:
+CURRENT_VLM_MODEL возвращает bounding boxes в нормализованном формате [0, 1000]:
 
 ```python
 # Промпт для grounding
@@ -747,7 +749,7 @@ messages = [
 ### Видео — нативная поддержка через Conv3d
 
 ```python
-# Qwen3.5 обрабатывает видео нативно через DeepStack Conv3d
+# CURRENT_VLM_MODEL обрабатывает видео нативно через video encoder текущей VLM
 # Не нужен внешний frame sampler — модель сама управляет temporal attention
 
 messages = [
@@ -792,13 +794,13 @@ messages = [
 
  GTX 1660 6 Гб           RTX 3090/4090 24 Гб        Multi-GPU / Cloud
       │                         │                          │
- Qwen3.5-9B Q4             Qwen3.5-35B-A3B           Qwen3.5-397B-A17B
+ CURRENT_VLM_MODEL Q4             CLOUD_VLM_MODEL mid           CLOUD_VLM_MODEL large
  LM Studio 0.4.8           LM Studio / vLLM          vLLM / NVIDIA NIM
  ~4-6 img/min              ~15-20 img/min            ~50+ img/min
  n_ctx до 16K              n_ctx до 32K              n_ctx до 262K
 
  Маленькие задачи          Рабочий вариант           Enterprise production
- Qwen3.5-4B / 2B / 0.8B   для команды               Kimi K2.5 (vLLM only)
+ CURRENT_SMALL_VLM / 2B / 0.8B   для команды               CLOUD_VLM_MODEL (vLLM only)
  для routing/pre-screen
 ```
 
@@ -816,17 +818,17 @@ class DocumentComplexity(Enum):
 # Pre-screening: маленькая модель классифицирует сложность
 # Основная extraction: только на нужном размере
 async def smart_extract(image_path: str) -> dict | None:
-    # Stage 0: быстрая классификация сложности (Qwen3.5-0.8B)
+    # Stage 0: быстрая классификация сложности (CURRENT_EDGE_SLM)
     complexity = await classify_complexity(
         image_path,
-        model="lmstudio-community/Qwen3.5-0.8B-GGUF",
+        model="lmstudio-community/CURRENT_EDGE_SLM-GGUF",
     )
 
     # Stage 1: extraction по сложности
     model = {
-        DocumentComplexity.SIMPLE:  "Qwen3.5-4B-GGUF",
-        DocumentComplexity.MEDIUM:  "Qwen3.5-9B-GGUF",
-        DocumentComplexity.COMPLEX: "Qwen3.5-9B-GGUF",  # max на GTX 1660
+        DocumentComplexity.SIMPLE:  "CURRENT_SMALL_VLM-GGUF",
+        DocumentComplexity.MEDIUM:  "CURRENT_VLM_MODEL-GGUF",
+        DocumentComplexity.COMPLEX: "CURRENT_VLM_MODEL-GGUF",  # max на GTX 1660
     }[complexity]
 
     return await extract_document(image_path, model=model)
@@ -847,7 +849,7 @@ client = AsyncOpenAI(
 
 async def batch_extract(
     paths: list[str],
-    concurrency: int = 2,  # GTX 1660: максимум 2 для Qwen3.5-9B
+    concurrency: int = 2,  # GTX 1660: максимум 2 для CURRENT_VLM_MODEL
 ) -> list[dict | None]:
     # Расчёт concurrency:
     # GTX 1660: 6 Гб - 5 Гб (модель Q4) - 0.5 Гб (overhead) = 0.5 Гб
@@ -863,7 +865,7 @@ async def batch_extract(
     return await asyncio.gather(*[_extract(p) for p in paths])
 ```
 
-**Практический вывод для архитектора:** Qwen3.5-0.8B/2B/4B — не «слабые версии».
+**Практический вывод для архитектора:** CURRENT_EDGE_SLM/2B/4B — не «слабые версии».
 Это отдельные инструменты: 0.8B для routing и classification, 2B для простых
 extraction, 4B для medium сложности. Все с Reasoning и Vision. Routing по
 сложности снижает median latency в 2–3× при том же качестве на сложных кейсах.
@@ -871,18 +873,18 @@ extraction, 4B для medium сложности. Все с Reasoning и Vision. 
 ### Граничные случаи — где ломается
 
 ```python
-# Kimi K2.5 vision через GGUF — не работает
+# CLOUD_VLM_MODEL vision через GGUF — не работает
 # Vision поддерживается только через vLLM
 # ❌ Попытка запустить K2.5 через llama.cpp с mmproj
 # → vision недоступен, только text inference
 
-# ✅ Kimi K2.5 vision — только vLLM production setup:
-# vllm serve moonshotai/Kimi-K2.5 \
+# ✅ CLOUD_VLM_MODEL vision — только vLLM production setup:
+# vllm serve os.environ[CLOUD_VLM_MODEL] \
 #   --trust-remote-code \
 #   --tensor-parallel-size 8 \
 #   --gpu-memory-utilization 0.9
 
-# Для локального VLM без multi-GPU — только Qwen3.5
+# Для локального VLM без multi-GPU — только CURRENT_VLM_MODEL
 
 # Concurrency > 2 на GTX 1660 для 9B модели
 # VRAM overflow → CPU fallback → TPS деградация ×10
@@ -890,9 +892,9 @@ extraction, 4B для medium сложности. Все с Reasoning и Vision. 
 # ✅ Жёсткий semaphore, мониторинг GPU memory через nvidia-smi
 ```
 
-**Почему это важно архитектору:** Kimi K2.5 — лидер leaderboard, но
-недоступен для локального VLM без серьёзного железа. Qwen3.5 —
-единственная линейка с полным покрытием от 0.8B до 397B с рабочим
+**Почему это важно архитектору:** CLOUD_VLM_MODEL — лидер leaderboard, но
+недоступен для локального VLM без серьёзного железа. CURRENT_VLM_MODEL —
+не фиксировать линейку по памяти; выбирать текущую модель после проверки visual token budget
 VLM на любом hardware.
 
 ---
@@ -900,7 +902,7 @@ VLM на любом hardware.
 ## Реальный кейс
 
 **Задача:** batch extraction реквизитов из ~2000 сканов судебных удостоверений.
-**Стек:** GTX 1660 6 Гб, Qwen3.5-9B Q4\_K\_M, LM Studio 0.4.8, Python.
+**Стек:** GTX 1660 6 Гб, CURRENT_VLM_MODEL Q4\_K\_M, LM Studio 0.4.8, Python.
 
 **Гипотеза:** VLM с detail=high даст лучший результат чем
 pytesseract + text LLM для extraction из низкокачественных сканов.
@@ -913,7 +915,7 @@ Pytesseract + text LLM:
   Точность (чистые сканы):    91%
   Точность (низкое качество): 54%
 
-Qwen3.5-9B, detail=high, concurrency=2:
+CURRENT_VLM_MODEL, detail=high, concurrency=2:
   Скорость: ~4 docs/min
   Точность (чистые сканы):    95%
   Точность (низкое качество): 73%
@@ -925,7 +927,7 @@ Qwen3.5-9B, detail=high, concurrency=2:
 а VLM нет. После добавления auto\_rotate в pre-processing:
 
 ```
-Qwen3.5-9B + pre-processing pipeline:
+CURRENT_VLM_MODEL + pre-processing pipeline:
   Скорость: ~5.5 docs/min
   Точность (все типы): 94%
 ```
@@ -935,8 +937,8 @@ Qwen3.5-9B + pre-processing pipeline:
 - Pre-processing: auto\_rotate → contrast enhancement → letterbox resize
 - Routing: SSIM quality score
     - высокое качество → pytesseract + text LLM (~8 docs/min)
-    - низкое качество → Qwen3.5-9B detail=high (~4 docs/min)
-- Qwen3.5-4B для pre-screening и классификации типа документа
+    - низкое качество → CURRENT_VLM_MODEL detail=high (~4 docs/min)
+- CURRENT_SMALL_VLM для pre-screening и классификации типа документа
 
 Итог: 6.5 docs/min средняя скорость, 94% точность на всём датасете.
 
@@ -948,12 +950,12 @@ Qwen3.5-9B + pre-processing pipeline:
 
 ```python
 # ❌ processor без max_pixels на production данных
-processor = AutoProcessor.from_pretrained("Qwen/Qwen3.5-9B")
+processor = AutoProcessor.from_pretrained("os.environ.get("CURRENT_VLM_MODEL", "current-vlm")")
 # A4 300dpi → OOM или деградация из-за превышения n_ctx
 
 # ✅
 processor = AutoProcessor.from_pretrained(
-    "Qwen/Qwen3.5-9B",
+    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
     max_pixels=1280 * 32 * 32,
 )
 ```
@@ -972,7 +974,7 @@ messages[-1]["content"][-1]["text"] = "/no_think\nИзвлеки ИНН из д�
 **3. VLM вместо pytesseract для простых задач**
 
 ```python
-# ❌ Qwen3.5-9B для чистого печатного текста с высоким DPI
+# ❌ CURRENT_VLM_MODEL для чистого печатного текста с высоким DPI
 # VLM в 5-10× медленнее pytesseract без прироста качества
 
 # ✅ VLM оправдан когда:
@@ -996,20 +998,20 @@ def preprocess(path: str) -> Image.Image:
     return letterbox_resize(img, 1024)
 ```
 
-**5. Kimi K2.5 через GGUF для vision задач**
+**5. CLOUD_VLM_MODEL через GGUF для vision задач**
 
 ```python
 # ❌ Ожидать vision через llama.cpp / LM Studio для K2.5
-# Vision не поддерживается в GGUF для K2.5 на март 2026
+# Vision support в GGUF зависит от модели/backend; для некоторых VLM нужен отдельный projector или vLLM
 
-# ✅ Kimi K2.5 vision — только vLLM с полной моделью
-# Для локального VLM: Qwen3.5 линейка
+# ✅ CLOUD_VLM_MODEL vision — только vLLM с полной моделью
+# Для локального VLM: CURRENT_VLM_MODEL линейка
 ```
 
 **6. Один размер модели на все задачи**
 
 ```python
-# ❌ Qwen3.5-9B для всех документов включая простые
+# ❌ CURRENT_VLM_MODEL для всех документов включая простые
 # Waste: простой документ обрабатывается в 2× дольше чем нужно
 
 # ✅ Routing: 0.8B/2B для классификации и простых задач,
@@ -1094,7 +1096,7 @@ def preprocess(path: str) -> Image.Image:
 
 - [ ] Concurrency рассчитан под VRAM бюджет (не дефолт)
 - [ ] Routing по сложности: 0.8B/2B/4B/9B под задачу
-- [ ] Kimi K2.5 vision — только vLLM, не GGUF
+- [ ] CLOUD_VLM_MODEL vision — только vLLM, не GGUF
 - [ ] Two-stage pipeline для документов со сложной структурой
 - [ ] Fallback на pytesseract для высококачественных сканов
 

@@ -136,7 +136,7 @@ async function callAiApi(
       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: process.env.CURRENT_TEXT_MODEL || "current-text-model",
       messages: [{ role: 'user', content: prompt }],
     }),
     signal: options?.signal,
@@ -524,7 +524,7 @@ async function callAiWithRetry(
             'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
-            model: 'gpt-4o',
+            model: process.env.CURRENT_TEXT_MODEL || "current-text-model",
             messages: [{ role: 'user', content: prompt }],
           }),
           signal: options?.signal,
@@ -639,7 +639,7 @@ async function callAiApiRaw(prompt: string): Promise<string> {
       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: process.env.CURRENT_TEXT_MODEL || "current-text-model",
       messages: [{ role: 'user', content: prompt }],
     }),
   });
@@ -871,7 +871,7 @@ async function* streamCompletion(
         'Accept': 'text/event-stream',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: process.env.CURRENT_TEXT_MODEL || "current-text-model",
         messages: [{ role: 'user', content: prompt }],
         stream: true,
       }),
@@ -1178,7 +1178,7 @@ got: 5M загрузок/неделю, меньшая поверхность
 > «Сделай HTTP клиент для AI API»
 
 Хорошая формулировка:
-> «Реализуй TypeScript класс `AiApiClient` использующий undici 7.24.6 Pool. Конструктор принимает `{baseUrl: string, apiKey: string, poolSize?: number, inferenceTimeoutMs?: number}`. Дефолты: poolSize=10, inferenceTimeoutMs=120000. Метод `complete(prompt: string, signal?: AbortSignal): Promise<string>` — POST /v1/chat/completions, model: gpt-4o, парсить choices[^0].message.content. Retry через p-retry 6.x: maxAttempts=4, exponential backoff с jitter (randomize: true), ретраить только 429/500/502/503/504 и network ошибки. Для 429 — читать Retry-After заголовок и ждать указанное время. AbortError — немедленно выбрасывать без retry. Метод `getStats()` возвращает `{connected, free, pending}` из Pool stats.»
+> «Реализуй TypeScript класс `AiApiClient` использующий undici 7.24.6 Pool. Конструктор принимает `{baseUrl: string, apiKey: string, poolSize?: number, inferenceTimeoutMs?: number}`. Дефолты: poolSize=10, inferenceTimeoutMs=120000. Метод `complete(prompt: string, signal?: AbortSignal): Promise<string>` — POST /v1/chat/completions, model: process.env.CURRENT_TEXT_MODEL || "current-text-model", парсить choices[^0].message.content. Retry через p-retry 6.x: maxAttempts=4, exponential backoff с jitter (randomize: true), ретраить только 429/500/502/503/504 и network ошибки. Для 429 — читать Retry-After заголовок и ждать указанное время. AbortError — немедленно выбрасывать без retry. Метод `getStats()` возвращает `{connected, free, pending}` из Pool stats.»
 
 Формула: pooling + retry семантика + Retry-After + AbortError handling + stats.
 

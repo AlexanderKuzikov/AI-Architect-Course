@@ -418,7 +418,7 @@ JUDGE_SYSTEM = """
 
 # Self-enhancement bias: модель предпочитает свои же паттерны
 # Митигация: используй модель другого семейства в качестве судьи
-# Production модель: Qwen3.5 → Судья: Llama 3.x или внешний API
+# Production модель: CURRENT_TEXT_MODEL → Судья: модель другого семейства или внешний API
 ```
 
 ### Calibration — валидация судьи
@@ -515,7 +515,7 @@ extraction_accuracy = GEval(
         LLMTestCaseParams.EXPECTED_OUTPUT,
     ],
     threshold=0.7,
-    model="gpt-4o-mini",   # или локальная модель через LiteLLM
+    model=os.environ.get("CURRENT_TEXT_MODEL", "current-text-model"),   # или локальная модель через LiteLLM
 )
 
 @pytest.mark.parametrize("test_case", load_test_cases())
@@ -620,14 +620,14 @@ prompts:
   - file://prompts/court_extractor_v2.txt
 
 providers:
-  - id: openai:chat:gpt-4o-mini
+  - id: openai:chat:${CURRENT_TEXT_MODEL}
   - id: http
     config:
       url: http://localhost:1234/v1/chat/completions
       headers:
         Authorization: "Bearer lm-studio"
       body:
-        model: lmstudio-community/Qwen3.5-9B-GGUF
+        model: lmstudio-community/CURRENT_LOCAL_JUDGE-GGUF
         temperature: 0.0
 
 tests:
@@ -899,9 +899,9 @@ AgentOps evals должны быть частью CI/CD, но не заменя�
 ## 8. Реальный кейс
 
 **Задача:** построить evaluation pipeline для extraction ~5000 судебных объектов.  
-**Стек:** Python, DeepEval, локальный LLM-судья (LM Studio), GitHub Actions.
+**Стек:** Python, DeepEval, локальный LLM-судья из проверенного current registry (LM Studio), GitHub Actions.
 
-**Гипотеза:** LLM-as-Judge с Qwen3.5-9B как судьёй достаточно для CI/CD gates —  
+**Гипотеза:** LLM-as-Judge с CURRENT_LOCAL_JUDGE как судьёй достаточно для CI/CD gates —  
 это дешевле облачного API и соответствует требованиям data privacy.
 
 **Что получилось:**
@@ -931,7 +931,7 @@ downstream системы не простит.
 **Итоговая архитектура:**
 
 - CI/CD: DeepEval + exact metrics (field-level accuracy) — на каждый PR, < 2 мин
-- Ночной прогон: G-Eval с локальным судьёй (Qwen3.5-4B + few-shot) — 500 кейсов
+- Ночной прогон: G-Eval с локальным судьёй (CURRENT_LOCAL_JUDGE + few-shot) — 500 кейсов
 - Pre-release: human evaluation 50 кейсов из hard/edge категорий
 
 ---

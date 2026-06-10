@@ -202,6 +202,10 @@
 
 Этот блок расширен модулями 41–47: MCP/tool servers, A2A/multi-agent, agent memory, browser-use, agentic RAG, AgentOps и AI security для агентов.
 
+### Model freshness policy
+
+Курс не фиксирует конкретные model names как «актуальный топ»: такие таблицы устаревают быстрее, чем обновляется статичный Markdown. Для AI-модулей используется правило: в тексте — архитектурные классы и плейсхолдеры `CURRENT_*_MODEL`, а перед публикацией или запуском — проверка в LMArena/HF/Ollama/LM Studio/backend docs.
+
 ---
 
 ## Прогресс курса

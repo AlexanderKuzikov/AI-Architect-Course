@@ -23,32 +23,36 @@
 
 ---
 
-## Актуальные версии (март 2026)
+## Актуальный стек и модельная свежесть
 
-### Топ open-weight моделей (Arena, март 2026)
+Модельный рынок меняется быстрее, чем успевает обновляться статичный учебник. Поэтому курс не фиксирует «текущий топ моделей» по памяти. Перед публикацией или использованием раздела нужно проверить:
 
+- LMArena / independent evals — качество и специализацию;
+- Hugging Face / Ollama / LM Studio — доступность артефактов и лицензии;
+- backend support — chat template, GGUF, vision projector, structured output;
+- cost/latency/privacy — можно ли запускать локально и в каком hardware envelope.
 
-| Модель        | Организация | Arena ELO | Ctx  | Особенность             |
-| ------------- | ----------- | --------- | ---- | ----------------------- |
-| GLM-5         | Zhipu AI    | ~1454     | 200K | Лидер overall           |
-| Qwen3.5 397B  | Alibaba     | ~1450     | 262K | Hybrid thinking mode    |
-| Kimi K2.5     | Moonshot    | ~1438     | 262K | 1T MoE, лидер кода      |
-| DeepSeek V3.2 | DeepSeek    | ~1423     | 130K | MIT license             |
-| Qwen3 235B    | Alibaba     | ~1423     | 262K | A-tier, меньше ресурсов |
+### Model freshness policy
 
+```text
+Не писать: "конкретный model name из старого leaderboard — актуальный топ"
+Писать: "перед запуском проверить текущие модели в LMArena/HF/Ollama/LM Studio"
+```
 
-### Inference backend (локально)
+В примерах ниже используются нейтральные плейсхолдеры:
 
+- `CURRENT_TEXT_MODEL` — текущая текстовая модель, выбранная после проверки;
+- `CURRENT_LOCAL_TEXT_MODEL` — текущая локальная модель;
+- `CURRENT_REASONING_MODEL` — текущая reasoning model, если включён reasoning mode.
 
-| Инструмент      | Статус   | Ключевое                            |
-| --------------- | -------- | ----------------------------------- |
-| LM Studio 0.3.x | Актуален | GUI + OpenAI-совместимый API        |
-| Ollama          | Актуален | CLI-first, Docker-friendly          |
-| llama.cpp       | Актуален | Основа обоих выше, grammar sampling |
-| vLLM            | Актуален | Production serving, PagedAttention  |
+### Inference backend
 
-
----
+| Инструмент | Статус | Ключевое |
+|:--|:--|:--|
+| LM Studio | текущий stable | GUI + OpenAI-compatible API, GGUF/VLM support зависит от релиза |
+| Ollama | текущий stable | CLI-first, Docker-friendly, library/model compatibility меняется |
+| llama.cpp | rolling | Фиксировать commit/build hash в production |
+| vLLM | текущий stable | Production serving, PagedAttention, provider/model support меняется |
 
 ## 1. Как LLM генерирует текст — механика
 
@@ -94,7 +98,7 @@ messages = [
     {"role": "user",      "content": "Извлеки адрес из текста: ..."},
 ]
 
-# То, что видит Qwen3.5 (после применения chat template):
+# То, что видит CURRENT_TEXT_MODEL после применения chat template:
 # <|im_start|>system
 # Ты ассистент для анализа документов.<|im_end|>
 # <|im_start|>user
@@ -102,7 +106,7 @@ messages = [
 # <|im_start|>assistant
 # <думает>   ← thinking tokens если включён reasoning
 
-# То, что видит GLM-5 — другой формат специальных токенов
+# То, что видит другая модель — другой формат специальных токенов
 ```
 
 Нарушение ожидаемого формата chat template деградирует качество ответов —  
@@ -155,9 +159,10 @@ prompt = [
 
 ```python
 # Подсчёт токенов перед отправкой (tiktoken для OpenAI-совместимых)
+import os
 import tiktoken
 
-def count_tokens(messages: list[dict], model: str = "gpt-4o") -> int:
+def count_tokens(messages: list[dict], model: str = os.environ.get("CURRENT_TEXT_MODEL", "current-text-model")) -> int:
     enc = tiktoken.encoding_for_model(model)
     total = 0
     for msg in messages:
@@ -168,7 +173,7 @@ def count_tokens(messages: list[dict], model: str = "gpt-4o") -> int:
 
 # Для локальных моделей — через transformers tokenizer
 from transformers import AutoTokenizer
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3.5-7B-Instruct")
+tokenizer = AutoTokenizer.from_pretrained(os.environ.get("CURRENT_LOCAL_TEXT_MODEL", "current-local-text-model"))
 tokens = tokenizer.apply_chat_template(messages, tokenize=True)
 print(f"Токенов: {len(tokens)}")
 ```
@@ -206,7 +211,7 @@ SYSTEM_PROMPT = """
 ```python
 # Anthropic — явная разметка кэшируемого блока
 response = client.messages.create(
-    model="claude-*-latest",
+    model=os.environ.get("CURRENT_REASONING_MODEL", "current-reasoning-model"),
     system=[{
         "type": "text",
         "text": LONG_SYSTEM_PROMPT,
@@ -563,7 +568,7 @@ Thinking-токены:
 Современные модели поддерживают переключение thinking on/off:
 
 ```python
-# Qwen3.5 через параметр API (LM Studio / OpenAI-совместимый):
+# CURRENT_TEXT_MODEL через параметр API (LM Studio / OpenAI-совместимый):
 response = client.chat.completions.create(
     model=MODEL,
     messages=messages,
@@ -943,7 +948,7 @@ class PipelineMetrics:
 судебных органов РФ. Источник — неструктурированный HTML, качество данных  
 варьирует от чистого до «адрес написан в поле телефона».
 
-**Стек:** Python, OpenAI-совместимый API → LM Studio, модель Qwen3 4B (локально,  
+**Стек:** Python, OpenAI-совместимый API → LM Studio, модель CURRENT_LOCAL_TEXT_MODEL (локально,  
 GTX 1660 6 Гб).
 
 **Гипотеза:** отключение reasoning через `/no_think` или `reasoning: 'off'` даст  
@@ -1037,9 +1042,9 @@ assert response.usage.reasoning_tokens == 0, (
 ### Один промпт для всех размеров модели
 
 ```python
-# ❌ "Промпт работает на 14B — значит будет работать на 4B"
-# 4B и 14B имеют принципиально разные возможности instruction following.
-# Промпт под 14B может быть слишком сложным для 4B.
+# ❌ "Промпт работает на local-mid model — значит будет работать на edge SLM"
+# edge SLM и local-mid model имеют принципиально разные возможности instruction following.
+# Промпт под local-mid model может быть слишком сложным для edge SLM.
 
 # ✅ Отдельная валидация на целевом размере модели.
 # Правило: уменьшил размер модели — пересмотри сложность промпта.

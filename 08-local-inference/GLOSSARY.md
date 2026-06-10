@@ -76,12 +76,12 @@ Draft 2019-09/2020-12. Unicode в enum значениях может генер�
 `-ngl -1` или `--n-gpu-layers 999` — загрузить всё что помещается.
 Слои сверх VRAM остаются в RAM и обрабатываются CPU — резко снижая TPS.
 Правило: частичный offload с CPU fallback даёт ~5-20x меньше TPS чем полный GPU.
-Для GTX 1660 6 Гб: Q4_K_M 7B помещается полностью, 14B — частично.
+Для GTX 1660 6 Гб: compact Q4_K_M model может помещаться полностью, local-mid model — часто частично.
 
 **GQA (Grouped Query Attention)**
 Архитектурная оптимизация: `n_kv_heads < n_heads`. Снижает размер KV-cache
 пропорционально соотношению голов. Стандартная формула расчёта VRAM завышает
-KV-cache для GQA моделей. Используется в Llama 3.x, Qwen 2.x/3.x.
+KV-cache для GQA моделей. Используется в современных decoder-only моделях.
 
 ## H
 
@@ -143,7 +143,7 @@ Headless inference daemon LM Studio 0.4.x. Позволяет использов
 
 **mmproj**
 Дополнительный файл vision проекции для мультимодальных моделей.
-Причина несовместимости Qwen3.5 GGUF с Ollama (март 2026):
+Причина возможной несовместимости GGUF/VLM с Ollama:
 Ollama не поддерживает split weights с отдельным mmproj файлом.
 
 **Modelfile**
@@ -164,7 +164,7 @@ PARAMETER num_ctx 8192
 
 **no_think / think**
 Теги `/no_think` и `/think` в начале user message для управления reasoning
-у совместимых моделей (Qwen3.5, QwQ, DeepSeek-R1).
+у совместимых reasoning-capable моделей.
 Работают на уровне chat template токенизации — наиболее надёжный способ управления.
 API параметры (`reasoning_effort`) могут игнорироваться если модель их не поддерживает.
 
@@ -181,7 +181,7 @@ CLI-first инструмент для локального запуска LLM с
 Управляет загрузкой/выгрузкой моделей, хранит их в `~/.ollama/models`.
 Использует llama.cpp как backend. Modelfile — механизм конфигурации.
 В отличие от LM Studio: headless-режим, легче интегрируется в Docker и CI.
-Qwen3.5 GGUF несовместим с Ollama (март 2026) из-за mmproj split weights.
+GGUF/VLM может быть несовместим с Ollama из-за split weights, vision projector или неподдерживаемого tokenizer.
 
 **OpenAI-Compatible API**
 HTTP API, реализующий эндпоинты `/v1/chat/completions`, `/v1/completions`, `/v1/models`
@@ -191,7 +191,7 @@ HTTP API, реализующий эндпоинты `/v1/chat/completions`, `/v1
 
 **Outlines**
 Библиотека structured generation. Реализует токен-уровневые маски через FSM
-поверх HuggingFace transformers или llama.cpp. Версия 0.2.x (март 2026).
+поверх HuggingFace transformers или llama.cpp. Версия зависит от релиза; перед запуском проверять current package.
 Поддерживает сложные схемы, regex, CFG. Overhead инициализации FSM ~100–500ms
 на первый запрос, последующие — без задержки.
 
@@ -282,7 +282,7 @@ KV-cache устраняет повторный prefill общего prefix — �
 **TPS (Tokens Per Second)**
 Скорость генерации токенов в decode-фазе.
 Определяется memory bandwidth GPU, не FLOPS. На GTX 1660 (192 GB/s):
-Q4_K_M 7B ≈ 30–40 TPS при полном GPU offload, Q8_0 7B ≈ 15–20 TPS.
+Compact Q4_K_M model ≈ 30–40 TPS при полном GPU offload; Q8_0 compact model ≈ 15–20 TPS.
 CPU fallback (частичный offload) даёт 5–10x падение TPS.
 
 **Two-Pass Pipeline**
@@ -301,9 +301,9 @@ VRAM_total = model_weights + kv_cache + overhead
 model_weights = (params_billions × bits_per_weight) / 8 × 1.05  \# +5% overhead
 kv_cache = 2 × n_layers × n_kv_heads × head_dim × n_ctx × bytes_per_element
 
-# Пример: Q4_K_M 7B на GTX 1660 6 Гб
+# Пример: compact Q4_K_M model на GTX 1660 6 Гб
 
-# model_weights ≈ 7B × 4 / 8 × 1.05 ≈ 3.7 Гб
+# model_weights ≈ params × 4 / 8 × 1.05
 
 # kv_cache (n_ctx=4096) ≈ 0.5 Гб
 

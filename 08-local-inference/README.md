@@ -22,32 +22,33 @@
 
 ---
 
-## Актуальные версии (март 2026)
+## Актуальный local-inference стек
 
-| Инструмент | Версия | Примечание |
-| :-- | :-- | :-- |
-| LM Studio | 0.4.8 | GUI + headless `llmster` daemon + OpenAI/Anthropic API |
-| Ollama | 0.19 | CLI + REST API, headless |
-| llama.cpp | b8xxx (rolling) | Фиксируй build hash в production |
-| llama-cpp-python | 0.3.19 | Python bindings, март 2026 |
-| Outlines | 0.2.x | Structured generation, март 2026 |
+Локальный inference зависит от модели, backend, driver stack и quantization. Поэтому курс не пинит конкретные версии в тексте. Перед запуском проверь:
 
-> Версии llama.cpp обновляются несколько раз в неделю.
-> Фиксируй конкретный build hash в production конфигурации.
+- LM Studio / Ollama / llama.cpp — актуальные stable/rolling релизы;
+- llama.cpp commit/build hash — фиксировать в production config;
+- CUDA/driver/runtime — совместимость с GPU;
+- GGUF/VLM support — tokenizer, chat template, vision projector;
+- structured output / grammar support — если нужен constrained decoding.
 
-### Qwen3.5 Small Series (март 2026) — рекомендуемые для локального запуска
+### Model freshness policy
 
-| Модель | VRAM Q4_K_M | Контекст | Примечание |
-| :-- | :-- | :-- | :-- |
-| Qwen3.5-0.8B | ~1 ГБ | 256K | Edge/mobile |
-| Qwen3.5-2B | ~2 ГБ | 256K | Минимальная production |
-| Qwen3.5-4B | ~3.5 ГБ | 256K | Оптимальное качество/VRAM |
-| Qwen3.5-9B | ~6 ГБ | 256K | Максимум для GTX 1660 6 ГБ |
+```text
+Не писать: "конкретная Small Series — рекомендуемая"
+Писать: "перед запуском проверить текущие edge/compact/local-mid модели в HF/Ollama/LM Studio/llama.cpp"
+```
 
-> Apache 2.0. Поддержка thinking/no_think. GGUF через LM Studio / llama.cpp.
-> **Ollama не поддерживает Qwen3.5 GGUF** (март 2026) — отдельные mmproj vision files.
+Размерные классы — не дата релиза, а hardware envelope:
 
----
+| Класс | Где использовать | Что проверять |
+|:--|:--|:--|
+| edge SLM | CPU/NPU/mobile | latency, battery, tokenizer, quantization |
+| compact local | GPU 4–8 ГБ / хороший CPU | VRAM + KV-cache, constrained decoding |
+| local-mid | GPU 8–24 ГБ | quality/latency/cost trade-off |
+| server VLM | multi-GPU / cloud | projector, batching, n_ctx, visual tokens |
+
+> Правило: модель должна быть выбрана из проверенного current registry, а не из заголовка статьи полугодовой давности.
 
 ## 1. VRAM Budget — расчёт и выбор квантизации
 
@@ -71,16 +72,16 @@ runtime_overhead ≈ 300–500 МБ  \# CUDA контекст, активаци�
 
 Практические числа для GTX 1660 (6 Гб VRAM):
 
-| Модель | Квантизация | Веса | KV 4K | KV 8K | Итого 4K | Итого 8K |
+| Модельный класс | Квантизация | Веса | KV 4K | KV 8K | Итого 4K | Итого 8K |
 | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
-| 7B | Q4_K_M | 3.8 Гб | 0.5 Гб | 1.0 Гб | 4.7 Гб ✅ | 5.2 Гб ✅ |
-| 7B | Q8_0 | 7.2 Гб | 0.5 Гб | 1.0 Гб | 8.1 Гб ❌ | — |
-| 14B | Q4_K_M | 7.6 Гб | 0.8 Гб | 1.5 Гб | 8.8 Гб ❌ | — |
-| 14B | Q3_K_M | 5.6 Гб | 0.8 Гб | 1.5 Гб | 6.8 Гб ❌ | — |
-| 3B | Q8_0 | 3.1 Гб | 0.2 Гб | 0.4 Гб | 3.7 Гб ✅ | 3.9 Гб ✅ |
+| compact local | Q4_K_M | 3–4 Гб | 0.5 Гб | 1.0 Гб | 4–5 Гб ✅ | 5–6 Гб ⚠️ |
+| compact local | Q8_0 | 6–8 Гб | 0.5 Гб | 1.0 Гб | 8–9 Гб ❌ | — |
+| local-mid | Q4_K_M | 7–9 Гб | 0.8 Гб | 1.5 Гб | 9–11 Гб ❌ | — |
+| local-mid | Q3_K_M | 5–7 Гб | 0.8 Гб | 1.5 Гб | 7–9 Гб ❌ | — |
+| edge SLM | Q8_0 | 2–4 Гб | 0.2–0.4 Гб | 0.4–0.8 Гб | 3–5 Гб ✅ | 4–6 Гб ⚠️ |
 
-Вывод: на GTX 1660 6 Гб — Q4_K_M 7B или Q8_0 3B.
-14B в любой квантизации — частичный CPU offload с деградацией TPS.
+Вывод: на GTX 1660 6 Гб — компактная Q4_K_M модель или Q8_0 edge SLM.
+Local-mid класс в любой сильной квантизации часто требует CPU offload с деградацией TPS.
 
 ### Выбор квантизации — trade-offs
 
@@ -96,15 +97,15 @@ PPL деградация ~1-3% от fp16
 Применение: основной выбор для production на consumer GPU
 
 Q3_K_M → заметная деградация, ~5-8% PPL
-Применение: когда 14B в Q4 не помещается, нужен размер модели
+Применение: когда local-mid модель в Q4 не помещается, нужен размер модели
 
 Q2_K   → значительная деградация, структурные артефакты
 Применение: только для экспериментов
 
 ```
 
-**Практический вывод для архитектора:** Q4_K_M 7B vs Q8_0 3B — не очевидный выбор.
-На задачах extraction с constrained decoding Q4_K_M 7B обычно лучше:
+**Практический вывод для архитектора:** Q4_K_M compact local vs Q8_0 edge SLM — не очевидный выбор.
+На задачах extraction с constrained decoding Q4_K_M compact local обычно лучше:
 больший параметрический объём компенсирует квантизационную деградацию.
 Проверяй на своей задаче, не на PPL бенчмарке.
 
@@ -112,7 +113,7 @@ Q2_K   → значительная деградация, структурные
 
 ```python
 # Случай 1: GQA (Grouped Query Attention) — n_kv_heads < n_heads
-# Llama 3.x, Qwen 2.x используют GQA:
+# современные decoder-only модели с GQA используют:
 # n_heads = 32, n_kv_heads = 8 → KV-cache в 4x меньше
 # Стандартная формула завышает KV-cache для GQA моделей
 
@@ -140,7 +141,7 @@ Chat template — Jinja2 шаблон в `tokenizer_config.json` модели.
 в последовательность токенов для модели:
 
 ```python
-# Пример: Qwen3.5 chat template (упрощённо)
+# Пример: CURRENT_LOCAL_MODEL chat template (упрощённо)
 # <|im_start|>system\nSYSTEM_PROMPT<|im_end|>\n
 # <|im_start|>user\nUSER_MESSAGE<|im_end|>\n
 # <|im_start|>assistant\n
@@ -186,7 +187,7 @@ llama-server (прямой запуск):
 # Проверка применяемого шаблона через tokenizer
 from transformers import AutoTokenizer
 
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3.5-9B")
+tokenizer = AutoTokenizer.from_pretrained(os.environ.get("CURRENT_LOCAL_TEXT_MODEL", "current-local-text-model"))
 
 messages = [
     {"role": "system", "content": "Ты экстрактор данных."},
@@ -293,7 +294,7 @@ reasoning_tokens = usage.reasoning_tokens  # 0 если reasoning отключё
 
 ```bash
 # Загрузить модель с параметрами (обновлённый синтаксис 0.4.x)
-lms load "lmstudio-community/Qwen3.5-9B-GGUF" \
+lms load "lmstudio-community/CURRENT_LOCAL_VLM-GGUF" \
   --context-length 8192 \
   --gpu max \
   --parallel 3          # новый флаг в 0.4.x — параллельные слоты
@@ -354,7 +355,7 @@ class CourtRecord(BaseModel):
     website: Optional[str] = None
 
 response = client.beta.chat.completions.parse(
-    model="lmstudio-community/Qwen3.5-9B-GGUF/Qwen3.5-9B-Q4_K_M.gguf",
+    model="lmstudio-community/CURRENT_LOCAL_VLM-GGUF/CURRENT_LOCAL_VLM-Q4_K_M.gguf",
     messages=[
         {"role": "system", "content": "Извлеки данные суда. Если поле не найдено — null."},
         {"role": "user", "content": "/no_think\n\n" + raw_text},
@@ -396,18 +397,18 @@ for model in models["data"]:
 
 ## 4. Ollama — архитектура и Modelfile
 
-### Qwen3.5 в Ollama — не работает
+### CURRENT_LOCAL_MODEL в Ollama — не работает
 
 ```bash
-# ❌ Qwen3.5 GGUF несовместим с Ollama (март 2026)
-# Причина: отдельные mmproj vision files — Ollama не поддерживает split weights
+# ❌ GGUF с отдельным vision projector может быть несовместим с Ollama
+# Причина: backend может не поддерживать split weights / vision projector
 ollama run qwen3.5:9b   # ошибка загрузки модели
 
-# ✅ Для Qwen3.5 — только llama.cpp-совместимые backends
+# ✅ Для CURRENT_LOCAL_MODEL — только llama.cpp-совместимые backends
 # LM Studio 0.4.x (llama.cpp b8xxx), llama-cpp-python, llama.cpp CLI
 ```
 
-**Практический вывод для архитектора:** если pipeline требует Qwen3.5 — Ollama не вариант.
+**Практический вывод для архитектора:** если pipeline требует CURRENT_LOCAL_MODEL — Ollama не вариант.
 LM Studio 0.4.x с `llmster` headless daemon — прямая замена без потери API-совместимости.
 
 ### Архитектурный стек Ollama
@@ -516,7 +517,7 @@ batch-обработки. Дефолт `5m` означает что между �
 
 ### Три способа контролировать reasoning
 
-Модели с thinking capability (Qwen3.5, QwQ, DeepSeek-R1) имеют три уровня управления:
+Модели с thinking capability имеют три уровня управления:
 
 ```
 Способ 1: Chat template — /think и /no_think теги в user message
@@ -700,7 +701,7 @@ from llama_cpp import Llama, LlamaGrammar
 import json
 
 llm = Llama(
-    model_path="./Qwen3.5-9B-Q4_K_M.gguf",
+    model_path="./CURRENT_LOCAL_VLM-Q4_K_M.gguf",
     n_gpu_layers=-1,    # все слои на GPU
     n_ctx=8192,
     verbose=False,
@@ -826,7 +827,7 @@ def measure_inference(prompt: str, model: str) -> dict:
 # - Требует определённые архитектуры GPU (Ampere+ для полного эффекта)
 # - GTX 1660 (Turing) — частичная поддержка, эффект меньше
 # - Некоторые квантизации несовместимы (Q2_K + FA → артефакты)
-# - Известный баг: Flash Attention ломает некоторые Qwen модели в LM Studio
+# - Известный баг: Flash Attention ломает некоторые VLM/LLM модели в LM Studio
 #   github.com/lmstudio-ai/lmstudio-bug-tracker/issues/1353
 
 # ✅ Рекомендация для GTX 1660: тестировать с FA и без, сравнивать TPS
@@ -896,7 +897,7 @@ hard → cloud/fallback model
 ## 9. Реальный кейс
 
 **Задача:** batch extraction из ~5000 судебных объектов.
-**Стек:** Ryzen 5 3600, GTX 1660 6 Гб, Qwen3.5-9B Q4_K_M, LM Studio 0.4.x.
+**Стек:** Ryzen 5 3600, GTX 1660 6 Гб, CURRENT_LOCAL_VLM Q4_K_M, LM Studio 0.4.x.
 **Схема:** 7 полей, Literal enum с кириллицей, Optional поля.
 
 **Гипотеза:** включить thinking для повышения точности на граничных кейсах
@@ -939,7 +940,7 @@ Thinking OFF (reasoning_effort: "none" + /no_think):
 ```python
 # ❌ Загрузить модель и считать что она на GPU
 llm = Llama(model_path=MODEL, n_gpu_layers=-1, n_ctx=32768)
-# n_ctx=32768 на 7B Q4_K_M → KV-cache ~4 Гб → не помещается после весов
+# n_ctx=32768 на compact Q4_K_M → KV-cache может съесть весь VRAM после весов
 # llama.cpp молча переносит часть на CPU
 # TPS: 1-2 вместо 15-18
 

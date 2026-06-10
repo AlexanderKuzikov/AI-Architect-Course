@@ -597,12 +597,12 @@ findCourt(regionId); // ❌ ошибка компиляции — защита �
 ```typescript
 // Строгая типизация конфига с сохранением литеральных значений
 const MODEL_LIMITS = {
-  'qwen/qwen3-32b':      { rpm: 30,  tpd: 500_000  },
+  'CURRENT_TEXT_MODEL mid':      { rpm: 30,  tpd: 500_000  },
   'openai/gpt-oss-120b': { rpm: 20,  tpd: 1_000_000 },
   'kimi/k2':             { rpm: 15,  tpd: 750_000  },
 } as const satisfies Record<string, { rpm: number; tpd: number }>;
 
-// MODEL_LIMITS['qwen/qwen3-32b'].rpm имеет тип 30 — не просто number
+// MODEL_LIMITS['CURRENT_TEXT_MODEL mid'].rpm имеет тип 30 — не просто number
 // Компилятор проверил структуру каждой записи
 ```
 

@@ -1,6 +1,6 @@
 # Модуль 13 — Fine-tuning / LoRA
 
-> **Для AI-архитектора:** Fine-tuning — последний инструмент, не первый. Его берут когда prompt engineering исчерпан, RAG не применим, а задача требует изменения поведения модели на уровне весов. На GTX 1660 6 ГБ реально: QLoRA на моделях до 7B. Выше — только в облаке или с quantization tricks.
+> **Для AI-архитектора:** Fine-tuning — последний инструмент, не первый. Его берут когда prompt engineering исчерпан, RAG не применим, а задача требует изменения поведения модели на уровне весов. На слабом локальном GPU реально пробовать compact SLM / QLoRA; выше — считать VRAM, gradient checkpointing и batch/accumulation trade-offs.
 > Один день изучения — механика LoRA/QLoRA, границы применимости, dataset pipeline, гиперпараметры с trade-offs, GGUF export в LM Studio.
 
 ## Содержание
@@ -149,12 +149,12 @@ QLoRA = quantization исходной модели до 4-bit (NF4) + обуче
 
 | Модель | LoRA (16-bit) | QLoRA (4-bit) | Влезает в 6 ГБ |
 |:--|:--|:--|:--|
-| Qwen3.5 0.8B | ~2 ГБ | ~1 ГБ | ✅ LoRA и QLoRA |
-| Qwen3.5 2B | ~5 ГБ | ~2 ГБ | ⚠️ LoRA впритык, QLoRA ✅ |
-| Qwen3.5 4B | ~10 ГБ | ~4 ГБ | ❌ LoRA, ✅ QLoRA |
-| Qwen3.5 7B+ | ~18 ГБ | ~6–7 ГБ | ❌ LoRA, ⚠️ QLoRA с tricks |
+| edge SLM | ~2 ГБ | ~1 ГБ | ✅ LoRA и QLoRA |
+| compact SLM | ~5 ГБ | ~2 ГБ | ⚠️ LoRA впритык, QLoRA ✅ |
+| compact SLM | ~10 ГБ | ~4 ГБ | ❌ LoRA, ✅ QLoRA |
+| local-mid model | ~18 ГБ | ~6–7 ГБ | ❌ LoRA, ⚠️ QLoRA с tricks |
 
-Tricks для GTX 1660 6 ГБ при QLoRA на 4B:
+Tricks для слабого локального GPU при QLoRA на compact SLM:
 - `gradient_checkpointing="unsloth"` — -30% VRAM при +20% времени
 - `per_device_train_batch_size=1`
 - `gradient_accumulation_steps=4` — effective batch size 4 без VRAM overhead
@@ -163,7 +163,7 @@ Tricks для GTX 1660 6 ГБ при QLoRA на 4B:
 
 NF4 (Normal Float 4) — квантизация с неравномерными шагами, оптимизированная под нормальное распределение весов нейросетей. INT4 — равномерная сетка. NF4 даёт лучшее качество при том же объёме — bitsandbytes использует NF4 по умолчанию.
 
-**Практический вывод для архитектора:** На GTX 1660 6 ГБ — QLoRA с Qwen3.5 2B или 4B. 2B для быстрых итераций, 4B для production качества. 7B+ — только облако (Colab T4 = 15 ГБ бесплатно).
+**Практический вывод для архитектора:** На GTX 1660 6 ГБ — QLoRA с compact SLM или 4B. 2B для быстрых итераций, 4B для production качества. local-mid+ — только облако/multi-GPU; считать VRAM, gradient checkpointing и batch/accumulation trade-offs.
 
 ---
 
@@ -335,7 +335,7 @@ alpha = r/2 → scaling = 0.5 (консервативно, для малых д�
 |:--|:--|:--|:--|
 | Скорость обучения | ✅ 2–3× быстрее | Стандартная | Стандартная |
 | VRAM эффективность | ✅ Лучшая | Хорошая | Базовая |
-| VLM fine-tuning | ✅ Qwen3.5 VLM | ✅ Multimodal | ⚠️ Ручная настройка |
+| VLM fine-tuning | ⚠️ только если backend/model поддерживают | ✅ Multimodal | ⚠️ Ручная настройка |
 | Multi-GPU | ⚠️ Ограниченно | ✅ Нативно | ✅ через Accelerate |
 | Конфигурация | Python API | ✅ YAML | Python API |
 | Embedding fine-tuning | ✅ 1.8–3.3× быстрее | ❌ | ✅ |
@@ -353,7 +353,7 @@ Multi-GPU + production scale + multimodal → Axolotl
 
 ## 7. Тренировочный pipeline на GTX 1660 6 ГБ
 
-### Полный рабочий пример: Qwen3.5 2B + QLoRA
+### Полный рабочий пример: compact SLM + QLoRA
 
 ```python
 # fine_tune.py — QLoRA на GTX 1660 6GB
@@ -369,7 +369,7 @@ LOAD_IN_4BIT = True     # QLoRA
 
 # 1. Загрузка модели
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="unsloth/Qwen3-2B-bnb-4bit",
+    model_name=os.environ.get("CURRENT_LOCAL_FINETUNE_MODEL", "current-local-finetune-model"),
     max_seq_length=MAX_SEQ_LENGTH,
     dtype=DTYPE,
     load_in_4bit=LOAD_IN_4BIT,
@@ -691,7 +691,7 @@ async function evaluateWithLLM(
 > «Запусти fine-tuning модели на наших данных»
 
 Хорошая формулировка:
-> «Напиши скрипт QLoRA fine-tuning на Python 3.12 с Unsloth 2026.3. Модель: `unsloth/Qwen3-2B-bnb-4bit`. Параметры: r=16, lora_alpha=16, все target_modules, gradient_checkpointing="unsloth", fp16=True, batch_size=1, gradient_accumulation=4, lr=2e-4, 3 эпохи. Датасет: `data/train.jsonl` и `data/val.jsonl` в Alpaca формате. Early stopping: если eval_loss не улучшается 3 eval шага подряд — остановить. Сохранять checkpoint каждые 100 шагов в `./checkpoints/`. После обучения экспортировать merged GGUF q4_k_m в `./output/model.gguf`.»
+> «Напиши скрипт QLoRA fine-tuning на Python 3.12 с Unsloth 2026.3. Модель: `CURRENT_LOCAL_FINETUNE_MODEL`. Параметры: r=16, lora_alpha=16, все target_modules, gradient_checkpointing="unsloth", fp16=True, batch_size=1, gradient_accumulation=4, lr=2e-4, 3 эпохи. Датасет: `data/train.jsonl` и `data/val.jsonl` в Alpaca формате. Early stopping: если eval_loss не улучшается 3 eval шага подряд — остановить. Сохранять checkpoint каждые 100 шагов в `./checkpoints/`. После обучения экспортировать merged GGUF q4_k_m в `./output/model.gguf`.»
 
 Формула: точная версия + все гиперпараметры + early stopping + экспорт.
 

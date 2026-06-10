@@ -228,11 +228,11 @@ cosine_sim("цена доставки", "рецепт борща") ≈ 0.12
 |:--|:--|:--|:--|:--|
 | text-embedding-3-small (OpenAI) | 1536 | 8191 | ✅ | Cloud |
 | text-embedding-3-large (OpenAI) | 3072 | 8191 | ✅ | Cloud |
-| Qwen3.5 embedding (local) | 1536 | 32768 | ✅ Native | LM Studio |
+| CURRENT_LOCAL_EMBEDDING_MODEL | зависит от модели | зависит от модели | ✅ Native | LM Studio |
 | multilingual-e5-large | 1024 | 512 | ✅ | Local |
 | nomic-embed-text | 768 | 8192 | ⚠️ EN-first | Local |
 
-Для русскоязычных корпусов — Qwen3.5 embedding или multilingual-e5-large локально, либо OpenAI text-embedding-3-small в облаке. Модели типа nomic-embed-text обучены преимущественно на EN, качество RU хуже.
+Для русскоязычных корпусов — использовать текущую локальную embedding-модель с проверкой RU-качества или multilingual-e5-large локально; cloud-вариант выбирать по latency/cost/privacy. Модели типа nomic-embed-text обучены преимущественно на EN, качество RU хуже.
 
 ### Размерность и хранение
 
