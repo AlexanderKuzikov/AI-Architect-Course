@@ -1,4 +1,4 @@
-# Модуль 38 — Caching стратегии: HTTP, Service Worker, CDN
+# Модуль 38 — HTTP / Service Worker caching
 
 > **Для AI-архитектора:** кеширование — не «добавить Cache-Control: max-age». Это трёхуровневая система: браузерный кеш (HTTP headers), edge кеш (CDN), application-level (SW). Каждый уровень решает разную задачу. Архитектурный вопрос: как инвалидировать кеш при деплое, и как не отдавать stale данные пользователям при этом? Главная ловушка: cache `max-age=31536000` на HTML без hash в URL → пользователь видит старый сайт после деплоя.
 > Один день изучения — HTTP Cache-Control директивы, ETag/Last-Modified, CDN кеширование, Service Worker стратегии с Workbox 7, cache invalidation при деплое.
@@ -25,8 +25,8 @@
 
 | Инструмент / API | Версия | Статус |
 | :-- | :-- | :-- |
-| Workbox | **7.x** | Текущий |
-| vite-plugin-pwa | **0.21.x** | Vite интеграция Workbox |
+| Workbox | **7.4.1** | Текущий |
+| vite-plugin-pwa | **1.3.0** | Vite интеграция Workbox |
 | `stale-while-revalidate` | RFC 5861 | Полная поддержка браузеров + CDN |
 | `stale-if-error` | RFC 5861 | CDN (Cloudflare, Fastly, Nginx) |
 | `CDN-Cache-Control` | Cloudflare | Edge-specific директивы |
@@ -640,7 +640,7 @@ if (request.method !== 'GET') return  // Не перехватывать mutatio
 > «Добавь Service Worker»
 
 **Хорошая формулировка:**
-> «Добавить PWA с Workbox 7 через vite-plugin-pwa@0.21.x:
+> «Добавить PWA с Workbox 7 через vite-plugin-pwa@1.3.0:
 > 1. В `vite.config.ts`: VitePWA({ registerType: 'autoUpdate', workbox: { globPatterns: ['**/*.{js,css,html,ico,avif,webp,woff2}'] } }).
 > 2. Стратегии в workbox.runtimeCaching: HTML навигация → NetworkFirst (maxEntries: 30, maxAgeSeconds: 604800); изображения → CacheFirst (maxEntries: 100, 30 дней); `/api/public/*` → StaleWhileRevalidate (maxEntries: 50, 1 час).
 > 3. Все POST/PUT/DELETE → NetworkOnly (без кеша).
@@ -696,4 +696,4 @@ if (request.method !== 'GET') return  // Не перехватывать mutatio
 ---
 
 *Модуль 38 завершён.*
-*Следующий: [Модуль 39 — Core Web Vitals: LCP, INP, CLS от измерения до фикса](../39-core-web-vitals/README.md)*
+*Следующий: [Модуль 39 — Core Web Vitals: диагностика, RUM и fixes](../39-core-web-vitals-diagnostics-rum/README.md)*

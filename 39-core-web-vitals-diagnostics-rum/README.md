@@ -1,4 +1,4 @@
-# Модуль 39 — Core Web Vitals: LCP, INP, CLS от измерения до фикса
+# Модуль 39 — Core Web Vitals: диагностика, RUM и fixes
 
 > **Для AI-архитектора:** CWV — не просто метрики для SEO. Это прямая связь «latency → revenue»: redBus улучшили INP → +7% продаж, Trendyol снизили INP на 50% → +1% CTR. Архитектурное понимание: три метрики = три разных проблемы (загрузка / отзывчивость / стабильность). Ошибка большинства: оптимизируют Lighthouse lab score вместо field data (CrUX). Google ранжирует по 75-й перцентили реальных пользователей, не по Lighthouse.
 > Один день изучения — пороги и измерение (CrUX vs Lab), LCP диагностика + fetchpriority, INP анатомия + LoAF, CLS причины + fixes, attribution API для RUM.
@@ -28,7 +28,7 @@
 | LCP порог «хорошо» | **≤ 2.5s** |
 | INP порог «хорошо» | **≤ 200ms** (заменил FID в марте 2024) |
 | CLS порог «хорошо» | **≤ 0.1** |
-| web-vitals (npm) | **4.x** |
+| web-vitals (npm) | **5.3.0** |
 | Chrome User Experience Report (CrUX) | Обновляется ежедневно |
 | LoAF API | **Baseline 2024** (Chrome 123+) |
 | `fetchpriority` | **Baseline 2023** — все браузеры |

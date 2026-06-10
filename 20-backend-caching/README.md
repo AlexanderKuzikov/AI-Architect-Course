@@ -1,4 +1,4 @@
-# Модуль 20 — Кэширование: Redis, in-memory, CDN
+# Модуль 20 — Backend caching: Redis, in-memory, CDN
 
 > **Для AI-архитектора:** Кэш — не «сохранить чтобы быстрее». Кэш — это явный trade-off: скорость против консистентности. Каждый слой кэша имеет свою инвалидацию, TTL и failure mode. Неправильная инвалидация убивает данные. Отсутствие TTL — память. Кэш без метрик — чёрный ящик. Для AI pipeline — кэш LLM ответов, embeddings и промежуточных результатов может снизить стоимость на порядок.
 > Один день изучения — иерархия кэшей, in-memory (LRUCache, Map), Redis как distributed cache, паттерны Cache-Aside / Write-Through / Write-Behind, инвалидация, stampede protection, CDN-кэширование, observability.
@@ -25,12 +25,13 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| ioredis | 5.9.3 | март 2026 |
-| lru-cache | 11.2.6 | март 2026 |
-| node-cache | 5.x | март 2026 |
-| quick-lru | 7.x | март 2026 |
-| Redis | 7.x | март 2026 |
+| Node.js | **24.x Active LTS** | июнь 2026 |
+| Node.js | **26.x Current** | июнь 2026 | для новых инструментов и экспериментов |
+| ioredis | **5.11.1** | июнь 2026 |
+| lru-cache | **11.5.1** | июнь 2026 |
+| node-cache | **5.1.2** | июнь 2026 |
+| quick-lru | **7.3.0** | июнь 2026 |
+| redis | **6.0.0** | июнь 2026 | npm client package |
 
 ---
 

@@ -1069,5 +1069,5 @@ def benchmark(prompt, model, n=10, warmup=2):
 ---
 
 *Модуль 08 завершён.*
-*Следующий: [Модуль 09 — LLM Evaluation \& Quality Metrics](../09-llm-evaluation/README.md)*
+*Следующий: [Модуль 09 — Evaluator / Benchmark Design](../09-evaluator-benchmark/README.md)*
 

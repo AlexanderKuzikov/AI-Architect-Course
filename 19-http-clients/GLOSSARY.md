@@ -224,4 +224,4 @@ Node.js HTTP/1.1 клиент. Версия 7.24.6 (март 2026). Bundled в N
 
 ---
 
-*Глоссарий модуля 19. Следующий: [Модуль 20 — Кэширование: Redis, in-memory, CDN*](../20-caching/GLOSSARY.md)
+*Глоссарий модуля 19. Следующий: [Модуль 20 — Backend caching: Redis, in-memory, CDN*](../20-backend-caching/GLOSSARY.md)

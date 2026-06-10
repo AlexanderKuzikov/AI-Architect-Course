@@ -25,13 +25,13 @@
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Lighthouse CI (`@lhci/cli`) | **0.14.x** | Lighthouse в CI |
+| Lighthouse CI (`@lhci/cli`) | **0.15.1** | Lighthouse в CI |
 | `treosh/lighthouse-ci-action` | **v12** | GitHub Actions обёртка |
 | BundleMon | **2.x** | Bundle size мониторинг + PR comments |
-| `size-limit` | **11.x** | Bundle size limits (npm) |
+| `size-limit` | **12.1.0** | Bundle size limits (npm) |
 | `rollup-plugin-visualizer` | **5.x** | Bundle composition анализ |
-| `vite-bundle-visualizer` | **1.x** | Vite-специфичный анализ |
-| `@next/bundle-analyzer` | **latest** | Next.js bundle анализ |
+| `vite-bundle-visualizer` | **1.2.1** | Vite-специфичный анализ |
+| `@next/bundle-analyzer` | **16.2.9** | Next.js bundle анализ |
 
 ---
 
@@ -628,4 +628,4 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'))
 
 *Модуль 40 завершён.*
 *Блок «Web Performance» (модули 28–40) завершён.*
-*Следующий блок: [Модуль 41 — ...](../41-.../README.md)*
+*Следующий слой курса — security, implementation notes и production-patterns — будет добавлен отдельным блоком после базового ядра.*

@@ -691,4 +691,4 @@ setInterval(async () => {
 ---
 
 *Модуль 37 завершён.*
-*Следующий: [Модуль 38 — Caching стратегии: HTTP, Service Worker, CDN](../38-caching/README.md)*
+*Следующий: [Модуль 38 — HTTP / Service Worker caching](../38-http-service-worker-caching/README.md)*

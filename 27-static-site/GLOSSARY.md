@@ -108,4 +108,4 @@ HTTP кеш стратегия (и ISR механика): при истёкше�
 
 ---
 
-*Глоссарий модуля 27. Следующий: [Модуль 28 — Core Web Vitals](../28-core-web-vitals/GLOSSARY.md)*
+*Глоссарий модуля 27. Следующий: [Модуль 28 — Core Web Vitals: intro](../28-core-web-vitals-intro/GLOSSARY.md)*

@@ -1,4 +1,4 @@
-# Модуль 28 — Core Web Vitals
+# Модуль 28 — Core Web Vitals: intro
 
 > **Для AI-архитектора:** Core Web Vitals — это не SEO-чеклист. Это сигналы о том, как пользователь воспринимает скорость и стабильность страницы. AI-кодер получит 95 в Lighthouse и скажет «готово» — но Lighthouse это lab data. Для Google Rankings важен CrUX (field data от реальных пользователей), и он может кардинально отличаться. 47% сайтов не проходят пороги в 2026 году.
 > Один день изучения — механика LCP/INP/CLS, field vs lab разница, измерение в production, Lighthouse CI gates.
@@ -25,9 +25,9 @@
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Lighthouse | **13.x** | Lab performance audit |
-| web-vitals (npm) | **4.x** | Field measurement library (~2KB brotli) |
-| Lighthouse CI | **0.14.x** | CI gates для performance |
+| Lighthouse | **13.4.0** | Lab performance audit |
+| web-vitals (npm) | **5.3.0** | Field measurement library (~2KB brotli) |
+| Lighthouse CI (`@lhci/cli`) | **0.15.1** | CI gates для performance |
 | CrUX API | v1 | Field data от Chrome пользователей |
 
 ### Пороговые значения 2026

@@ -522,4 +522,4 @@ export default async function Page() {
 ---
 
 *Модуль 27 завершён.*
-*Следующий: [Модуль 28 — Core Web Vitals](../28-core-web-vitals/README.md)*
+*Следующий: [Модуль 28 — Core Web Vitals: intro](../28-core-web-vitals-intro/README.md)*

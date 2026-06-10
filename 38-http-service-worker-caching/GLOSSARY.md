@@ -103,4 +103,4 @@ Google библиотека (версия 7.x): набор модулей для
 
 ---
 
-*Глоссарий модуля 38. Следующий: [Модуль 39 — Core Web Vitals: LCP, INP, CLS](../39-core-web-vitals/GLOSSARY.md)*
+*Глоссарий модуля 38. Следующий: [Модуль 39 — Core Web Vitals: диагностика, RUM и fixes](../39-core-web-vitals-diagnostics-rum/GLOSSARY.md)*

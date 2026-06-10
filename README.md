@@ -137,7 +137,7 @@
 | --- | -------------------------------------------------------------- | -------------------------------------------- |
 | 18  | [Task queues](./18-task-queues/README.md)                      | [Глоссарий](./18-task-queues/GLOSSARY.md)    |
 | 19  | [HTTP clients / retry strategies](./19-http-clients/README.md) | [Глоссарий](./19-http-clients/GLOSSARY.md)   |
-| 20  | [Caching](./20-caching/README.md)                              | [Глоссарий](./20-caching/GLOSSARY.md)        |
+| 20  | [Backend caching](./20-backend-caching/README.md)                              | [Глоссарий](./20-backend-caching/GLOSSARY.md)        |
 | 21  | [Testing](./21-testing/README.md)                              | [Глоссарий](./21-testing/GLOSSARY.md)        |
 | 22  | [Worker Threads / Piscina](./22-worker-threads/README.md)      | [Глоссарий](./22-worker-threads/GLOSSARY.md) |
 | 23  | [Rate limiting](./23-rate-limiting/README.md)                  | [Глоссарий](./23-rate-limiting/GLOSSARY.md)  |
@@ -152,7 +152,7 @@
 | #   | Модуль                                                              | Глоссарий                                             |
 | --- | ------------------------------------------------------------------- | ----------------------------------------------------- |
 | 27  | [Static site generation](./27-static-site/README.md)                | [Глоссарий](./27-static-site/GLOSSARY.md)             |
-| 28  | [Core Web Vitals](./28-core-web-vitals/README.md)                   | [Глоссарий](./28-core-web-vitals/GLOSSARY.md)         |
+| 28  | [Core Web Vitals: intro](./28-core-web-vitals-intro/README.md)                   | [Глоссарий](./28-core-web-vitals-intro/GLOSSARY.md)         |
 | 29  | [Critical CSS](./29-critical-css/README.md)                         | [Глоссарий](./29-critical-css/GLOSSARY.md)            |
 | 30  | [Schema.org / structured data](./30-schema-org/README.md)           | [Глоссарий](./30-schema-org/GLOSSARY.md)              |
 | 31  | [Mobile-first CSS](./31-mobile-first-css/README.md)                 | [Глоссарий](./31-mobile-first-css/GLOSSARY.md)        |
@@ -162,8 +162,8 @@
 | 35  | [Image optimization](./35-image-optimization/README.md)             | [Глоссарий](./35-image-optimization/GLOSSARY.md)      |
 | 36  | [Critical Rendering Path](./36-critical-rendering-path/README.md)   | [Глоссарий](./36-critical-rendering-path/GLOSSARY.md) |
 | 37  | [JavaScript performance / memory](./37-js-performance/README.md)    | [Глоссарий](./37-js-performance/GLOSSARY.md)          |
-| 38  | [Caching strategies](./38-caching/README.md)                        | [Глоссарий](./38-caching/GLOSSARY.md)                 |
-| 39  | [Core Web Vitals: LCP / INP / CLS](./39-core-web-vitals/README.md)  | [Глоссарий](./39-core-web-vitals/GLOSSARY.md)         |
+| 38  | [HTTP / Service Worker caching](./38-http-service-worker-caching/README.md)                        | [Глоссарий](./38-http-service-worker-caching/GLOSSARY.md)                 |
+| 39  | [Core Web Vitals: диагностика, RUM и fixes](./39-core-web-vitals-diagnostics-rum/README.md)  | [Глоссарий](./39-core-web-vitals-diagnostics-rum/GLOSSARY.md)         |
 | 40  | [Performance budget](./40-performance-budget/README.md)             | [Глоссарий](./40-performance-budget/GLOSSARY.md)      |
 
 
@@ -208,7 +208,7 @@
 | Инструмент | Рекомендуемая версия | Комментарий                                       |
 | ---------- | -------------------- | ------------------------------------------------- |
 | Node.js    | **24 LTS**           | для production-бэкенда и современных инструментов |
-| TypeScript | **6.0**              | использовать как базовую целевую ветку            |
+| TypeScript | **6.0.3**            | npm latest, апрель 2026; базовая целевая ветка |
 | PHP        | **8.5**              | ориентироваться на актуальную стабильную ветку    |
 | Python     | **3.14.3**           | актуальная стабильная ветка Python 3              |
 | Go         | **1.26**             | актуальная стабильная ветка                       |
@@ -256,7 +256,7 @@ AI-Architect-Course/
 ├── 17-xlsx-internals/
 ├── 18-task-queues/
 ├── 19-http-clients/
-├── 20-caching/
+├── 20-backend-caching/
 ├── 21-testing/
 ├── 22-worker-threads/
 ├── 23-rate-limiting/
@@ -264,7 +264,7 @@ AI-Architect-Course/
 ├── 25-cicd/
 ├── 26-logging/
 ├── 27-static-site/
-├── 28-core-web-vitals/
+├── 28-core-web-vitals-intro/
 ├── 29-critical-css/
 ├── 30-schema-org/
 ├── 31-mobile-first-css/
@@ -274,8 +274,8 @@ AI-Architect-Course/
 ├── 35-image-optimization/
 ├── 36-critical-rendering-path/
 ├── 37-js-performance/
-├── 38-caching/
-├── 39-core-web-vitals/
+├── 38-http-service-worker-caching/
+├── 39-core-web-vitals-diagnostics-rum/
 └── 40-performance-budget/
 ```
 

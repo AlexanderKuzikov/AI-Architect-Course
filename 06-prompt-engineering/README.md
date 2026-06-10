@@ -1144,4 +1144,4 @@ MONSTER_PROMPT = """
 ---
 
 *Модуль 06 завершён.*  
-*Следующий: [Модуль 13 — JSON Schema / Structured Output*](../13-json-schema/README.md)
+*Следующий: [Модуль 13 — JSON Schema / Structured Output*](../07-json-schema/README.md)

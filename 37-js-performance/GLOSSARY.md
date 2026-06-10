@@ -108,4 +108,4 @@ ES2025 синтаксис: детерминированная очистка р�
 
 ---
 
-*Глоссарий модуля 37. Следующий: [Модуль 38 — Caching стратегии: HTTP, Service Worker, CDN](../38-caching/GLOSSARY.md)*
+*Глоссарий модуля 37. Следующий: [Модуль 38 — HTTP / Service Worker caching](../38-http-service-worker-caching/GLOSSARY.md)*

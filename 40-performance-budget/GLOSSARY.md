@@ -55,7 +55,7 @@ Rollup/Vite плагин: генерирует `stats.html` с интеракт�
 Свойство `"sideEffects"` в `package.json`: сигнал bundler что файлы без явного импорта можно удалить при tree-shaking. `"sideEffects": false` — агрессивный tree-shaking. Отсутствие свойства → bundler не удаляет unused exports.
 
 **size-limit**  
-npm инструмент (версия 11.x): проверка bundle size с завершением с exit code 1 при превышении. Прост в настройке через `package.json`. `--why` флаг показывает топ contributors к размеру. Для npm пакетов и SPA.
+npm инструмент (версия 12.1.0): проверка bundle size с завершением с exit code 1 при превышении. Прост в настройке через `package.json`. `--why` флаг показывает топ contributors к размеру. Для npm пакетов и SPA.
 
 ---
 

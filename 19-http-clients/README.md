@@ -1240,4 +1240,4 @@ got: 5M загрузок/неделю, меньшая поверхность
 ---
 
 *Модуль 19 завершён.*
-*Следующий: [Модуль 20 — Кэширование: Redis, in-memory, CDN](../20-caching/README.md)*
+*Следующий: [Модуль 20 — Backend caching: Redis, in-memory, CDN](../20-backend-caching/README.md)*
