@@ -4,7 +4,7 @@
 > Архитектурное мышление, глубина технологий, работа с LLM-кодерами.
 
 **Автор:** [Alexander Kuzikov](https://github.com/AlexanderKuzikov)  
-**Формат:** 40 базовых модулей + дальнейшее расширение курса практическими и implementation-разделами
+**Формат:** 47 модулей: 40 базовых + 7 агентных/production-расширений
 
 ---
 
@@ -65,14 +65,14 @@
 
 ### 1. Последовательно
 
-Если нужно собрать полную системную картину — идти от `01` к `40`.
+Если нужно собрать полную системную картину — идти от `01` к `47`.
 
 ### 2. По архитектурным трекам
 
 Если задача прикладная, можно идти по трекам:
 
 - **AI foundation:** 06–10
-- **AI systems:** 11–13
+- **AI systems:** 11–13, 41–47
 - **Document processing:** 14–17
 - **Infrastructure / DevOps:** 18–26
 - **Web performance:** 27–40
@@ -167,6 +167,21 @@
 | 40  | [Performance budget](./40-performance-budget/README.md)             | [Глоссарий](./40-performance-budget/GLOSSARY.md)      |
 
 
+
+### AI systems / agents (2026 expansion)
+
+Новые модули по production AI-архитектуре: agents, tool servers, protocols, memory, browser automation, agentic RAG, AgentOps и AI security.
+
+|| #   | Модуль                                                                 | Глоссарий                                           |
+|| --- | ---------------------------------------------------------------------- | --------------------------------------------------- |
+|| 41  | [MCP: Tool Server Architecture](./41-mcp-tool-server-architecture/README.md) | [Глоссарий](./41-mcp-tool-server-architecture/GLOSSARY.md) |
+|| 42  | [A2A Protocol и Multi-Agent Systems](./42-a2a-protocol/README.md)      | [Глоссарий](./42-a2a-protocol/GLOSSARY.md)          |
+|| 43  | [Agent Memory и Knowledge Graphs](./43-agent-memory-knowledge-graphs/README.md) | [Глоссарий](./43-agent-memory-knowledge-graphs/GLOSSARY.md) |
+|| 44  | [Browser Use и Computer Use Agents](./44-browser-use-computer-use/README.md) | [Глоссарий](./44-browser-use-computer-use/GLOSSARY.md) |
+|| 45  | [Agentic RAG и Graph RAG](./45-agentic-rag-graph-rag/README.md)        | [Глоссарий](./45-agentic-rag-graph-rag/GLOSSARY.md) |
+|| 46  | [AgentOps](./46-agentops/README.md)                                    | [Глоссарий](./46-agentops/GLOSSARY.md)              |
+|| 47  | [AI Security для агентов](./47-ai-security-agents/README.md)           | [Глоссарий](./47-ai-security-agents/GLOSSARY.md)    |
+
 ---
 
 ## Security
@@ -185,17 +200,17 @@
 - threat modeling для AI-систем;
 - observability, audit trail и разбор инцидентов.
 
-Этот блок будет расширяться отдельными implementation-разделами.
+Этот блок расширен модулями 41–47: MCP/tool servers, A2A/multi-agent, agent memory, browser-use, agentic RAG, AgentOps и AI security для агентов.
 
 ---
 
 ## Прогресс курса
 
 **Базовое ядро курса:** 40 модулей.  
-**Дальше:** расширение implementation-разделами, безопасностью, практическими сценариями и production-patterns.
+**Полный курс:** 47 модулей с agent/production-расширениями.
 
 ```text
-████████████████████████████████████████ 40 / 40
+███████████████████████████████████████████████ 47 / 47
 ```
 
 ---
@@ -224,7 +239,7 @@
 - implementation notes внутри модулей;
 - практические production-patterns;
 - security-разделы;
-- integration playbooks;
+- agent/protocol integration playbooks;
 - anti-failure checklists;
 - шаблоны задач для LLM-кодеров;
 - архитектурные decision guides.
@@ -276,7 +291,14 @@ AI-Architect-Course/
 ├── 37-js-performance/
 ├── 38-http-service-worker-caching/
 ├── 39-core-web-vitals-diagnostics-rum/
-└── 40-performance-budget/
+├── 40-performance-budget/
+├── 41-mcp-tool-server-architecture/
+├── 42-a2a-protocol/
+├── 43-agent-memory-knowledge-graphs/
+├── 44-browser-use-computer-use/
+├── 45-agentic-rag-graph-rag/
+├── 46-agentops/
+└── 47-ai-security-agents/
 ```
 
 ---

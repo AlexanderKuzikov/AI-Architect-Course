@@ -10,10 +10,11 @@
 3. [Model Rotation Failover](#3-model-rotation-failover)
 4. [Cascade Filter — дешёвая модель как gate](#4-cascade-filter--дешёвая-модель-как-gate)
 5. [Image Preprocessing — обязательный этап pipeline](#5-image-preprocessing--обязательный-этап-pipeline)
-6. [Реальный кейс: Telegram price detection pipeline](#6-реальный-кейс-telegram-price-detection-pipeline)
-7. [Антипаттерны](#7-антипаттерны)
-8. [Задачи AI-кодеру](#задачи-ai-кодеру)
-9. [Чеклист архитектора](#чеклист-архитектора)
+6. [Model Gateway 2026: routing, fallback pools, latency/cost/quality](#6-model-gateway-2026-routing-fallback-pools-latencycostquality)
+7. [Реальный кейс: Telegram price detection pipeline](#7-реальный-кейс-telegram-price-detection-pipeline)
+8. [Антипаттерны](#8-антипаттерны)
+9. [Задачи AI-кодеру](#задачи-ai-кодеру)
+10. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -563,9 +564,77 @@ async function processImage(imagePath: string): Promise<string> {
 
 **Практический вывод для архитектора:** 1000px — дефолт для всего. 1536px — только для документов с плотным текстом, и только если 1000px даёт деградацию качества (проверяется на тестовой выборке, не наугад).
 
+## 6. Model Gateway 2026: routing, fallback pools, latency/cost/quality
+
+Model Gateway — это следующий уровень после простой Model Rotation. Это централизованный слой, который принимает запрос от application/agent и решает:
+
+- какую модель выбрать;
+- какой provider использовать;
+- нужен ли fallback pool;
+- какие latency/cost/quality budgets применить;
+- как обработать rate limits;
+- как нормализовать output разных моделей;
+- как логировать переключения и деградацию качества.
+
+```text
+Application / Agent
+   │
+   ▼
+Model Gateway
+   │  route_by(task_type, budget, provider_state)
+   ▼
+Provider Pool
+   ├── primary: quality model
+   ├── fallback: cheaper model
+   ├── local: SLM for simple tasks
+   └── emergency: degraded mode
+```
+
+### Routing dimensions
+
+| Dimension | Пример |
+|:--|:--|
+| task type | extraction, summarization, reasoning, vision |
+| risk level | low/medium/high/critical |
+| latency budget | < 2s, < 10s, async |
+| cost budget | $0.001, $0.01, $0.10 |
+| data policy | no external provider for secrets/PII |
+| quality target | schema valid, hallucination rate, judge score |
+
+### Fallback pools
+
+Fallback pool должен быть не «любая модель», а заранее проверенная цепочка:
+
+```text
+primary → fallback quality → fallback cheap → local SLM → degraded deterministic response
+```
+
+Для каждого fallback нужно знать:
+
+- output schema compatibility;
+- required normalizer;
+- quality delta;
+- cost delta;
+- latency delta;
+- provider risk.
+
+### Rate-limit strategy
+
+Rate limits обрабатываются на уровне gateway:
+
+- retry-after;
+- circuit breaker;
+- per-provider quotas;
+- per-model quotas;
+- token budget;
+- request shedding;
+- fallback switch.
+
+Главное правило: gateway должен быть observability-first. Если fallback сработал, команда должна увидеть не только факт fallback, но и причину, модель, latency, cost и качество.
+
 ---
 
-## 6. Реальный кейс: Telegram price detection pipeline
+## 7. Реальный кейс: Telegram price detection pipeline
 
 ### Контекст
 
@@ -631,7 +700,7 @@ Telegram posts folder
 
 ---
 
-## 7. Антипаттерны
+## 8. Антипаттерны
 
 ### «Универсальная мощная модель для всего»
 

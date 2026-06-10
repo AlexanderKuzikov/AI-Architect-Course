@@ -10,6 +10,7 @@
 ## Содержание
 
 1. [Как LLM генерирует текст — механика](#1-как-llm-генерирует-текст--механика)
+   - [Context Engineering для агентов](#context-engineering-как-архитектурный-слой)
 2. [Анатомия промпта](#2-анатомия-промпта)
 3. [Техники промптинга](#3-техники-промптинга)
 4. [Structured Output](#4-structured-output)
@@ -728,6 +729,42 @@ def chunk_document(
 
     return chunks
 ```
+
+### Context Engineering как архитектурный слой
+
+В agent systems промпт перестал быть единичной строкой. Контекст — это управляемый набор источников:
+
+```text
+system policy
++ user task
++ chat history summary
++ retrieved documents
++ tool results
++ memory facts
++ schema / output contract
+```
+
+**Context Engineering** отвечает за три вопроса:
+
+1. **Что попадает в контекст** — не всё подряд, а только релевантные и разрешённые данные.
+2. **В каком виде** — raw text, summary, citations, tool result metadata, memory facts.
+3. **Как обновляется** — summarization policy, staleness detection, token budget, lost-in-the-middle mitigation.
+
+Практические правила:
+
+- retrieved documents и tool results считаются **untrusted input**;
+- memory facts должны иметь `sourceId`, `confidence` и `expiresAt`;
+- tool output нужно нормализовать и ограничивать по размеру;
+- длинную историю диалога надо сжимать с сохранением decisions/actions;
+- критичные факты размещать ближе к началу или концу prompt;
+- перед генерацией проверять token budget и наличие обязательных источников.
+
+```text
+❌ "Добавь весь чат и все retrieved chunks"
+✅ "Добавь последние N turn'ов, summary истории, top-k релевантных chunks с citations и memory facts с provenance"
+```
+
+Контекст — это архитектурный resource. Его нужно проектировать так же явно, как API contract или схему БД.
 
 ---
 

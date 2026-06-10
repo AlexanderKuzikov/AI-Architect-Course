@@ -15,8 +15,9 @@
 4. [LLM-as-Judge — механика и bias](#4-llm-as-judge--механика-и-bias)
 5. [Инструменты — DeepEval, Ragas, Promptfoo](#5-инструменты--deepeval-ragas-promptfoo)
 6. [CI/CD интеграция и quality gates](#6-cicd-интеграция-и-quality-gates)
-7. [Реальный кейс](#реальный-кейс)
-8. [Антипаттерны](#антипаттерны)
+7. [AgentOps evals: production-оценка агентного поведения](#7-agentops-evals-production-оценка-агентного-поведения)
+8. [Реальный кейс](#реальный-кейс)
+9. [Антипаттерны](#антипаттерны)
 
 ---
 
@@ -842,9 +843,60 @@ if __name__ == "__main__":
 **Почему это важно архитектору:** стоимость и стабильность evaluation в CI —  
 практические ограничения которые определяют архитектуру пайплайна.
 
+## 7. AgentOps evals: production-оценка агентного поведения
+
+Для agent systems обычных extraction metrics недостаточно. Нужно измерять не только качество final answer, но и поведение pipeline: какие tools были вызваны, сколько стоил workflow, были ли retry/fallback, не ушёл ли агент в лишний retrieval loop.
+
+Минимальный набор AgentOps evals:
+
+| Layer | Что проверяет | Когда |
+|:--|:--|:--|
+| Deterministic | schema, forbidden actions, secrets, max latency | каждый PR |
+| Golden dataset | ожидаемые answers/actions/tools | каждый PR или nightly |
+| Regression | delta против baseline | перед merge/release |
+| LLM judge | rubric, citations, hallucination | pre-release |
+| Human review | high-risk domains | по необходимости |
+
+### Agent-specific metrics
+
+- success rate по task type;
+- tool call accuracy;
+- forbidden tool rate;
+- retrieval loop rate;
+- fallback rate;
+- cost per task;
+- p50/p95 latency;
+- hallucination rate;
+- guardrail rejection rate;
+- approval rate для risky actions.
+
+```text
+workflow_trace
+ ├── llm_calls: 4
+ ├── tools: search_documents, get_contract_metadata
+ ├── memory_reads: 2
+ ├── fallback: false
+ ├── cost_usd: 0.014
+ ├── latency_ms: 3200
+ └── final_score: 0.91
+```
+
+### Quality gates
+
+Рекомендуемые пороги для production agent:
+
+- schema valid ≥ 99.9%;
+- forbidden tool rate = 0%;
+- hallucination rate < 1% для legal/finance/support;
+- cost per task не выше budget;
+- p95 latency не выше SLA;
+- fallback rate не выше 5% без деградации качества.
+
+AgentOps evals должны быть частью CI/CD, но не заменять human review в high-risk доменах.
+
 ---
 
-## Реальный кейс
+## 8. Реальный кейс
 
 **Задача:** построить evaluation pipeline для extraction ~5000 судебных объектов.  
 **Стек:** Python, DeepEval, локальный LLM-судья (LM Studio), GitHub Actions.
@@ -884,7 +936,7 @@ downstream системы не простит.
 
 ---
 
-## Антипаттерны
+## 9. Антипаттерны
 
 **1. Evaluator на том же датасете что и разработка**
 

@@ -13,6 +13,7 @@
 2. [Dynamic Resolution — управление токен-бюджетом](#2-dynamic-resolution--управление-токен-бюджетом)
 3. [Промптинг для VLM — отличия от text-only LLM](#3-промптинг-для-vlm--отличия-от-text-only-llm)
 4. [Document Understanding — OCR, таблицы, формы](#4-document-understanding--ocr-таблицы-формы)
+   - [Document Intelligence 2026: MarkItDown + VLM + OCR](#document-intelligence-2026-markitdown--vlm--ocr)
 5. [Grounding и локализация объектов](#5-grounding-и-локализация-объектов)
 6. [Multi-image и видео](#6-multi-image-и-видео)
 7. [Production pipeline — выбор backend](#7-production-pipeline--выбор-backend)
@@ -601,6 +602,35 @@ results = [await extract_document(page) for page in pages]
 
 **Почему это важно архитектору:** ориентация документа — pre-processing шаг
 который VLM не делает автоматически. Встречается на 5–10% реальных сканов.
+
+### Document Intelligence 2026: MarkItDown + VLM + OCR
+
+Document Intelligence — это уже не только OCR. Для production pipeline лучше думать в терминах **layout-aware extraction**:
+
+```text
+Document → layout/OCR → semantic parsing → structured JSON → validation
+```
+
+Ключевые компоненты:
+
+- **OCR** для печатного текста;
+- **VLM** для сложных layout, таблиц, форм, рукописных фрагментов;
+- **MarkItDown / document parsers** для DOCX/XLSX/PDF → markdown/html;
+- **layout model** для понимания блоков: header, table, footer, checkbox;
+- **structured output** для финального JSON;
+- **deterministic validation** для реквизитов, дат, ИНН, сумм.
+
+Практический routing:
+
+| Тип документа | Лучший путь |
+|:--|:--|
+| чистый печатный текст | OCR + text LLM |
+| скан с таблицами | VLM + structured output |
+| DOCX/XLSX | parser → markdown/table extraction |
+| сложный PDF с формами | OCR + layout + VLM |
+| низкое качество | preprocessing → VLM |
+
+Главная ошибка — отправлять raw document сразу в VLM. Сначала нужны preprocessing, layout detection, token budget и понятный output schema.
 
 ---
 

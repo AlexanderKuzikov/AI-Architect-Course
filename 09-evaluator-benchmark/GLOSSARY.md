@@ -198,3 +198,11 @@ ROUGE-L (longest common subsequence) — основная метрика для 
 **Verbosity Bias**
 Тенденция LLM-судьи предпочитать более длинные и развёрнутые ответы.
 Митигация: явная инструкция в системном промпте судьи что длина не является критерием качества.
+
+---
+
+## A
+
+**AgentOps Evals**  
+Набор метрик для оценки agent workflows: success rate, tool accuracy, forbidden tool rate, fallback rate, cost per task, latency, hallucination rate.
+

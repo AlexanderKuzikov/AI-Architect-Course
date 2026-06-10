@@ -242,3 +242,18 @@ Constrained Decoding с JSON Schema (гарантия). В production — тол
 Запрос без примеров — только инструкция и задача. Работает на сильных instruction-tuned моделях.
 Baseline для измерения: проверь zero-shot первым, только потом усложняй few-shot или CoT.
 Для структурированного вывода на слабых или квантизированных локальных моделях — ненадёжно.
+
+---
+
+## I
+
+**Indirect Injection**  
+Вредная инструкция, попавшая в prompt через retrieved document, tool result или другой untrusted source. Требует отдельного threat model и tool approval policy.
+
+---
+
+## P
+
+**Prompt Injection**  
+Попытка изменить поведение модели через user input или untrusted content. Снижается не только system prompt, но и sandboxing, tool permissions, approvals и output guardrails.
+

@@ -318,3 +318,25 @@ Production inference сервер с PagedAttention — эффективное �
 Оптимален для multi-user, высоконагруженных сценариев. Требует NVIDIA GPU с CUDA.
 В отличие от llama.cpp: нет GGUF поддержки (только HuggingFace форматы),
 нет CPU fallback, требует значительно больше VRAM для serving.
+
+---
+
+## E
+
+**Edge Inference**  
+Запуск модели на устройстве пользователя или edge hardware: CPU, NPU, browser/WebGPU или локальный server. Обычно требует smaller models и строгого quality routing.
+
+---
+
+## S
+
+**SLM (Small Language Model)**  
+Малая языковая модель, обычно 1B–8B параметров. Используется для routing, classification, pre-screening и простых extraction-задач, где важны privacy, latency и cost.
+
+---
+
+## W
+
+**WebGPU Inference**  
+Запуск ML-модели прямо в браузере через WebGPU. Подходит для локальных задач, но требует проверки совместимости модели, browser support и memory budget.
+

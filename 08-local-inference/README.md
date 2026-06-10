@@ -16,8 +16,9 @@
 5. [Управление Reasoning / Thinking](#5-управление-reasoning--thinking)
 6. [Structured Output на локальных моделях](#6-structured-output-на-локальных-моделях)
 7. [Производительность — измерение и тюнинг](#7-производительность--измерение-и-тюнинг)
-8. [Реальный кейс](#реальный-кейс)
-9. [Антипаттерны](#антипаттерны)
+8. [SLM / Edge / WebGPU: local-first инференс](#8-slm--edge--webgpu-local-first-инференс)
+9. [Реальный кейс](#реальный-кейс)
+10. [Антипаттерны](#антипаттерны)
 
 ---
 
@@ -853,9 +854,46 @@ lms log stream -s runtime | grep "offload"
 **Почему это важно архитектору:** CPU fallback для KV-cache — самая частая причина
 необъяснимого падения TPS. Модель «работает», но в 10x медленнее.
 
+## 8. SLM / Edge / WebGPU: local-first инференс
+
+Local inference в 2026 — это не только Ollama/LM Studio на GPU. Для части задач оправдан **local-first** подход: small language models, edge inference, browser/WebGPU и on-device preprocessing.
+
+| Уровень | Пример | Когда выбирать |
+|:--|:--|:--|
+| Local GPU | Ollama, LM Studio, llama.cpp | quality важнее cost, есть GPU |
+| Edge SLM | 1B–4B модели на CPU/NPU | routing, classification, extraction простых полей |
+| Browser/WebGPU | inference прямо в браузере | privacy, offline, low-latency UI |
+| Hybrid | SLM pre-screening → cloud/LLM | баланс качества и стоимости |
+
+### Архитектурные сценарии
+
+**SLM pre-screening**: маленькая модель классифицирует документ/тикет/запрос и решает, нужна ли большая модель.
+
+```text
+SLM 2B → route: simple/medium/hard
+simple → deterministic rules
+medium → local 4B/9B
+hard → cloud/fallback model
+```
+
+**Browser inference**: модель запускается на клиенте для задач, где данные не должны покидать устройство: черновик письма, локальная классификация, предварительная проверка формы.
+
+**Edge pipeline**: preprocessing, OCR, routing и validation выполняются локально, а дорогой LLM вызывается только для сложных кейсов.
+
+### Trade-offs
+
+| Решение | Плюсы | Цена |
+|:--|:--|:--|
+| SLM на CPU/NPU | ниже latency/cost, privacy | хуже instruction following |
+| WebGPU | данные остаются на клиенте | ограниченная модельная совместимость |
+| Local-first routing | меньше облачных вызовов | сложнее тестирование качества |
+| Full cloud LLM | максимальное качество | cost, latency, data transfer |
+
+Главное правило: SLM/edge не должен «угадывать» критичные факты. Его зона — routing, classification, pre-screening, validation и простые extraction-задачи с deterministic fallback.
+
 ---
 
-## Реальный кейс
+## 9. Реальный кейс
 
 **Задача:** batch extraction из ~5000 судебных объектов.
 **Стек:** Ryzen 5 3600, GTX 1660 6 Гб, Qwen3.5-9B Q4_K_M, LM Studio 0.4.x.
@@ -894,7 +932,7 @@ Thinking OFF (reasoning_effort: "none" + /no_think):
 
 ---
 
-## Антипаттерны
+## 10. Антипаттерны
 
 **1. CPU fallback незаметен**
 

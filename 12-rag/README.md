@@ -12,10 +12,11 @@
 5. [Retrieval — стратегии поиска](#5-retrieval--стратегии-поиска)
 6. [Context Assembly — сборка контекста](#6-context-assembly--сборка-контекста)
 7. [RAG Failure Modes — где ломается системно](#7-rag-failure-modes--где-ломается-системно)
-8. [Реальный кейс](#8-реальный-кейс)
-9. [Антипаттерны](#9-антипаттерны)
-10. [Задачи AI-кодеру](#задачи-ai-кодеру)
-11. [Чеклист архитектора](#чеклист-архитектора)
+8. [Agentic RAG и Graph RAG](#8-agentic-rag-и-graph-rag-следующий-уровень-retrieval)
+9. [Реальный кейс](#9-реальный-кейс)
+10. [Антипаттерны](#10-антипаттерны)
+11. [Задачи AI-кодеру](#задачи-ai-кодеру)
+12. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -629,9 +630,62 @@ LLM генерирует ответ, который выглядит как об
 
 **Диагностика:** manual review retrieved чанков для запросов с неверными ответами.
 
+## 8. Agentic RAG и Graph RAG: следующий уровень retrieval
+
+Классический RAG делает один проход: query → retrieve → generate. Для сложных задач этого недостаточно. Agentic RAG превращает retrieval в управляемый loop:
+
+```text
+query → plan → retrieve → inspect gaps → retrieve again → verify → answer
+```
+
+Агент может:
+
+- уточнять query;
+- искать по vector, BM25, graph и temporal retrievers;
+- проверять противоречия;
+- возвращаться за дополнительными источниками;
+- отказываться от ответа при недостатке evidence.
+
+### Graph RAG
+
+Graph RAG добавляет entities и relations:
+
+```text
+Contract ── hasParty ── Company
+Company ── hasDirector ── Person
+Clause ── requires ── Approval
+Approval ── belongsTo ── Policy
+```
+
+Это полезно для multi-hop вопросов, legal/finance/contract domains и объяснимости: модель может показать путь по graph, а не только top-k chunks.
+
+### Temporal RAG
+
+Temporal RAG учитывает версии документов:
+
+- `valid_from`;
+- `valid_to`;
+- `superseded_by`;
+- `updated_at`;
+- as-of date запроса.
+
+Без temporal awareness агент может ответить по старой версии policy.
+
+### Verification
+
+Agentic RAG требует verifier:
+
+- citations per claim;
+- contradiction detection;
+- confidence score;
+- source freshness;
+- abstain policy.
+
+Главное правило: больше агентности = больше observability и evals. Нужно логировать каждый retrieval step, gaps, unsupported claims и итоговый evidence pack.
+
 ---
 
-## 8. Реальный кейс
+## 9. Реальный кейс
 
 > ⚠️ **Раздел ожидает данных от автора.**
 > Формат: входные данные → гипотеза → результат → вывод противоречащий интуиции.
@@ -639,7 +693,7 @@ LLM генерирует ответ, который выглядит как об
 
 ---
 
-## 9. Антипаттерны
+## 10. Антипаттерны
 
 ### «Один промпт с chunk_size=1024 справится»
 

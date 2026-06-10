@@ -175,3 +175,24 @@
 ---
 
 *Глоссарий модуля 12. Следующий: [Модуль 13 — Fine-tuning / LoRA*](../13-fine-tuning/GLOSSARY.md)
+---
+
+## A
+
+**Agentic RAG**  
+RAG-система, где retrieval управляется агентным loop: planning, multi-step retrieval, gap detection, verification.
+
+---
+
+## G
+
+**Graph RAG**  
+RAG, использующий knowledge graph: entities, relations, communities, paths. Полезен для multi-hop вопросов и объяснимости.
+
+---
+
+## T
+
+**Temporal RAG**  
+RAG, учитывающий версии документов, valid_from/valid_to, superseded_by и as-of date запроса.
+

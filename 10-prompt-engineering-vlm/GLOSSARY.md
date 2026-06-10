@@ -200,3 +200,14 @@ Stage 2 — extraction (высокое разрешение, только най
 Расчёт: `свободный VRAM = total - веса модели - overhead`.
 KV-cache одного VLM запроса (1280 visual + 300 text tokens) ≈ 0.25 Гб на GTX 1660.
 `max_concurrency = свободный VRAM / KV-cache per request`.
+
+---
+
+## D
+
+**Document Intelligence**  
+Комплексный pipeline из OCR, layout detection, VLM, parsers и structured output для извлечения данных из документов, таблиц и форм.
+
+**Document Parser**  
+Компонент, который преобразует DOCX/XLSX/PDF в markdown/html/table representation перед VLM или LLM extraction.
+

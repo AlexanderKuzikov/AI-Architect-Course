@@ -135,3 +135,13 @@ Requests Per Day — суточный лимит запросов провайд
 ---
 
 *Глоссарий модуля 11. Следующий: [Модуль 12 — RAG*](../12-rag/GLOSSARY.md)
+---
+
+## M
+
+**Model Gateway**  
+Централизованный слой routing между application/agent и LLM providers. Отвечает за выбор модели, fallback pools, rate limits, output normalization, cost/latency/quality monitoring.
+
+**Model Routing**  
+Выбор модели/провайдера по типу задачи, budget, risk level и data policy. Отличается от простой Key Rotation тем, что разные модели могут иметь разный output behavior.
+
