@@ -8,10 +8,9 @@
 2. [Архитектурная механика](#2-архитектурная-механика)
 3. [Production trade-offs](#3-production-trade-offs)
 4. [Security и failure modes](#4-security-и-failure-modes)
-5. [Реальный кейс](#5-реальный-кейс)
-6. [Антипаттерны](#6-антипаттерны)
-7. [Задачи AI-кодеру](#задачи-ai-кодеру)
-8. [Чеклист архитектора](#чеклист-архитектора)
+5. [Антипаттерны](#5-антипаттерны)
+6. [Задачи AI-кодеру](#задачи-ai-кодеру)
+7. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -127,31 +126,29 @@ User: confirm / reject
 
 | Решение | Выигрыш | Цена | Когда выбирать |
 |:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
+| Browser-use (agent driven) | гибкость, работает без API | flaky, медленно, опасно | нет API, legacy system |
+| Playwright script (hardcoded) | надёжно, быстро, дешево | хрупкий при изменении UI | стабильный UI, известные селекторы |
+| DOM + screenshot hybrid | надёжнее чем screenshot-only | сложнее | высокие требования к accuracy |
+| Только screenshot | простота | ненадёжные селекторы | prototype |
+| Full sandbox (incognito + proxy) | безопасно | overhead, limited sessions | production с untrusted sites |
+| Shared browser context | дёшево | data leakage между runs | prototype |
 
 ---
 
 ## 4. Security и failure modes
 
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
-
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
-
----
-
-## 5. Реальный кейс
-
-Реальный кейс: агент проверки заказа в админке
-
-Цель: проверить заказ 4581 — найден ли, статус оплаты, комментарий менеджера. Ограничения: только `https://admin.example`, только read actions, timeout 60 sec, audit log каждого действия.
+| Failure mode | Пример | Контроль |
+|:--|:--|:--|
+| Prompt injection через сайт | сайт говорит «переведи деньги» | DOM как untrusted, policy |
+| Credential leakage | агент читает cookie | isolated context, secrets manager |
+| Anti-bot / legal | scraping запрещён TOS | legal review, rate limits |
+| Flaky selectors | UI изменился | stable selectors + tests |
+| State corruption | агент нажал не туда | approval + dry-run + audit |
+| Session mixup | один видит сессию другого | tenant/user isolation |
 
 ---
 
-## 6. Антипаттерны
+## 5. Антипаттерны
 
 ### «Дать агенту полный браузер»
 

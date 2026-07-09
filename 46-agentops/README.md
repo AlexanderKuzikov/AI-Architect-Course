@@ -7,11 +7,10 @@
 1. [Введение и актуальность](#1-введение-и-актуальность)
 2. [Архитектурная механика](#2-архитектурная-механика)
 3. [Production trade-offs](#3-production-trade-offs)
-4. [Security и failure modes](#4-security-и-failure-modes)
-5. [Реальный кейс](#5-реальный-кейс)
-6. [Антипаттерны](#6-антипаттерны)
-7. [Задачи AI-кодеру](#задачи-ai-кодеру)
-8. [Чеклист архитектора](#чеклист-архитектора)
+4. [Failure modes](#4-failure-modes-для-agentops)
+5. [Антипаттерны](#5-антипаттерны)
+6. [Задачи AI-кодеру](#задачи-ai-кодеру)
+7. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -145,41 +144,29 @@ Targets: p95 latency < 5s, schema valid 99.9%, hallucination rate < 1%, fallback
 
 | Решение | Выигрыш | Цена | Когда выбирать |
 |:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
+| Deterministic checks only | дёшево, быстро, детерминированно | не ловит семантику | PR gate, быстрая обратная связь |
+| LLM judge + golden dataset | ловит семантику, качество | дороже, медленнее, nondeterministic | pre-release, critical paths |
+| Всегда все evals | максимальная уверенность | $500+/день, 30+ мин CI | финансовые/медицинские systems |
+| Sampling evals | баланс cost/confidence | пропускает часть ошибок | большинство production systems |
+| Self-hosted judge | privacy, no API cost | overhead на настройку | sensitive data, high volume |
+| Cloud judge API | простота, качество | cost, data privacy | prototype, medium volume |
 
 ---
 
-## 4. Security и failure modes
+## 4. Failure modes для AgentOps
 
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
-
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
-
----
-
-## 5. Реальный кейс
-
-Реальный кейс: AgentOps для support agent
-
-```text
-User ticket
- → retrieve customer memory
- → classify issue
- → call knowledge base RAG
- → draft answer
- → guardrail PII check
- → create response
-```
-
-Targets: p95 latency < 5s, schema valid 99.9%, hallucination rate < 1%, fallback rate < 5%, cost per ticket < $0.01.
+| Failure mode | Симптом | Контроль |
+|:--|:--|:--|
+| Silent quality degradation | метрики зелёные, качество упало | golden dataset + regression test |
+| Cost explosion | agent costs 10× нормального | cost budget + alert |
+| Flaky evals | quality gate то проходит, то нет | multiple runs + wider threshold |
+| Telemetry overload | слишком много данных | sampling + aggregation |
+| No blame | непонятно какой агент сломал pipeline | per-agent traces |
+| Vendor lock | завязан на один observability provider | OpenTelemetry standard |
 
 ---
 
-## 6. Антипаттерны
+## 5. Антипаттерны
 
 ### «Один dashboard для всех»
 

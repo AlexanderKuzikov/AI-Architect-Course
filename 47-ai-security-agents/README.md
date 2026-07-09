@@ -118,29 +118,49 @@ Controls: retrieved contract marked untrusted, only `documents:read` and `policy
 
 | Решение | Выигрыш | Цена | Когда выбирать |
 |:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
+| Strict policy-as-code | безопасность, audit trail | больше upfront design, latency | production, критичные данные, regulated domain |
+| Permissive (prompt-based) | быстрый старт, гибкость | blast radius, нет гарантий | prototype, read-only, изолированные среды |
+| Human approval для всех write | безопасность | friction, slow | любые destructive/secrets/payment actions |
+| Sandboxed agent | изоляция, нет доступа к системе | overhead настройки sandbox | coding agents, browser agents |
+| Redact всё | безопасность по умолчанию | потеря полезной информации | неизвестный trust level данных |
 
 ---
 
-## 4. Security и failure modes
+## 4. Стратегия защиты: слои обороны
 
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
+Для agent system защита выстраивается слоями — ни один слой не достаточен сам по себе:
 
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
+```
+Layer 1: Input guards — prompt injection detection на входе
+Layer 2: Tool sandbox — agent имеет только необходимые инструменты
+Layer 3: Approval policy — write/destructive/secrets требуют человека
+Layer 4: Output guards — PII redaction, format validation
+Layer 5: Audit trail — каждый tool call логируется с agentId, userId, resultHash
+Layer 6: Recovery — rollback memory, отзыв compromised tokens
+```
 
----
+Каждый слой — defence in depth. Если injection прошёл Layer 1 — Layer 2 (tool sandbox) не позволит сделать destructive action.
 
-## 5. Реальный кейс
+### Threat model для типового agent
 
-Реальный кейс: security review document agent
+```
+Активы: customer data, contracts, secrets, production systems, payment
+Угрозы: prompt injection (direct/indirect), tool abuse, data exfiltration,
+        memory poisoning, supply chain, compromised provider, insider
+Blast radius: зависит от layer 2 (tool permissions) и layer 3 (approvals)
+```
 
-Агент проверяет договор на риски. Threats: contract contains indirect prompt injection, agent tries to call email tool, agent leaks contract to logs, memory stores false approval rule.
+### Security для agent: конкретные правила
 
-Controls: retrieved contract marked untrusted, only `documents:read` and `policy:read`, no `emails:send`, output PII guardrail, audit every tool call, memory write disabled for contract content.
+| Правило | Почему |
+|:--|:--|
+| Retrieved documents = untrusted | Indirect injection через RAG |
+| No secrets in prompt | Prompt leaking через модель |
+| Tool allowlist, не blocklist | Allowlist нельзя обойти |
+| Scoped short-lived tokens | Комpromised agent = ограниченный ущерб |
+| Logs без raw secrets | Логи = новый attack surface |
+| Human approval для write | Destructive action требует человека |
+| Immutable audit trail | Расследование инцидентов |
 
 ---
 

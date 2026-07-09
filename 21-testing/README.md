@@ -377,7 +377,198 @@ it('does not throw', () => {
 
 ---
 
-## Антипаттерны
+## 4. Тестирование AI-выводов
+
+### Проблема: LLM output недетерминирован
+
+Обычный assertion `expect(result).toBe('expected')` не работает с LLM — тот же промпт может дать разные формулировки.
+
+```typescript
+// ❌ Не работает для LLM
+it('извлекает название суда', async () => {
+  const result = await extractCourt(text);
+  expect(result.name).toBe('Арбитражный суд г. Москвы');
+  // Ошибка: модель вернула "АС г. Москвы" или "Арбитражный суд Москвы"
+});
+```
+
+### Три подхода к тестированию AI
+
+**Подход 1: Schema validation (детерминированный)**
+
+Проверяем структуру, не содержание:
+
+```typescript
+it('возвращает валидный JSON по схеме', async () => {
+  const result = await extractCourt(text);
+  const parsed = CourtRecord.safeParse(JSON.parse(result));
+  expect(parsed.success).toBe(true);
+  expect(parsed.data!.name).toBeDefined();
+  expect(typeof parsed.data!.region_code).toBe('number');
+});
+// ✅ Всегда работает, независимо от формулировок LLM
+// ✅ Быстро, не требует LLM-судьи
+// ❌ Не проверяет семантическую корректность
+```
+
+**Подход 2: Semantic similarity (LLM-as-Judge)**
+
+Проверяем семантическую близость к эталону:
+
+```typescript
+it('извлекает название суда семантически верно', async () => {
+  const result = await extractCourt(text);
+  const expected = 'Арбитражный суд г. Москвы';
+  const got = result.name;
+  const embA = await embed(expected);
+  const embB = await embed(got);
+  const similarity = cosineSimilarity(embA, embB);
+  expect(similarity).toBeGreaterThan(0.85);
+});
+```
+
+**Подход 3: Deterministic checks + golden dataset**
+
+Для regression-тестов — фиксированный датасет с ожидаемыми полями:
+
+```typescript
+interface GoldenTestCase {
+  input: string;
+  expectedFields: Partial<CourtRecord>;
+}
+
+const GOLDEN_DATASET: GoldenTestCase[] = [
+  {
+    input: 'Арбитражный суд г. Москвы, ул. Большая Тульская, 17',
+    expectedFields: { court_type: 'АРБИТРАЖНЫЙ', region_code: 77 },
+  },
+];
+
+describe('extraction golden dataset', () => {
+  it.each(GOLDEN_DATASET)('извлекает данные из: $input',
+    async ({ input, expectedFields }) => {
+      const result = await extractCourt(input);
+      for (const [field, expected] of Object.entries(expectedFields)) {
+        expect(result[field]).toBe(expected);
+      }
+    }
+  );
+});
+```
+
+### Когда какой подход
+
+| Подход | Скорость | Confidence | Когда использовать |
+|--------|----------|------------|-------------------|
+| Schema validation | ~1ms | Средняя | Каждый PR |
+| Semantic similarity | ~20ms | Высокая | Nightly / pre-release |
+| Golden dataset | ~1s | Очень высокая | Regression suite |
+| Human evaluation | ~5min/case | Максимальная | Pre-production |
+
+---
+
+## 5. Snapshot-тестирование
+
+LLM output может меняться от версии к версии. Snapshot-тесты фиксируют «текущее состояние» и сигнализируют о незапланированных изменениях:
+
+```typescript
+it('генерация SEO-описания стабильна', async () => {
+  const description = await generateMetaDescription('Шуруп 5x20');
+  expect(description).toMatchSnapshot('seo-desc-screw-5x20');
+});
+```
+
+```bash
+# Обновить snapshots после осознанного изменения промпта
+npx vitest --update
+```
+
+**Когда snapshot полезен:** SEO-генерация, template rendering, classification
+**Когда не полезен:** extraction с вариативным контентом, creative generation
+
+---
+
+## 6. Contract testing для сервисов
+
+В multi-agent архитектуре контракты между сервисами проверяются без запуска всех вместе:
+
+```typescript
+// Consumer test (agent вызывает MCP tool)
+it('MCP server возвращает документ по ID', async () => {
+  await pact
+    .given('документ DOC-123 существует')
+    .uponReceiving('запрос getDocument')
+    .withRequest({
+      method: 'POST',
+      path: '/mcp/call_tool',
+      body: { tool: 'getDocument', args: { id: 'DOC-123' } },
+    })
+    .willRespondWith({
+      status: 200,
+      body: { documentId: 'DOC-123', title: 'Договор поставки' },
+    });
+
+  await pact.executeTest(async (mockServer) => {
+    const client = new McpClient({ url: mockServer.url });
+    const doc = await client.callTool('getDocument', { id: 'DOC-123' });
+    expect(doc.documentId).toBe('DOC-123');
+  });
+});
+```
+
+---
+
+## 7. Performance testing
+
+Минимальный benchmark для LLM pipeline:
+
+```typescript
+import { bench, describe } from 'vitest';
+
+describe('extraction throughput', () => {
+  const testCases = loadTestCases(100);
+
+  bench('sequential', async () => {
+    for (const tc of testCases) await extractCourt(tc.input);
+  }, { iterations: 3 });
+
+  bench('parallel x5', async () => {
+    const batch = testCases.slice(0, 5);
+    await Promise.all(batch.map(tc => extractCourt(tc.input)));
+  }, { iterations: 3 });
+});
+```
+
+Мониторинг качества в production:
+
+```typescript
+interface ExtractionQualityMetric {
+  successRate: number;        // валидный JSON
+  semanticAccuracy: number;    // A/B с evaluator
+  avgLatencyMs: number;
+  costUsd: number;
+}
+
+function checkQualityAlert(m: ExtractionQualityMetric): string | null {
+  if (m.successRate < 0.95) return 'SUCCESS_RATE_DROP';
+  if (m.semanticAccuracy < 0.80) return 'SEMANTIC_ACCURACY_DROP';
+  if (m.avgLatencyMs > 5000) return 'LATENCY_INCREASE';
+  return null;
+}
+```
+
+---
+
+## Anti-checklist ☠️
+
+- [ ] Мокировать DB/HTTP — testcontainers Postgres стартует за 2s, мок даёт ложную уверенность
+- [ ] Тестировать имплементацию (spy на приватные методы) — сломается при рефакторинге
+- [ ] `beforeEach` поднимает Docker контейнер — 50 тестов × 3s = 150s
+- [ ] Coverage как KPI для AI-кодера — напишет тесты на покрытие строк, не на поведение
+- [ ] E2E вместо интеграционных тестов — 10× медленнее, не даёт больше confidence
+- [ ] `test.only` в закоммиченном тесте — CI runs only one test
+
+---## Антипаттерны
 
 **1. Мокировать всё, что «медленное»**
 Мок репозитория позволяет написать быстрый тест, который падает в продакшне из-за специфики реального SQL. testcontainers + Postgres 16 Alpine стартует за ~2 секунды — это приемлемая цена за реальную confidence.

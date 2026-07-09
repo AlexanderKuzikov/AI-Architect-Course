@@ -7,11 +7,10 @@
 1. [Введение и актуальность](#1-введение-и-актуальность)
 2. [Архитектурная механика](#2-архитектурная-механика)
 3. [Production trade-offs](#3-production-trade-offs)
-4. [Security и failure modes](#4-security-и-failure-modes)
-5. [Реальный кейс](#5-реальный-кейс)
-6. [Антипаттерны](#6-антипаттерны)
-7. [Задачи AI-кодеру](#задачи-ai-кодеру)
-8. [Чеклист архитектора](#чеклист-архитектора)
+4. [Failure modes](#4-failure-modes-для-agentic-rag)
+5. [Антипаттерны](#5-антипаттерны)
+6. [Задачи AI-кодеру](#задачи-ai-кодеру)
+7. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -160,39 +159,29 @@ Controls:
 
 | Решение | Выигрыш | Цена | Когда выбирать |
 |:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
+| Standard RAG (single pass) | быстро, дешево, просто | нет multi-hop, плохо для сложных вопросов | простые вопросы, FAQ |
+| Agentic RAG (iterative) | глубже, точнее на сложных запросах | дороже, медленнее, сложнее | юридические, финансовые, сложные домены |
+| Graph RAG | связи, multi-hop, explainability | overhead на построение графа | entity-heavy knowledge bases |
+| Vector-only | просто, быстро | нет связей между фактами | прототип |
+| Hybrid vector + graph | лучшее из двух | сложнее инфра | production |
+| Temporal RAG | актуальность данных | сложнее индексация | контракты, политики, законы |
 
 ---
 
-## 4. Security и failure modes
+## 4. Failure modes для Agentic RAG
 
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
-
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
-
----
-
-## 5. Реальный кейс
-
-Реальный кейс: legal knowledge base
-
-Запрос: «Нужно ли согласование юриста для договора на 2.5M ₽ с новым контрагентом?»
-
-План:
-
-1. найти policy по сумме;
-2. проверить vendor status;
-3. найти clause risk;
-4. проверить exceptions;
-5. собрать answer с citations.
+| Failure mode | Симптом | Контроль |
+|:--|:--|:--|
+| Retrieval loop | агент бесконечно ищет | max iterations |
+| Graph poisoning | неверные relations | source trust + review |
+| Stale policy | ответ по старой версии | temporal filters |
+| Citation washing | цитата не подтверждает claim | verifier |
+| Context explosion | слишком много evidence | budget + summaries |
+| Cascade hallucination | ошибка порождает ошибки | verifier + abstain policy |
 
 ---
 
-## 6. Антипаттерны
+## 5. Антипаттерны
 
 ### «Graph RAG вместо evaluation»
 

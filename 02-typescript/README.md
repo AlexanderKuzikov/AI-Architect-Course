@@ -803,6 +803,15 @@ const config = { port: 3000, host: 'localhost' } satisfies AppConfig;
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] `any` как способ закончить задачу быстрее — отложенный runtime-баг
+- [ ] Type assertion (`as User`) без runtime guard — компилятор доверяет, данные могут быть другими
+- [ ] Enum для открытых доменов — плохо переживает сериализацию и миграции
+- [ ] `@ts-ignore` / `@ts-expect-error` без объяснения причины — технический долг
+- [ ] Слишком глубокие conditional/mapped types — AI и разработчики боятся их менять
+- [ ] Типы без инвариантов (деньги, даты, ID) — branded types или value objects обязательны
+
 ## 9. Задачи AI-кодеру
 
 - Сгенерировать типизированный контракт для внешнего API и runtime guard для входящих данных.

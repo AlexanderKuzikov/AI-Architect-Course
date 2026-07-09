@@ -43,20 +43,15 @@ JavaScript однопоточный. Это означает: в каждый м
 
 Вот что происходит внутри Node.js в каждый момент времени:
 
-```
-┌─────────────────────────────┐
-│         Call Stack          │  ← здесь выполняется синхронный код
-└─────────────────────────────┘
-           ↓ пусто?
-┌─────────────────────────────┐
-│       Microtask Queue       │  ← Promise.then(), queueMicrotask()
-│    (приоритет — высокий)    │  ← очищается ПОЛНОСТЬЮ перед следующим тиком
-└─────────────────────────────┘
-           ↓ пусто?
-┌─────────────────────────────┐
-│       Macrotask Queue       │  ← setTimeout, setInterval, I/O callbacks
-│   (приоритет — обычный)     │  ← берётся ОДНА задача за тик
-└─────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph "Фазы Event Loop"
+        A["🧠 Call Stack<br/>синхронный код"] -->|"стек пуст?"| B["⚡ Microtask Queue<br/>Promise.then(), queueMicrotask()<br/>очищается ПОЛНОСТЬЮ"]
+        B -->|"пусто?"| C["📋 Macrotask Queue<br/>setTimeout, setInterval, I/O<br/>ОДНА задача за тик"]
+        C --> A
+    end
+
+    D["libuv Thread Pool<br/>(дефолт: 4 потока)"] -.->|"fs, crypto, DNS"| A
 ```
 
 **Тик Event Loop** — это один полный цикл: проверить стек →
@@ -883,6 +878,15 @@ class ApiError extends AppError {
 - [ ] `node:test` вместо Jest для простых тест-сьютов
 
 ---
+
+## Anti-checklist ☠️
+
+- [ ] Использовать `forEach` с async callback — ошибки и порядок завершения неконтролируемы
+- [ ] `fs.readFileSync` в runtime — блокирует Event Loop, только для инициализации
+- [ ] Последовательные `await` вместо `Promise.all` для независимых операций — в 3× медленнее
+- [ ] `setInterval` как бизнес-планировщик — нет backpressure, не масштабируется
+- [ ] Глобальный кэш без TTL и лимита — OOM в production незаметно
+- [ ] `new Error(string)` без кода — в обработчике нельзя отличить rate limit от network error
 
 ## 9. Задачи AI-кодеру — правильные формулировки
 

@@ -7,11 +7,10 @@
 1. [Введение и актуальность](#1-введение-и-актуальность)
 2. [Архитектурная механика](#2-архитектурная-механика)
 3. [Production trade-offs](#3-production-trade-offs)
-4. [Security и failure modes](#4-security-и-failure-modes)
-5. [Реальный кейс](#5-реальный-кейс)
-6. [Антипаттерны](#6-антипаттерны)
-7. [Задачи AI-кодеру](#задачи-ai-кодеру)
-8. [Чеклист архитектора](#чеклист-архитектора)
+4. [Failure modes](#4-failure-modes-для-памяти-агента)
+5. [Антипаттерны](#5-антипаттерны)
+6. [Задачи AI-кодеру](#задачи-ai-кодеру)
+7. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -139,38 +138,28 @@ Ticket ── resolvedBy ── Workaround
 
 | Решение | Выигрыш | Цена | Когда выбирать |
 |:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
+| Векторная БД только для памяти | просто, быстро | нет связей между фактами | FAQ, семантический поиск |
+| Graph + vector hybrid | связи, multi-hop, explainability | сложнее инфра | юрлица, документооборот, контракты |
+| Единая память на всех юзеров | просто | data leakage, tenant isolation | prototype |
+| Tenant-scoped memory | privacy, isolation | overhead на фильтрацию | production SaaS |
+| Auto-write (всё что сказано) | полнота | шум, poisoning | исследовательские агенты |
+| Policy-based write (только факты) | качество, безопасность | сложнее настройка правил | production |
 
 ---
 
-## 4. Security и failure modes
+## 4. Failure modes для памяти агента
 
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
-
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
-
----
-
-## 5. Реальный кейс
-
-Реальный кейс: support agent с долгосрочной памятью
-
-Support agent должен помнить последние обращения клиента, продукты, SLA, timezone и approved workarounds.
-
-```text
-Customer ── hasProduct ── Product
-Customer ── hasSLA ── SLA
-Customer ── prefersTimezone ── Europe/Moscow
-Ticket ── resolvedBy ── Workaround
-```
+| Failure mode | Симптом | Контроль |
+|:--|:--|:--|
+| Stale memory | agent uses old preferences | TTL + recency ranking |
+| Cross-user leakage | один видит память другого | tenant/user фильтры на query |
+| Memory poisoning | вредный факт влияет на ответы | source trust + human review |
+| Context explosion | memory перегружает prompt | summary + top-k + budget |
+| No explainability | нельзя понять источник факта | provenance chain |
 
 ---
 
-## 6. Антипаттерны
+## 5. Антипаттерны
 
 ### «Сохранять весь чат»
 

@@ -38,35 +38,22 @@
 
 RAG-pipeline состоит из двух независимых фаз: **indexing** (разовая или периодическая) и **retrieval** (на каждый запрос).
 
-```
-═══════════════════ INDEXING PHASE ══════════════════════
-                                                         
-  Source Documents                                       
-        │                                                
-        ▼                                                
-    Chunking ──── стратегия нарезки, overlap[^1]
-        │                                                
-        ▼                                                
-    Embedding ─── модель, размерность, батчинг[^2]
-        │                                                
-        ▼                                                
-    Vector Store ─ индекс, метаданные, persistence[^3]
-                                                         
-═══════════════════ RETRIEVAL PHASE ═════════════════════
-                                                         
-  User Query                                             
-        │                                                
-        ▼                                                
-    Embedding ──── та же модель что при индексации[^2]
-        │                                                
-        ▼                                                
-    Retrieval ──── similarity search, top-k, filters[^4]
-        │                                                
-        ▼                                                
-    Context Assembly ── rerank, deduplicate, format[^5]
-        │                                                
-        ▼                                                
-    LLM Generation ─── prompt + context → ответ[^6]
+```mermaid
+flowchart LR
+    subgraph "INDEXING PHASE"
+        A["📄 Source Documents"] --> B["✂️ Chunking<br/>strategy, overlap"]
+        B --> C["🔢 Embedding<br/>model, dims, batch"]
+        C --> D["💾 Vector Store<br/>index, metadata"]
+    end
+
+    subgraph "RETRIEVAL PHASE"
+        E["❓ User Query"] --> F["🔢 Embedding<br/>(same model)"]
+        F --> G["🔍 Retrieval<br/>similarity, top-k"]
+        G --> H["🧩 Context Assembly<br/>rerank, deduplicate"]
+        H --> I["🤖 LLM Generation<br/>prompt + context → answer"]
+    end
+
+    D -.-> G
 ```
 
 ### Зависимости между компонентами
@@ -724,6 +711,18 @@ Agentic RAG требует verifier:
 **Выглядит правильно:** более мощная embedding модель = лучше поиск.
 
 **Почему ошибка:** смена embedding модели = переиндексация всего корпуса. Если текущий Recall@10 = 0.85 и проблема в chunking — смена модели не поможет. Сначала измеряй, потом меняй.
+
+---
+
+## Anti-checklist ☠️
+
+- [ ] Выбирать embedding модель до измерения Recall@k — без baseline неясно, помогла ли смена
+- [ ] Доверять `similarity > 0.8` как индикатору релевантности — ANN approximation, не точная метрика
+- [ ] Использовать LangChain/LlamaIndex дефолты для production — спроектированы для demos
+- [ ] Одна embedding модель для RU и EN текстов — специализированные модели дают +10-15% Recall
+- [ ] top-3 и считать что ответ всегда в них — измеряй Recall@k, а не предполагай
+- [ ] Chunking текста без учёта таблиц — таблица разрезанная пополам = потерянный контекст
+- [ ] Писать full re-index без blue-green индекса — downtime на время переиндексации
 
 ---
 

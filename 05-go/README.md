@@ -1347,6 +1347,15 @@ for _, item := range items {
 - **Shared mutable state между goroutines.** Гонки появляются даже в простом кэше. Для состояния — mutex, channel ownership, atomic или immutable snapshots.
 - **Игнорирование GC и аллокаций.** Go быстрый, но не отменяет профилирование. `pprof`, `GOMEMLIMIT`, escape analysis и benchmark нужны до production.
 
+## Anti-checklist ☠️
+
+- [ ] Игнорировать ошибки (`result, _ := doSomething()`) — молча теряешь сбой
+- [ ] Горутина на каждый request без лимита — дешёво, но не бесплатно
+- [ ] `defer` в цикле — все Close() вызовутся только при возврате из функции
+- [ ] Context без распространения — отмена запроса не работает
+- [ ] `interface{}` / `any` как универсальный тип — теряешь все преимущества типизации
+- [ ] `go test` без `-race` в CI — race condition в production непредсказуемы
+
 ## 11. Задачи AI-кодеру
 
 - Добавить `context.Context` во все HTTP/DB/queue вызовы.

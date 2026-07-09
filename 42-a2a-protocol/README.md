@@ -52,138 +52,224 @@ Orchestrator Agent
 
 ## 2. Архитектурная механика
 
+### 2.1. Agent Card — описание возможностей агента
 
+Agent Card — JSON-документ, который агент публикует для discovery.
+Содержит name, description, URL, authentication и список capabilities.
 
-## 2. Agent Card, Task, Artifact
-
-**Agent Card** описывает capabilities агента: name, description, URL, capabilities, authentication.
-
-**Task** — единица работы: `taskId`, `sessionId`, `input`, `status`.
-
-**Artifact** — результат работы: structured JSON, text, file reference или ссылка на raw data.
-
-```json
-{
-  "taskId": "task_123",
-  "sessionId": "session_456",
-  "input": {"documentId": "DOC-789"},
-  "status": "submitted"
+```typescript
+interface AgentCard {
+  name: string;
+  description: string;
+  url: string;
+  version: string;
+  capabilities: {
+    tasks: string[];           // типы задач: "extraction", "research"
+    maxInputSize: number;      // макс. размер входных данных (chars)
+    maxOutputSize: number;     // макс. размер результата (chars)
+    supportedFormats: string[]; // "json", "markdown", "text"
+    maxConcurrent: number;     // параллельных task
+  };
+  authentication: {
+    type: 'none' | 'bearer' | 'oauth2';
+    scopes: string[];
+  };
+  // Пример:
+  // {
+  //   "name": "contract-extractor",
+  //   "description": "Извлекает реквизиты из договоров",
+  //   "url": "https://agents.internal/contract-extractor",
+  //   "capabilities": {
+  //     "tasks": ["extraction"],
+  //     "maxInputSize": 100_000,
+  //     "maxOutputSize": 10_000
+  //   },
+  //   "authentication": { "type": "bearer", "scopes": ["documents:read"] }
+  // }
 }
 ```
 
+### 2.2. Task — единица работы
 
+Task — контракт между агентами. Содержит вход, выход и статус.
 
-## 3. Протокольный lifecycle
-
-```text
-submit → submitted → working → completed
-                         ↘ failed
-                         ↘ canceled
+```mermaid
+flowchart LR
+    A["submit<br/>(orchestrator)"] --> B["submitted"]
+    B --> C["working<br/>(agent processes)"]
+    C --> D["completed<br/>(result available)"]
+    C --> E["failed<br/>(error + reason)"]
+    C --> F["canceled<br/>(orchestrator abort)"]
+    B --> F
 ```
 
-Операции: submit, poll, stream, cancel.
+```typescript
+interface Task {
+  taskId: string;          // UUID
+  sessionId: string;       // группа связанных task
+  parentTaskId?: string;   // для DAG иерархии
+  agentId: string;         // целевой агент
+  idempotencyKey?: string; // для safe retry
 
-| Тип задачи | Timeout |
-|:--|:--|
-| classification | 5–10 sec |
-| extraction | 30–60 sec |
-| research | async, 5–30 min |
-| code review | async, 10–60 min |
-| legal analysis | async + human approval |
+  input: TaskInput;
+  status: TaskStatus;      // submitted | working | completed | failed | canceled
+  output?: TaskOutput;
+  error?: { code: string; message: string };
 
+  metadata: {
+    createdAt: string;     // ISO 8601
+    updatedAt: string;
+    attempts: number;
+    maxAttempts: number;
+    timeoutMs: number;
+  };
+}
+```
 
+### 2.3. Протокольный lifecycle
 
-## 4. Паттерны multi-agent orchestration
+Агент-отправитель (orchestrator) вызывает агента-исполнителя:
 
-| Паттерн | Плюсы | Минусы |
-|:--|:--|:--|
-| Orchestrator + specialists | контроль, accountability | coordinator bottleneck |
-| Peer agents | гибкость | сложнее tracing и blame |
-| Pipeline agents | предсказуемость | меньше адаптивности |
-| Market-style delegation | масштабируемость | нужен trust/rating/auth layer |
+```text
+1. Orchestrator: POST /a2a/task → { taskId, status: "submitted" }
+2. Orchestrator: GET /a2a/task/{taskId} (poll) → { status: "working" }
+   или: SSE /a2a/task/{taskId}/stream (stream) → { status, delta }
+3. Agent:       PATCH /a2a/task/{taskId} → { status: "completed", output }
+4. Orchestrator: GET /a2a/task/{taskId} → { status: "completed", output }
+```
 
+Выбор между poll и stream — trade-off:
 
+| Режим | Latency | Complexity | Нагрузка |
+|-------|---------|-----------|----------|
+| Poll (каждые 2s) | ~2s avg | Низкая | N агентов × N poll/сек |
+| SSE streaming | ~200ms avg | Средняя (SSE парсер) | 1 соединение/task |
+| Webhook callback | ~500ms avg | Высокая (нужен endpoint) | 1 вызов/task |
 
-## 5. State management и idempotency
+### 2.4. Паттерны multi-agent orchestration
 
-Нужны: `taskId`, `sessionId`, `correlationId`, `idempotencyKey`, durable task store, retry policy, cancellation token.
+| Паттерн | Плюсы | Минусы | Пример |
+|---------|-------|--------|--------|
+| Orchestrator + specialists | контроль, accountability, traceability | coordinator bottleneck, SPOF | review договора: extraction→risk→summary |
+| Peer agents (decentralised) | гибкость, нет SPOF | сложнее tracing, blame | чат-агенты с маршрутизацией по навыку |
+| Pipeline agents (DAG) | предсказуемость, throughput | неадаптивен | batch обработка: стабильные шаги |
+| Market-style delegation | масштабируемость | trust/rating/auth | open agent networks |
+
+```mermaid
+flowchart TD
+    subgraph "Orchestrator + Specialists"
+        O["🎯 Orchestrator"] --> E["📄 Extraction Agent"]
+        O --> R["⚠️ Risk Agent"]
+        O --> S["📊 Summary Agent"]
+        O --> T["🎫 Ticket Agent"]
+        E -->|"result"| O
+        R -->|"result"| O
+    end
+
+    subgraph "Pipeline (DAG)"
+        A1["Input"] --> A2["Step 1"]
+        A2 --> A3["Step 2"]
+        A3 --> A4["Step 3"]
+    end
+
+    subgraph "Peer Agents"
+        P1["Agent A"] <--> P2["Agent B"]
+        P2 <--> P3["Agent C"]
+        P3 <--> P1
+    end
+```
+
+### 2.5. State management и idempotency
 
 Write operations должны быть идемпотентны:
 
 ```text
-same task + same input + same idempotencyKey → same result
+same taskId + same idempotencyKey → same result (no duplicate side effects)
 ```
 
-Иначе retry создаст дубли тикетов, писем или платежей.
+```typescript
+// Idempotent task submission
+async function submitTask(task: Task): Promise<Task> {
+  // Проверить существующий task по idempotencyKey
+  const existing = await taskStore.findByIdempotencyKey(
+    task.idempotencyKey!
+  );
+  if (existing) return existing; // уже создан — вернуть без изменений
 
+  // Создать новый
+  return taskStore.create(task);
+}
 
+// Durable task store
+interface TaskStore {
+  create(task: Task): Promise<Task>;
+  updateStatus(taskId: string, status: TaskStatus, output?: TaskOutput): Promise<void>;
+  findById(taskId: string): Promise<Task | null>;
+  findByIdempotencyKey(key: string): Promise<Task | null>;
+  listBySession(sessionId: string): Promise<Task[]>;
+  markCanceled(taskId: string): Promise<void>;
+}
+```
 
-## 6. Failure modes и observability
+### 2.6. Failure modes и observability
 
 | Failure mode | Симптом | Контроль |
 |:--|:--|:--|
-| Infinite delegation | task уходит по кругу | max depth, visited agents |
+| Infinite delegation | task уходит по кругу | max depth, visited agents set |
 | Lost task | orchestrator не знает status | durable task store |
-| Silent quality degradation | result есть, но плохой | evaluator per agent |
+| Silent quality degradation | result есть, но плохой | per-agent evaluator |
 | Context explosion | слишком много artifact | summary + references |
-| No blame | непонятно кто сломал pipeline | per-agent traces |
-| Retry storm | failed agent вызывает лавину retry | backoff + circuit breaker |
+| No blame | непонятно кто сломал pipeline | per-agent traces + correlationId |
+| Retry storm | failed agent вызывает лавину | backoff + circuit breaker |
+| Credential propagation | compromised agent получает доступ других | scoped credentials, short-lived tokens |
 
+**Observability для multi-agent:**
 
+```typescript
+// Каждый agent call логируется с correlationId и traceId
+interface AgentCallLog {
+  correlationId: string;     // сквозной ID всей сессии
+  traceId: string;           // W3C Trace Context
+  parentTaskId?: string;     // кто вызвал
+  taskId: string;            // текущая task
+  agentId: string;           // какой агент
+  durationMs: number;
+  status: 'success' | 'failure' | 'timeout';
+  tokensUsed?: number;
+  costUsd?: number;
+}
+```
 
-### 7.1. Реальный кейс: агент обработки договора
+### 2.7. Реальный кейс: агент обработки договора
 
-Цель: извлечь реквизиты, проверить риски, сравнить с policy, подготовить резюме, создать тикет юристу.
+Pipeline из 4 агентов: extraction → risk → summary → ticket.
 
 ```text
 contract:DOC-789
- ├── extraction: completed, 12s
- ├── risk: completed, 8s
- ├── summary: completed, 6s
- └── ticket: created, id=LEGAL-1042
+ ├── extraction (12s) → { стороны: "ООО Ромашка / ИП Иванов",
+ │                         сумма: "1 200 000 ₽", срок: "31.12.2026" }
+ ├── risk (8s) → { уровень: "medium", риск: "отсутствие неустойки",
+ │                 рекомендация: "добавить пункт 5.3" }
+ ├── summary (6s) → { итого: "Договор поставки, типовой, рекомендовано
+ │                     согласование с юристом" }
+ └── ticket: created (id=LEGAL-1042)
 ```
 
+Ключевые решения:
+- extraction без human approval (read-only)
+- ticket:create с idempotencyKey (повторный вызов не создаст дубль)
+- risk agent использует другую модель чем extraction (специализация)
+- всё логируется с `correlationId = "contract:DOC-789"`
 
 ---
 
-## 3. Production trade-offs
-
-| Решение | Выигрыш | Цена | Когда выбирать |
-|:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
 
 ---
 
-## 4. Security и failure modes
-
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
-
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
 
 ---
 
-## 5. Реальный кейс
-
-Реальный кейс: агент обработки договора
-
-Цель: извлечь реквизиты, проверить риски, сравнить с policy, подготовить резюме, создать тикет юристу.
-
-```text
-contract:DOC-789
- ├── extraction: completed, 12s
- ├── risk: completed, 8s
- ├── summary: completed, 6s
- └── ticket: created, id=LEGAL-1042
-```
-
----
-
-## 6. Антипаттерны
-
+## 5. Антипаттерны
 ### «Пять агентов вместо одного большого промпта»
 
 **Почему ошибка:** если нет явных контрактов, state и evals — это усложнение без выигрыша.

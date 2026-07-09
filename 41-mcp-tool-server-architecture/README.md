@@ -6,12 +6,10 @@
 
 1. [Введение и актуальность](#1-введение-и-актуальность)
 2. [Архитектурная механика](#2-архитектурная-механика)
-3. [Production trade-offs](#3-production-trade-offs)
-4. [Security и failure modes](#4-security-и-failure-modes)
-5. [Реальный кейс](#5-реальный-кейс)
-6. [Антипаттерны](#6-антипаттерны)
-7. [Задачи AI-кодеру](#задачи-ai-кодеру)
-8. [Чеклист архитектора](#чеклист-архитектора)
+3. [Security boundaries и failure modes](#3-security-boundaries-и-failure-modes)
+4. [Антипаттерны](#4-антипаттерны)
+5. [Задачи AI-кодеру](#задачи-ai-кодеру)
+6. [Чеклист архитектора](#чеклист-архитектора)
 
 ---
 
@@ -55,9 +53,7 @@ MCP Server
 
 ## 2. Архитектурная механика
 
-
-
-## 2. Архитектура: tools, resources, prompts
+### 2.1. Tools, resources, prompts
 
 **Tool** — действие, которое агент может вызвать. У tool должны быть: schema, validation, timeout, audit log, idempotency для write-операций.
 
@@ -67,9 +63,7 @@ MCP Server
 
 Практический вывод: MCP server — это не тонкий proxy к API, а архитектурный boundary с policy layer.
 
-
-
-## 3. Remote MCP: transport, discovery, registry
+### 2.2. Transport: STDIO vs HTTP/SSE vs WebSocket
 
 | Transport | Плюсы | Минусы | Когда использовать |
 |:--|:--|:--|:--|
@@ -91,9 +85,7 @@ MCP Server
 }
 ```
 
-
-
-## 4. Authorization: OAuth 2.1, PKCE, scopes, approvals
+### 2.3. Authorization: OAuth 2.1, PKCE, scopes, approvals
 
 Remote MCP должен иметь user-scoped authorization. Агент не должен получать «бога в системе».
 
@@ -107,9 +99,7 @@ Remote MCP должен иметь user-scoped authorization. Агент не д
 
 Human approval обязателен для destructive actions, external payments, sending emails, production config changes и access to secrets.
 
-
-
-## 5. Production-интеграция MCP server
+### 2.4. Production-интеграция MCP server
 
 Production checklist:
 
@@ -137,39 +127,7 @@ Tool result должен быть машиночитаемым и огранич
 
 Не возвращай агенту огромный raw HTML/JSON, если он не нужен. Tool output — часть context window.
 
-
-
-## 6. Security boundaries и failure modes
-
-MCP расширяет attack surface:
-
-```text
-User input / retrieved document
-        │
-        ▼
-Indirect prompt injection
-        │
-        ▼
-Agent вызывает MCP tool
-        │
-        ├── exfiltrates data
-        ├── modifies state
-        ├── calls external API
-        └── escalates permissions
-```
-
-| Failure mode | Симптом | Контроль |
-|:--|:--|:--|
-| Tool output too large | context overflow, stale state | truncation + summary |
-| No approval | risky action выполнена без человека | policy engine |
-| No audit | невозможно расследовать инцидент | immutable audit log |
-| Remote MCP down | agent continues blind | health checks + circuit breaker |
-| Schema drift | tool call fails | contract tests |
-| Credential blast radius | compromised agent ломает систему | least privilege + short-lived tokens |
-
-
-
-### 7.1. Реальный кейс: MCP для документооборота
+### 2.5. Реальный кейс: MCP для документооборота
 
 Агент должен найти договор, извлечь стороны/сумму/срок, проверить подпись и создать тикет юристу, если подпись отсутствует.
 
@@ -192,51 +150,7 @@ Policy:
 
 ---
 
-## 3. Production trade-offs
-
-| Решение | Выигрыш | Цена | Когда выбирать |
-|:--|:--|:--|:--|
-| Простая интеграция | быстро стартует | fragile, мало контроля | prototype only |
-| Protocol boundary | стандартизация, reuse | больше upfront design | production agents |
-| Strict approvals | безопасность | больше latency/friction | write/destructive/secrets actions |
-| Full autonomy | скорость | высокий blast radius | только low-risk read-only tasks |
-| Observability by default | detectable degradation | extra instrumentation | любой production agent |
-
----
-
-## 4. Security и failure modes
-
-Главные failure modes для этой темы:\ policy bypass, stale state, context explosion, credential leakage, no audit trail, unbounded retry/delegation, silent quality degradation.
-
-Архитектор должен заранее определить: что считается risky action, где проходит security boundary, какие данные нельзя передавать модели, какие tool calls требуют approval и как восстанавливать состояние после сбоя.
-
----
-
-## 5. Реальный кейс
-
-Реальный кейс: MCP для документооборота
-
-Агент должен найти договор, извлечь стороны/сумму/срок, проверить подпись и создать тикет юристу, если подпись отсутствует.
-
-```text
-Agent
- ├── MCP DMS: documents:read
- ├── MCP OCR/VLM: extract_contract_fields
- ├── MCP Contract Policy: validate_contract
- └── MCP Tickets: tickets:create
-```
-
-Policy:
-
-- `documents:read` без approval;
-- `tickets:create` без approval, но с idempotency key;
-- `documents:write` только после human approval;
-- все tool calls логируются;
-- retrieved documents помечаются как untrusted content.
-
----
-
-## 6. Антипаттерны
+## 4. Антипаттерны
 
 ### «MCP server = тонкий wrapper над API»
 
@@ -258,7 +172,7 @@ Policy:
 
 ---
 
-## 7. Задачи AI-кодеру
+## 5. Задачи AI-кодеру
 
 **Задача 1 — MCP Tool Server для документов**
 
@@ -277,7 +191,7 @@ Policy:
 > Реализуй `auditLogMcpCall({agentId, userId, toolName, argsHash, resultHash, durationMs, ok})`. Логи JSON Lines, без raw secrets. `argsHash` и `resultHash` считаются SHA-256. Добавь redaction для полей `token`, `secret`, `authorization`, `cookie`.
 
 
-## 8. Чеклист архитектора
+## 6. Чеклист архитектора
 
 ### Protocol
 - [ ] MCP client/server contract описан явно
