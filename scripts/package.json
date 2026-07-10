@@ -1,0 +1,9 @@
+{
+  "name": "course-builder",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.3.0"
+  }
+}
