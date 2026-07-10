@@ -63,6 +63,9 @@ Requests Per Day — суточный лимит запросов провайд
 **markExhausted()**  
 Метод ротатора, принудительно обнуляющий остаток квоты для ключа/модели. Вызывается при получении HTTP 429 — как дополнение к локальному счётчику, который может расходиться с состоянием на стороне провайдера.
 
+**Model Gateway**  
+Централизованный слой routing между application/agent и LLM providers. Отвечает за выбор модели, fallback pools, rate limits, output normalization, cost/latency/quality monitoring.
+
 **Model Rotation**  
 Паттерн переключения между моделями при исчерпании квоты или ошибке. Сложнее Key Rotation: поведение, качество и формат ответа могут отличаться между моделями. Требует `outputNormalizer` и логирования переключений.
 
@@ -137,11 +140,5 @@ Requests Per Day — суточный лимит запросов провайд
 *Глоссарий модуля 11. Следующий: [Модуль 12 — RAG*](../12-rag/GLOSSARY.md)
 ---
 
-## M
 
-**Model Gateway**  
-Централизованный слой routing между application/agent и LLM providers. Отвечает за выбор модели, fallback pools, rate limits, output normalization, cost/latency/quality monitoring.
-
-**Model Routing**  
-Выбор модели/провайдера по типу задачи, budget, risk level и data policy. Отличается от простой Key Rotation тем, что разные модели могут иметь разный output behavior.
 

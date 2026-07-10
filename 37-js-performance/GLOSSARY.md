@@ -87,17 +87,17 @@ V8 optimizing JIT компилятор: максимальная оптимиз�
 
 ---
 
-## W
-
-**WeakRef**  
-ES2021 API: слабая ссылка на объект не предотвращающая GC. `ref.deref()` возвращает объект или `undefined`. Использовать для memory-safe кешей. GC timing непредсказуем — всегда проверять deref() результат.
-
----
-
 ## U
 
 **using (Explicit Resource Management)**  
 ES2025 синтаксис: детерминированная очистка ресурсов при выходе из scope. `using conn = new Connection()` — `conn[Symbol.dispose]()` вызывается автоматически. Не зависит от GC в отличие от FinalizationRegistry.
+
+---
+
+## W
+
+**WeakRef**  
+ES2021 API: слабая ссылка на объект не предотвращающая GC. `ref.deref()` возвращает объект или `undefined`. Использовать для memory-safe кешей. GC timing непредсказуем — всегда проверять deref() результат.
 
 ---
 

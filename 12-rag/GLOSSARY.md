@@ -6,6 +6,9 @@
 
 ## A
 
+**Agentic RAG**  
+RAG-система, где retrieval управляется агентным loop: planning, multi-step retrieval, gap detection, verification.
+
 **ANN (Approximate Nearest Neighbor)**  
 Алгоритм поиска ближайших соседей в векторном пространстве, жертвующий точностью ради скорости. Возвращает не гарантированно точный top-k, а приближённый. Recall ANN-индекса нужно измерять явно — он не гарантирован алгоритмом.
 
@@ -61,6 +64,13 @@
 
 **Faithful Hallucination**  
 Тип ошибки LLM в RAG: модель генерирует ответ внешне согласованный с контекстом, но содержащий факты отсутствующие в retrieved чанках. Диагностируется LLM-judge — отдельным вызовом LLM для верификации.
+
+---
+
+## G
+
+**Graph RAG**  
+RAG, использующий knowledge graph: entities, relations, communities, paths. Полезен для multi-hop вопросов и объяснимости.
 
 ---
 
@@ -152,6 +162,9 @@
 
 ## T
 
+**Temporal RAG**  
+RAG, учитывающий версии документов, valid_from/valid_to, superseded_by и as-of date запроса.
+
 **Token Budget**  
 Явно задаваемый лимит токенов для контекста в RAG-промпте. Рассчитывается как: `max_context_window - reserve_for_answer - system_prompt_tokens`. Для русского текста: `~Math.ceil(text.length / 3)` токенов.
 
@@ -175,24 +188,4 @@
 ---
 
 *Глоссарий модуля 12. Следующий: [Модуль 13 — Fine-tuning / LoRA*](../13-fine-tuning/GLOSSARY.md)
----
-
-## A
-
-**Agentic RAG**  
-RAG-система, где retrieval управляется агентным loop: planning, multi-step retrieval, gap detection, verification.
-
----
-
-## G
-
-**Graph RAG**  
-RAG, использующий knowledge graph: entities, relations, communities, paths. Полезен для multi-hop вопросов и объяснимости.
-
----
-
-## T
-
-**Temporal RAG**  
-RAG, учитывающий версии документов, valid_from/valid_to, superseded_by и as-of date запроса.
 

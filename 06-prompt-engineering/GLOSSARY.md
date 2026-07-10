@@ -245,15 +245,5 @@ Baseline для измерения: проверь zero-shot первым, то�
 
 ---
 
-## I
 
-**Indirect Injection**  
-Вредная инструкция, попавшая в prompt через retrieved document, tool result или другой untrusted source. Требует отдельного threat model и tool approval policy.
-
----
-
-## P
-
-**Prompt Injection**  
-Попытка изменить поведение модели через user input или untrusted content. Снижается не только system prompt, но и sandboxing, tool permissions, approvals и output guardrails.
 

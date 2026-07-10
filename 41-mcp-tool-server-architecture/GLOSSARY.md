@@ -1,4 +1,4 @@
-# Глоссарий — MCP: Tool Server Architecture
+# GLOSSARY — MCP: Tool Server Architecture
 
 ## A
 
@@ -20,6 +20,12 @@ Runtime, который управляет агентом, UI, permissions, appr
 
 ---
 
+## P
+
+**Prompts** — шаблоны повторяемых workflow в MCP. Позволяют агенту вызывать стандартизированные последовательности действий (draft_legal_response, summarize_incident) через единый контракт.
+
+---
+
 ## R
 
 **Resource**  
@@ -31,4 +37,6 @@ Runtime, который управляет агентом, UI, permissions, appr
 
 **Tool**  
 Действие, которое агент может вызвать через MCP. Должно иметь schema, validation, timeout, audit log и понятный результат.
+
+*Глоссарий модуля 41. Следующий: [Модуль 42 — A2A Protocol](../42-a2a-protocol/GLOSSARY.md)*
 

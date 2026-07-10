@@ -1,4 +1,4 @@
-# Глоссарий — Browser Use и Computer Use Agents
+# GLOSSARY — Browser Use и Computer Use Agents
 
 ## A
 
@@ -11,6 +11,16 @@ Typed contract допустимых действий браузера: goto, fil
 
 **Browser Context**  
 Изолированная сессия браузера: cookies, localStorage, viewport, permissions. Для agent run должен быть отдельный context.
+
+---
+
+## C
+
+**Computer Use Agent**  
+тип агента, управляющего экраном, мышью, клавиатурой, мобильным устройством или desktop-приложением (шире чем browser-use, который ограничен браузером).
+
+**Screenshot Grounding**  
+техника получения контекста страницы через скриншот. Комбинируется с DOM snapshot для надёжных selectors. Screenshot-only недостаточен — не даёт accessibility tree и точных координат элементов.
 
 ---
 
@@ -32,4 +42,6 @@ Typed contract допустимых действий браузера: goto, fil
 
 **URL Allowlist**  
 Список разрешённых origins/domains для browser-use agent. Всё вне allowlist запрещено.
+
+*Глоссарий модуля 44. Следующий: [Модуль 45 — Agentic RAG и Graph RAG](../45-agentic-rag-graph-rag/GLOSSARY.md)*
 

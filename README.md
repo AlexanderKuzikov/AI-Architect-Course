@@ -95,6 +95,28 @@
 Актуальные версии инструментов — в таблицах внутри каждого модуля.
 Ключевые изменения стека агрегируются в [`QUICKREF.md`](QUICKREF.md) (дата последнего обновления внизу файла).
 
+### 6. Security checklist
+
+Security — сквозная тема. Все точки сведены в единый чеклист:
+[`docs/SECURITY_CHECKLIST.md`](docs/SECURITY_CHECKLIST.md) — 10 ключевых проверок перед деплоем.
+
+### 7. Примеры ADR
+
+Готовые архитектурные решения, ссылающиеся на модули курса — в папке [`docs/adr/`](docs/adr/):
+- `ADR-001` — локальная vs облачная VLM
+- `ADR-002` — BullMQ vs pg-boss
+- `ADR-003` — Chunking стратегия для RAG
+
+### 8. Эволюция архитектуры
+
+[`docs/EVOLUTION.md`](docs/EVOLUTION.md) — narrative: как одна система проходит 3 итерации от прототипа до production-scale с решениями, trade-offs и ссылками на модули.
+
+### 9. Шпаргалки по задачам
+
+- [`docs/QUICKREF-DOCKER.md`](docs/QUICKREF-DOCKER.md) — Dockerfile, Compose, security
+- [`docs/QUICKREF-CI.md`](docs/QUICKREF-CI.md) — GitHub Actions pipeline
+- [`docs/QUICKREF-GIT.md`](docs/QUICKREF-GIT.md) — git workflow
+
 ---
 
 ## Быстрый старт — треки погружения
@@ -318,12 +340,23 @@ TOOLS_COMPARISON.md             (10 мин) — таблицы инструме�
 
 ```text
 AI-Architect-Course/
-├── README.md                 ← этот файл: философия, структура, прогресс
-├── ARCHITECTURE_LANDSCAPE.md ← карта связей между модулями и production-системами
-├── ADR_TEMPLATE.md           ← шаблон архитектурных решений с примерами
+├── README.md                 ← философия, структура, прогресс
+├── GLOSSARY.md               ← мастер-глоссарий: 512 терминов по всем модулям
+├── ARCHITECTURE_LANDSCAPE.md ← карта связей между модулями
+├── ADR_TEMPLATE.md           ← шаблон архитектурных решений
 ├── TOOLS_COMPARISON.md       ← таблицы «когда брать / когда не брать»
-├── QUICKREF.md               ← однострочная шпаргалка по 47 модулям
-├── Prompt.md
+├── QUICKREF.md               ← шпаргалка по 47 модулям
+├── Prompt.md                 ← системный промпт для AI-соавтора
+├── docs/
+│   ├── SECURITY_CHECKLIST.md ← cross-cutting security по модулям
+│   ├── EVOLUTION.md          ← эволюция архитектуры: 3 итерации
+│   ├── QUICKREF-DOCKER.md    ← Dockerfile/Compose шпаргалка
+│   ├── QUICKREF-CI.md        ← CI/CD pipeline шпаргалка
+│   ├── QUICKREF-GIT.md       ← git workflow шпаргалка
+│   └── adr/
+│       ├── ADR-001-lokal-vs-cloud-vlm.md
+│       ├── ADR-002-pgboss-vs-bullmq.md
+│       └── ADR-003-chunking-strategy-for-rag.md
 ├── 01-javascript-nodejs/
 ├── 02-typescript/
 ├── 03-php/

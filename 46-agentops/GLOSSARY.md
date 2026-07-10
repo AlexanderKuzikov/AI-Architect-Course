@@ -1,4 +1,4 @@
-# Глоссарий — AgentOps
+# GLOSSARY — AgentOps
 
 ## A
 
@@ -35,4 +35,6 @@ Policy check перед или после agent action: schema, PII, secrets, fo
 
 **Trace**  
 Полный execution path одного workflow: user request → agent steps → tools → output.
+
+*Глоссарий модуля 46. Следующий: [Модуль 47 — AI Security для агентов](../47-ai-security-agents/GLOSSARY.md)*
 

@@ -1,4 +1,4 @@
-# Глоссарий — A2A Protocol и Multi-Agent Systems
+# GLOSSARY — A2A Protocol и Multi-Agent Systems
 
 ## A
 
@@ -27,4 +27,6 @@
 
 **Task Store**  
 Durable хранилище состояния задач. Нужно для polling, retry, audit и восстановления после restart.
+
+*Глоссарий модуля 42. Следующий: [Модуль 43 — Agent Memory и Knowledge Graphs](../43-agent-memory-knowledge-graphs/GLOSSARY.md)*
 

@@ -1,4 +1,4 @@
-# Глоссарий — Agentic RAG и Graph RAG
+# GLOSSARY — Agentic RAG и Graph RAG
 
 ## A
 
@@ -35,4 +35,6 @@ RAG, учитывающий версии документов, valid_from/valid_
 
 **Verifier**  
 Компонент, который проверяет claims against evidence. Может быть deterministic, LLM-based или hybrid.
+
+*Глоссарий модуля 45. Следующий: [Модуль 46 — AgentOps](../46-agentops/GLOSSARY.md)*
 
