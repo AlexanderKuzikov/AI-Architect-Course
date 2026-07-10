@@ -107,7 +107,10 @@ async function main() {
       return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
     },
   });
-  md.use(anchor, { permalink: false, level: [1, 2, 3, 4] });
+  md.use(anchor, {
+    level: [1, 2, 3, 4],
+    slugify: s => s.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-').replace(/(^-|-$)/g, '')
+  });
 
   let body = '';
   let moduleCount = 0;
