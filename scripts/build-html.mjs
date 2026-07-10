@@ -91,6 +91,7 @@ async function main() {
   console.log('Building course HTML...');
 
   const MarkdownIt = (await import('markdown-it')).default;
+  const anchor = (await import('markdown-it-anchor')).default;
   const hljsCss = readFile('assets/highlight-github-dark.min.css');
   const mermaidJs = readFile('assets/mermaid.min.js');
 
@@ -106,6 +107,7 @@ async function main() {
       return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
     },
   });
+  md.use(anchor, { permalink: false, level: [1, 2, 3, 4] });
 
   let body = '';
   let moduleCount = 0;
