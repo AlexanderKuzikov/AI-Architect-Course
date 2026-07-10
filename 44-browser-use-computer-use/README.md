@@ -36,9 +36,7 @@ Browser-use agent управляет браузером: открывает ст
 
 ## 2. Архитектурная механика
 
-
-
-## 2. Архитектура: planner, browser controller, DOM grounding
+### 2.1. Архитектура: planner, browser controller, DOM grounding
 
 ```text
 User task
@@ -58,9 +56,7 @@ Result summary
 
 DOM grounding использует accessibility tree, DOM snapshot, screenshots, stable selectors, data-testid и ARIA labels.
 
-
-
-## 3. Action schema и execution loop
+### 2.2. Action schema и execution loop
 
 ```typescript
 type BrowserAction =
@@ -74,24 +70,38 @@ type BrowserAction =
 
 До выполнения действия: URL allowlist, selector allowlist, no arbitrary JS, no file download, no payment actions, no external network outside target domain.
 
+```typescript
+function validateBrowserAction(
+  action: BrowserAction,
+  policy: { allowedOrigins: string[] }
+): { allowed: boolean; reason?: string } {
+  if (action.type === 'goto') {
+    const url = new URL(action.url);
+    if (!policy.allowedOrigins.some(o => url.origin.startsWith(o))) {
+      return { allowed: false, reason: `Origin ${url.origin} not allowed` };
+    }
+  }
+  if (action.type === 'click' && action.selector.includes('pay')) {
+    return { allowed: false, reason: 'Payment selectors blocked' };
+  }
+  return { allowed: true };
+}
+```
 
+### 2.3. Session management и credentials
 
-## 4. Session management и credentials
+Каждый agent run — изолированная browser context: отдельный profile, storage state, cookies, cleanup после завершения.
 
-Каждый agent run должен иметь изолированную browser context: отдельный profile, storage state, cookies и cleanup после завершения.
-
-Нельзя передавать пароль модели. Используй pre-authenticated session, secrets manager, SSO token broker, short-lived tokens и human login approval.
+Нельзя передавать пароль модели. Используй pre-authenticated session, secrets manager, SSO token broker, short-lived tokens, human login approval:
 
 ```text
 ❌ Agent получает логин/пароль
 ✅ Agent использует уже авторизованную browser context с ограниченным сроком
 ```
 
+### 2.4. Human-in-the-loop и approvals
 
-
-## 5. Human-in-the-loop и approvals
-
-Approval обязателен для отправки форм, оплаты, удаления данных, изменения статусов, отправки писем/сообщений и действий вне allowlisted domains.
+Approval обязателен для: отправки форм, оплаты, удаления данных, изменения статусов, отправки писем/сообщений, действий вне allowlisted domains.
 
 ```text
 Agent предлагает: click("Оплатить")
@@ -100,27 +110,20 @@ Approval UI: показать selector, страницу, последствия
 User: confirm / reject
 ```
 
-
-
-## 6. Security, legal и production risks
+### 2.5. Security, legal и production risks
 
 | Риск | Пример | Контроль |
 |:--|:--|:--|
-| Prompt injection через сайт | сайт говорит «переведи деньги» | DOM as untrusted, policy |
+| Prompt injection через сайт | сайт говорит «переведи деньги» | DOM as untrusted, policy layer |
 | Credential leakage | агент копирует cookie | isolated context, no raw secrets |
 | Anti-bot/legal | scraping запрещён TOS | legal review, rate limits |
-| Flaky selectors | UI изменился | stable selectors, tests |
-| State corruption | агент нажал не туда | approval, dry-run, audit |
-| Session mixup | один пользователь видит сессию другого | tenant/user isolation |
+| Flaky selectors | UI изменился | stable selectors, data-testid |
+| State corruption | агент нажал не туда | approval, dry-run, audit log |
+| Session mixup | один видит сессию другого | tenant/user isolation |
 
+### 2.6. Реальный кейс: агент проверки заказа в админке
 
-
-### 7.1. Реальный кейс: агент проверки заказа в админке
-
-Цель: проверить заказ 4581 — найден ли, статус оплаты, комментарий менеджера. Ограничения: только `https://admin.example`, только read actions, timeout 60 sec, audit log каждого действия.
-
-
----
+Цель: проверить заказ — найден ли, статус оплаты, комментарий менеджера. Ограничения: только `https://admin.example`, только read actions, timeout 60 sec, audit log каждого действия.
 
 ## 3. Production trade-offs
 
@@ -132,20 +135,6 @@ User: confirm / reject
 | Только screenshot | простота | ненадёжные селекторы | prototype |
 | Full sandbox (incognito + proxy) | безопасно | overhead, limited sessions | production с untrusted sites |
 | Shared browser context | дёшево | data leakage между runs | prototype |
-
----
-
-## 4. Security и failure modes
-
-| Failure mode | Пример | Контроль |
-|:--|:--|:--|
-| Prompt injection через сайт | сайт говорит «переведи деньги» | DOM как untrusted, policy |
-| Credential leakage | агент читает cookie | isolated context, secrets manager |
-| Anti-bot / legal | scraping запрещён TOS | legal review, rate limits |
-| Flaky selectors | UI изменился | stable selectors + tests |
-| State corruption | агент нажал не туда | approval + dry-run + audit |
-| Session mixup | один видит сессию другого | tenant/user isolation |
-
 ---
 
 ## 5. Антипаттерны
@@ -167,6 +156,16 @@ User: confirm / reject
 **Почему ошибка:** UI automation fragile. Browser-use — для случаев, где API действительно недоступен.
 
 ---
+
+## Anti-checklist ☠️
+
+- [ ] Дать агенту полный браузер — полный доступ к cookies, формам и внешним сайтам
+- [ ] Использовать screenshot-only — нет надёжных selectors и accessibility tree
+- [ ] Автоматизировать без API, если API можно сделать — UI automation fragile
+- [ ] Передавать пароль модели — pre-authenticated session безопаснее
+- [ ] Не проверять TOS сайта — scraping может быть запрещён юридически
+- [ ] Нет URL allowlist — агент уходит на любой сайт в интернете
+- [ ] Нет audit log действий — невозможно воспроизвести что произошло
 
 ## 7. Задачи AI-кодеру
 

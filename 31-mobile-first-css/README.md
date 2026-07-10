@@ -595,6 +595,15 @@ inset-inline: auto 1rem;  /* = left: auto; right: 1rem (LTR) */
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] Desktop-first media queries — mobile users платят за загрузку desktop-стилей
+- [ ] `max-width: 0` пиксели вместо `rem` — ломается при изменении базового шрифта
+- [ ] `@media (min-width: 1200px)` без mobile defaults — desktop стили не наследуются от mobile
+- [ ] `touch-action: manipulation` не добавлен на кнопки — 300ms задержка на iOS
+- [ ] `input[type="text"]` без `font-size: 16px` на iOS — авто-зум при фокусе
+- [ ] Тестировать только на desktop DevTools mobile view — эмуляция ≠ реальное устройство
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

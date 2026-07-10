@@ -507,6 +507,15 @@ Beasties по умолчанию использует один viewport. Hero н
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] Inline весь CSS в critical — >20KB теряет ROI, лучше оптимизировать bundle
+- [ ] Critical CSS без :root variables — external CSS загружается, переменные меняются → layout shift
+- [ ] @import внутри CSS — sequential fetch, каждый @import = дополнительный RTT
+- [ ] Отключать render-blocking CSS для above-fold — FOUC (Flash Of Unstyled Content)
+- [ ] Critical CSS extraction без учёта JS-рендера — critters не увидит динамические классы
+- [ ] Полагаться на один инструмент extraction — penthouse и critters дают разные результаты
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

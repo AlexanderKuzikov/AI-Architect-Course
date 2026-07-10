@@ -629,6 +629,18 @@ setInterval(async () => {
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] `innerHTML` вместо текстовых node — XSS, ломает DOM дерево
+- [ ] `requestAnimationFrame` для всего — для I/O он не нужен, только для visual updates
+- [ ] Длинный `addEventListener` без `{passive: true}` — блокирует скролл на touch-устройствах
+- [ ] Измерять производительность без throttling — throttle в DevTools покажет реальную картину
+- [ ] `debounce` 500ms для поиска — пользователь ждёт полсекунды после каждой буквы
+- [ ] Глобальные переменные как кэш — утечка памяти, конфликты имён
+- [ ] forEach вместо for...of на больших массивах — function call overhead на каждой итерации
+
+---
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

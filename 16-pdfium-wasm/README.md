@@ -1103,6 +1103,15 @@ worker.postMessage({ type: 'render', data: bitmap }, [bitmap.buffer]);
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] Инициализировать PDFiumLibrary на каждый запрос — 10 MB WASM + ~500ms cold start
+- [ ] Не вызывать document.destroy() — WASM heap не освобождается GC
+- [ ] Рендерить в main thread без Worker — блокирует event loop на 100-500ms
+- [ ] Передавать Buffer через postMessage без transferList — 8 MB копирование на каждый рендер
+- [ ] Игнорировать холодный старт в Serverless — 1.5s до первого ответа
+- [ ] Sharp без raw: {channels: 4} — неправильная интерпретация RGBA данных
+
 ## Задачи AI-кодеру
 
 **Задача 1 — Production рендер-сервис**

@@ -549,6 +549,15 @@ tracer.startActiveSpan('work', async (span) => {
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] `console.log` в production — синхронный, блокирует event loop, не структурирован
+- [ ] Логировать в файл напрямую — нарушает 12-factor app, нужен logrotate
+- [ ] Один глобальный logger без child — нет requestId, невозможно трассировать запрос
+- [ ] Логировать req/res целиком — тысячи полей, включая токены в headers
+- [ ] OTel SDK инициализировать после импортов — auto-instrumentation не работает молча
+- [ ] Не закрывать spans — утечка, нет данных в Jaeger
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

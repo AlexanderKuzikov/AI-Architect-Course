@@ -46,9 +46,7 @@ query → plan → retrieve → inspect gaps → retrieve again → verify → a
 
 ## 2. Архитектурная механика
 
-
-
-## 2. Graph RAG: entities, relations, communities
+### 2.1. Graph RAG: entities, relations, communities
 
 ```text
 Contract ── hasParty ── Company
@@ -59,27 +57,30 @@ Approval ── belongsTo ── Policy
 
 Graph полезен для multi-hop questions, связей между документами, объяснения пути, community summaries, temporal relations и deduplication entities. Production-вариант часто hybrid: vector search → graph search → rerank → final context.
 
+```typescript
+// Пример multi-hop: "Есть ли у контрагента одобрение для договора > 1M?"
+// Path: Contract → hasParty → Company → hasPolicy → Policy.minAmount
+// Поиск: Policy.minAmount >= 1_000_000 && Policy.status == "active"
+```
 
-
-## 3. Архитектура agentic retrieval loop
+### 2.2. Архитектура agentic retrieval loop
 
 ```text
 User Query
    │
    ▼
 Planner
-   │
-   ├── Vector Retriever
-   ├── BM25 Retriever
-   ├── Graph Retriever
-   └── Temporal Retriever
+   │  выбирает retrievers по типу вопроса
+   ├── Vector Retriever  (семантика)
+   ├── BM25 Retriever    (точные совпадения)
+   ├── Graph Retriever   (связи)
+   └── Temporal Retriever (версии документов)
    │
    ▼
-Evidence Pack
+Evidence Pack  ← chunks + entities + relations
    │
    ▼
 Verifier
-   │
    ├── enough evidence?
    ├── contradictions?
    └── need another retrieval?
@@ -88,27 +89,61 @@ Verifier
 Answer + citations
 ```
 
-Evidence Pack должен включать chunks, entities, relations и gaps.
+```typescript
+interface RetrievalStep {
+  retriever: 'vector' | 'bm25' | 'graph' | 'temporal';
+  query: string;
+  maxResults: number;
+  reason: string;  // почему выбран этот retriever
+}
 
+interface EvidencePack {
+  chunks: ScoredChunk[];
+  entities: Entity[];
+  relations: Relation[];
+  gaps: string[];       // что не найдено
+  iterationCount: number;
+}
+```
 
-
-## 4. Temporal RAG и актуальность данных
-
-Temporal RAG учитывает document version, valid_from/valid_to, superseded_by, updated_at и effective date query.
+### 2.3. Temporal RAG и актуальность данных
 
 ```text
 Policy v1 (2024) superseded_by Policy v2 (2026)
 ```
 
-Без temporal awareness агент может ответить по устаревшей версии документа.
+Temporal RAG учитывает document version, valid_from/valid_to, superseded_by, updated_at и effective date query. Без temporal awareness агент отвечает по устаревшей версии.
 
+```typescript
+function filterTemporal(docs: Document[], asOfDate: Date): Document[] {
+  return docs.filter(doc => {
+    const validFrom = new Date(doc.validFrom);
+    const validTo = doc.validTo ? new Date(doc.validTo) : null;
+    return validFrom <= asOfDate && (!validTo || validTo >= asOfDate);
+  }).filter(doc => !doc.supersededBy);
+}
+```
 
+### 2.4. Verification и hallucination cascade control
 
-## 5. Verification и hallucination cascade control
-
-Agentic RAG создаёт риск cascade hallucination: ошибка на одном шаге порождает новые ошибки.
+Agentic RAG создаёт риск cascade hallucination: ошибка на одном шаге порождает новые.
 
 Controls:
+
+```typescript
+interface Claim {
+  text: string;
+  sources: string[];         // source IDs
+  requiredEvidence: string[]; // phrases that must appear in sources
+}
+
+interface VerificationResult {
+  claim: string;
+  supported: boolean;
+  confidence: number;         // 0-1
+  unsupportedReason?: string;
+}
+```
 
 - citations per claim;
 - contradiction detection;
@@ -125,9 +160,7 @@ Controls:
 }
 ```
 
-
-
-## 6. Failure modes и observability
+### 2.5. Failure modes и observability
 
 | Failure mode | Симптом | Контроль |
 |:--|:--|:--|
@@ -138,9 +171,7 @@ Controls:
 | Context explosion | слишком много evidence | budget + summaries |
 | No answer | агент не умеет сказать «не знаю» | abstain policy |
 
-
-
-### 7.1. Реальный кейс: legal knowledge base
+### 2.6. Реальный кейс: legal knowledge base
 
 Запрос: «Нужно ли согласование юриста для договора на 2.5M ₽ с новым контрагентом?»
 
@@ -168,19 +199,6 @@ Controls:
 
 ---
 
-## 4. Failure modes для Agentic RAG
-
-| Failure mode | Симптом | Контроль |
-|:--|:--|:--|
-| Retrieval loop | агент бесконечно ищет | max iterations |
-| Graph poisoning | неверные relations | source trust + review |
-| Stale policy | ответ по старой версии | temporal filters |
-| Citation washing | цитата не подтверждает claim | verifier |
-| Context explosion | слишком много evidence | budget + summaries |
-| Cascade hallucination | ошибка порождает ошибки | verifier + abstain policy |
-
----
-
 ## 5. Антипаттерны
 
 ### «Graph RAG вместо evaluation»
@@ -201,7 +219,17 @@ Controls:
 
 ---
 
-## 7. Задачи AI-кодеру
+## Anti-checklist ☠️
+
+- [ ] Graph RAG вместо evaluation — без метрик непонятно, стало лучше или просто сложнее
+- [ ] Больше retrievers = лучше — больше шума, latency и cost
+- [ ] Цитаты для красоты — неподтверждённый claim опаснее отсутствия citations
+- [ ] Бесконечный retrieval loop — агент ищет и не может остановиться
+- [ ] Игнорировать temporal awareness — ответ по старой версии policy
+- [ ] Нет abstain policy — агент отвечает даже при недостатке данных, галлюцинируя
+- [ ] Один проход для сложных вопросов — multi-hop требует итеративного retrieval
+
+## 6. Задачи AI-кодеру
 
 **Задача 1 — Retrieval planner**
 
@@ -220,7 +248,7 @@ Controls:
 > Реализуй `filterTemporalDocuments(docs, asOfDate)`. Документ имеет `validFrom`, `validTo`, `supersededBy`. Вернуть только актуальные на `asOfDate`, исключая superseded.
 
 
-## 8. Чеклист архитектора
+## 7. Чеклист архитектора
 
 ### Retrieval
 - [ ] Выбраны retrievers с измеренной пользой

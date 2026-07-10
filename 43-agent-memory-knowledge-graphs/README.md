@@ -33,9 +33,7 @@
 
 ## 2. Архитектурная механика
 
-
-
-## 2. Типы памяти
+### 2.1. Типы памяти
 
 | Тип | Что хранит | Lifetime | Пример |
 |:--|:--|:--|:--|
@@ -47,9 +45,7 @@
 
 Не всё надо сохранять. Память должна быть полезной, проверяемой, удаляемой, изолированной по tenant/user и связанной с provenance.
 
-
-
-## 3. Knowledge graph как память агента
+### 2.2. Knowledge graph как память агента
 
 ```text
 (Client:ООО Ромашка) -[HAS_CONTRACT]-> (Contract:DOC-123)
@@ -59,9 +55,7 @@
 
 Graph полезен для multi-hop questions, объяснимости, deduplication entities и temporal relations. Если нужны только FAQ и нет связей между сущностями — graph может быть избыточен.
 
-
-
-## 4. Memory controller: write, retrieve, forget
+### 2.3. Memory controller: write, retrieve, forget
 
 ```text
 Agent
@@ -81,11 +75,36 @@ Retrieve policy: учитывать recency, relevance, confidence, source trust
 
 Forget policy: TTL, user request, project completion, consent withdrawal, poisoning detection.
 
+```typescript
+interface MemoryController {
+  write(record: MemoryRecord): Promise<void>;
+  retrieve(
+    query: string,
+    filters: { tenantId: string; userId?: string; types?: MemoryType[] }
+  ): Promise<ScoredMemory[]>;
+  update(id: string, updates: Partial<MemoryRecord>): Promise<void>;
+  forget(id: string): Promise<void>;
+  explain(id: string): Promise<ProvenanceChain>;
+}
 
+interface MemoryRecord {
+  id: string;
+  type: 'episodic' | 'semantic' | 'procedural';
+  tenantId: string;
+  userId?: string;
+  subject: string;          // entity
+  predicate: string;        // relation
+  object: string;           // value
+  confidence: number;       // 0–1
+  sourceId: string;
+  sourceType: 'llm' | 'user' | 'document' | 'tool';
+  createdAt: string;
+  expiresAt?: string;
+  accessPolicy: 'public' | 'tenant' | 'user';
+}
+```
 
-## 5. Privacy, retention и provenance
-
-Каждая memory record должна иметь `tenantId`, `userId` или `anonymous`, `accessPolicy`, `retentionUntil`, `sourceType`, `sourceId`.
+### 2.4. Privacy, retention и provenance
 
 | Data type | Retention |
 |:--|:--|
@@ -95,7 +114,7 @@ Forget policy: TTL, user request, project completion, consent withdrawal, poison
 | Debug traces | 7–30 days |
 | User preferences | until deletion request |
 
-Provenance:
+Provenance каждой записи обязателен — иначе нельзя откатить poisoned memory:
 
 ```json
 {
@@ -106,30 +125,15 @@ Provenance:
 }
 ```
 
-
-
-## 6. Failure modes
+### 2.5. Failure modes
 
 | Failure mode | Симптом | Контроль |
 |:--|:--|:--|
 | Stale memory | agent uses old preferences | TTL + recency ranking |
-| Cross-user leakage | один пользователь видит память другого | tenant/user filters |
-| Memory poisoning | вредный факт влияет на ответы | source trust + human review |
-| Context explosion | memory перегружает prompt | summary + top-k + budget |
-| No explainability | нельзя понять почему агент вспомнил факт | provenance chain |
-
-
-
-### 7.1. Реальный кейс: support agent с долгосрочной памятью
-
-Support agent должен помнить последние обращения клиента, продукты, SLA, timezone и approved workarounds.
-
-```text
-Customer ── hasProduct ── Product
-Customer ── hasSLA ── SLA
-Customer ── prefersTimezone ── Europe/Moscow
-Ticket ── resolvedBy ── Workaround
-```
+| Cross-user leakage | пользователь видит память другого | tenant/user filters |
+| Memory poisoning | вредный факт из документа влияет на ответы | source trust + human review |
+| Context explosion | retrieved memory перегружает prompt | summary + top-k + token budget |
+| No explainability | нельзя понять откуда факт | provenance chain |
 
 
 ---
@@ -144,18 +148,6 @@ Ticket ── resolvedBy ── Workaround
 | Tenant-scoped memory | privacy, isolation | overhead на фильтрацию | production SaaS |
 | Auto-write (всё что сказано) | полнота | шум, poisoning | исследовательские агенты |
 | Policy-based write (только факты) | качество, безопасность | сложнее настройка правил | production |
-
----
-
-## 4. Failure modes для памяти агента
-
-| Failure mode | Симптом | Контроль |
-|:--|:--|:--|
-| Stale memory | agent uses old preferences | TTL + recency ranking |
-| Cross-user leakage | один видит память другого | tenant/user фильтры на query |
-| Memory poisoning | вредный факт влияет на ответы | source trust + human review |
-| Context explosion | memory перегружает prompt | summary + top-k + budget |
-| No explainability | нельзя понять источник факта | provenance chain |
 
 ---
 
@@ -179,7 +171,17 @@ Ticket ── resolvedBy ── Workaround
 
 ---
 
-## 7. Задачи AI-кодеру
+## Anti-checklist ☠️
+
+- [ ] Сохранять весь чат как память — это свалка контекста, не память
+- [ ] Векторная БД решит всё — embeddings плохо отражают связи, правила и сроки
+- [ ] Память без удаления — privacy и compliance риск
+- [ ] Одна память для всех пользователей — cross-user data leakage
+- [ ] Memory записи без provenance — нельзя понять, откуда взялся факт
+- [ ] Автоматически доверять memory — poisoned memory может быть занесена через документ
+- [ ] Нет token budget для retrieved memory — context window переполняется
+
+## 6. Задачи AI-кодеру
 
 **Задача 1 — Memory record schema**
 
@@ -198,7 +200,7 @@ Ticket ── resolvedBy ── Workaround
 > Реализуй `applyRetention(memoryRecords, now)`. Удаляет records с `expiresAt <= now`, помечает records с `retentionReason='legal_hold'` как undeletable, возвращает `{deletedIds, retainedIds}`.
 
 
-## 8. Чеклист архитектора
+## 7. Чеклист архитектора
 
 ### Memory model
 - [ ] Типы памяти явно разделены

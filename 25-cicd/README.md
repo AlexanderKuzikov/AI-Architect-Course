@@ -595,6 +595,16 @@ deploy:
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] `npm install` вместо `npm ci` в CI — молча обновляет lock-файл, невоспроизводимая сборка
+- [ ] Секреты через `run: echo $SECRET` — base64/JSON форматы не маскируются
+- [ ] `runs-on: ubuntu-latest` без пина — при смене версии меняется поведение
+- [ ] `if: always()` для деплоя — запустится даже при падении тестов
+- [ ] `set-output` (deprecated) — удалён, используй `$GITHUB_OUTPUT`
+- [ ] Долгоживущие cloud credentials в secrets — OIDC даёт ephemeral token на час
+- [ ] `cancel-in-progress: true` для main branch — отменяет деплой на полпути
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

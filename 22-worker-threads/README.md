@@ -443,6 +443,15 @@ app.post('/process', async (req, res) => {
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] Worker Threads для I/O-bound задач — serialization overhead без выигрыша
+- [ ] Создавать воркер на каждый запрос — ~50ms overhead, утечка при burst
+- [ ] Atomics.wait() в main thread — блокирует event loop полностью
+- [ ] Один пул для задач с разным временем — 5s задача блокирует очередь для быстрых
+- [ ] Передавать большие объекты через postMessage без transfer — 100MB копирование + GC pressure
+- [ ] Piscina без maxQueue в production — burst накапливает очередь до OOM
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

@@ -39,9 +39,7 @@ AgentOps = Tracing + Metrics + Evals + Guardrails + Cost Control
 
 ## 2. Архитектурная механика
 
-
-
-## 2. Tracing: spans, traces, metadata
+### 2.1. Tracing: spans, traces, metadata
 
 **Trace** — один пользовательский request/workflow. **Span** — один шаг: LLM call, tool call, retrieval, memory read, verifier, external API.
 
@@ -60,20 +58,27 @@ AgentOps = Tracing + Metrics + Evals + Guardrails + Cost Control
 - `latencyMs`;
 - `errorType`.
 
-```json
-{
-  "span": "tool_call",
-  "toolName": "search_documents",
-  "latencyMs": 234,
-  "tokensOut": 1800,
-  "cost": 0.00012,
-  "inputHash": "sha256:..."
+```typescript
+function createLLMSpan(metadata: {
+  agentId: string;
+  model: string;
+  tokensIn: number;
+  tokensOut: number;
+  latencyMs: number;
+  cost: number;
+}): SpanAttributes {
+  return {
+    'llm.agent_id': metadata.agentId,
+    'llm.model': metadata.model,
+    'llm.tokens.input': metadata.tokensIn,
+    'llm.tokens.output': metadata.tokensOut,
+    'llm.latency_ms': metadata.latencyMs,
+    'llm.cost_usd': metadata.cost,
+  };
 }
 ```
 
-
-
-## 3. Evaluation layers
+### 2.2. Evaluation layers
 
 | Tier | Когда | Что проверяет |
 |:--|:--|:--|
@@ -82,9 +87,7 @@ AgentOps = Tracing + Metrics + Evals + Guardrails + Cost Control
 | LLM judge | pre-release | rubric, hallucination, citations, tone |
 | Human review | high-risk domains | legal, medical, finance, production write actions |
 
-
-
-## 4. Guardrails и policy checks
+### 2.3. Guardrails и policy checks
 
 Guardrails должны проверять PII leakage, secrets, forbidden actions, prompt injection, output schema, allowed tools, model/provider policy и cost budget.
 
@@ -100,9 +103,23 @@ Guardrail Validator
    └── cost ok?
 ```
 
+```typescript
+interface GuardrailResult {
+  passed: boolean;
+  failures: Array<{ rule: string; reason: string; value?: string }>;
+}
 
+function validateOutput(output: unknown, policy: GuardrailPolicy): GuardrailResult {
+  const failures: GuardrailResult['failures'] = [];
+  if (policy.maxCost && (output as any).cost > policy.maxCost) {
+    failures.push({ rule: 'cost_budget', reason: `$${(output as any).cost} > $${policy.maxCost}` });
+  }
+  // ... schema, PII, secrets checks
+  return { passed: failures.length === 0, failures };
+}
+```
 
-## 5. Cost, latency и fallback control
+### 2.4. Cost, latency и fallback control
 
 | Metric | Budget | Action |
 |:--|:--|:--|
@@ -113,17 +130,13 @@ Guardrail Validator
 
 Fallback policy: primary model fails → fallback model; expensive model over budget → small model + summary; judge unavailable → deterministic checks only + flag.
 
-
-
-## 6. Dashboards и incident response
+### 2.5. Dashboards и incident response
 
 Must-have dashboards: success rate by agent, p50/p95 latency, cost per task, fallback rate, tool error rate, eval score trend, hallucination rate, guardrail rejection rate.
 
 Incident questions: когда началась деградация, какой агент изменился, какая модель/провайдер, какой tool дал ошибку, какой eval first failed, был ли cost spike, есть ли security guardrail rejection.
 
-
-
-### 7.1. Реальный кейс: AgentOps для support agent
+### 2.6. Реальный кейс: AgentOps для support agent
 
 ```text
 User ticket
@@ -186,7 +199,17 @@ Targets: p95 latency < 5s, schema valid 99.9%, hallucination rate < 1%, fallback
 
 ---
 
-## 7. Задачи AI-кодеру
+## Anti-checklist ☠️
+
+- [ ] Один dashboard для всех агентов — разные SLA, cost и risk
+- [ ] LLM judge вместо всех тестов — дорогой и nondeterministic, deterministic checks должны идти первыми
+- [ ] Считать только model cost — tools, memory и retries часто стоят больше генерации
+- [ ] Нет baseline для evals — непонятно улучшился pipeline или деградировал
+- [ ] Не логировать fallback — незаметная деградация качества
+- [ ] Собирать все traces подряд — через неделю база данных стоит дороже сервера
+- [ ] Нет runbook для деградации качества — при падении метрик начинается паника
+
+## 6. Задачи AI-кодеру
 
 **Задача 1 — Trace metadata**
 
@@ -205,7 +228,7 @@ Targets: p95 latency < 5s, schema valid 99.9%, hallucination rate < 1%, fallback
 > Реализуй CLI `agentops-gate --results results.json --baseline baseline.json --max-regression 0.03 --min-score 0.80`. Fail если mean_score ниже min-score или регрессия больше max-regression.
 
 
-## 8. Чеклист архитектора
+## 7. Чеклист архитектора
 
 ### Tracing
 - [ ] Есть traceId на workflow

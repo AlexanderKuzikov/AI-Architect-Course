@@ -172,6 +172,18 @@ Policy:
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] MCP server = тонкий wrapper над API — агент получает raw API без policy layer
+- [ ] Все инструменты доступны всем агентам — максимальный blast radius
+- [ ] Remote MCP без auth — внутренняя сеть не является security boundary
+- [ ] Tool output без ограничения размера — context window агента забивается
+- [ ] Schema без version — при изменении формата старые агенты падают
+- [ ] Audit log без agentId и userID — невозможно расследовать инцидент
+- [ ] Kill switch не добавлен — нет способа отключить скомпрометированный tool
+
+---
+
 ## 5. Задачи AI-кодеру
 
 **Задача 1 — MCP Tool Server для документов**

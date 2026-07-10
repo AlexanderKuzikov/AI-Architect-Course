@@ -1024,6 +1024,15 @@ judge_response = client.chat.completions.create(
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] Evaluator на том же датасете что и разработка — overfitting на eval set
+- [ ] Одна метрика для принятия решений — success_rate 99.8% скрывает semantic_rate 94.2%
+- [ ] LLM-as-Judge без калибровки против human labels — spearman_r < 0.7 = ненадёжно
+- [ ] Судья с `temperature > 0` — variance ±0.2 на одном кейсе, gate нестабилен
+- [ ] Игнорировать стоимость evaluation — 500 кейсов × GPT-4o = $15/прогон, забросят через неделю
+- [ ] Baseline без даты и версии модели — через месяц непонятно с чем сравнивать
+
 ## Задачи AI-кодеру
 
 **Задача 1 — Field-level accuracy**

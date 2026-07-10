@@ -513,6 +513,15 @@ RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] COPY . . без .dockerignore — node_modules, .env, .git попадают в образ
+- [ ] CMD node server.js без init process — SIGTERM идёт к sh, не к Node.js
+- [ ] Секреты через ENV в Dockerfile — видны в docker history
+- [ ] Latest тег в production — образ меняется без твоего ведома
+- [ ] Запускать процессы от root — компрометация = root в контейнере
+- [ ] COPY --from без учёта архитектуры — amd64 → arm64 падает с native addons
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**

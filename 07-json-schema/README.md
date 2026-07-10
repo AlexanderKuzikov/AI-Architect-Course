@@ -772,6 +772,15 @@ def build_validation_set(all_courts: list) -> list:
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] Одна схема для extraction и для хранения — модель будет галлюцинировать id и даты
+- [ ] Рекурсивные `$ref` в constrained decoding — бесконечный автомат, ошибка компиляции
+- [ ] `additionalProperties: true` (дефолт) — модель может добавить любые поля
+- [ ] `json.loads()` с `try/except` в production вместо constrained decoding — retry не гарантирует детерминизм
+- [ ] enum с кириллицей в локальных моделях — grammar может не скомпилироваться
+- [ ] Считать structured output = отсутствие ошибок — семантическая валидность ≠ структурная
+
 ## Задачи AI-кодеру
 
 ### Extraction pipeline

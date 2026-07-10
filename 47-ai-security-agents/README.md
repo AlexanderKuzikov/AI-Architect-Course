@@ -184,6 +184,16 @@ Blast radius: зависит от layer 2 (tool permissions) и layer 3 (approva
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] System prompt как security boundary — prompt не заменяет authz, sandbox и approvals
+- [ ] «Внутренний инструмент безопасен» — agent может вызвать internal tool под влиянием prompt injection
+- [ ] Логировать всё для debugging — raw логи содержат secrets, PII и contract data
+- [ ] Одна линия обороны — defence in depth требует layers: input → tool → output → audit
+- [ ] Давать агенту access к secrets manager без scoping — compromised agent = leak всех секретов
+- [ ] Нет human approval для destructive actions — agent удаляет production данные
+- [ ] Доверять retrieved content как safe — indirect injection через RAG документы
+
 ## 7. Задачи AI-кодеру
 
 **Задача 1 — Secret redactor**

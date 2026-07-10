@@ -639,6 +639,15 @@ async function extractCritical(url: string, cssPath: string): Promise<void> {
 
 ---
 
+## Anti-checklist ☠️
+
+- [ ] @import в CSS — sequential loading, каждый @import = дополнительный RTT
+- [ ] render-blocking `<link>` для below-fold стилей — блокирует FCP без причины
+- [ ] Анимация layout-triggering свойств (left, top) — вызывает reflow на каждом frame
+- [ ] `will-change` на всём подряд — GPU memory leak на мобильных
+- [ ] Critical CSS без :root variables — external CSS меняет переменные → layout shift
+- [ ] Container Queries без container-type на родителе — @container никогда не сработает
+
 ## Задачи AI-кодеру
 
 **Плохая формулировка:**
