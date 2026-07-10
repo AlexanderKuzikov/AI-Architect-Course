@@ -95,13 +95,13 @@ Data leakage: агент может выдать PII, contract terms, secrets и
 
 ## 6. AI supply chain и model gateway security
 
-Supply chain risks: malicious packages, poisoned models, unsafe plugins, vulnerable MCP servers, compromised agent skills, insecure CI/CD agents.
+Риски supply chain: вредоносные пакеты, отравленные модели, небезопасные плагины, уязвимые MCP-серверы, скомпрометированные skills агентов, небезопасные CI/CD-агенты.
 
-Controls: pin versions, verify signatures/hashes, SBOM, dependency scanning, review agent plugins, sandbox coding agents.
+Контроль: пинить версии, проверять сигнатуры/хэши, SBOM, сканирование зависимостей, ревью плагинов агентов, sandbox для coding-агентов.
 
-Model gateway risks: provider outage, vendor policy change, rate-limit abuse, data residency violation, fallback to weaker model unnoticed.
+Риски model gateway: отказ провайдера, изменение политики вендора, превышение rate limit, нарушение data residency, незаметный fallback на слабую модель.
 
-Controls: provider allowlist, data classification, fallback policy, cost/quality monitoring, no secrets to untrusted providers.
+Контроль: allowlist провайдеров, классификация данных, fallback-политика, мониторинг cost/качества, никаких секретов ненадёжным провайдерам.
 
 
 

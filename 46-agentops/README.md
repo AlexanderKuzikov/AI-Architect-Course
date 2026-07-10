@@ -128,11 +128,11 @@ function validateOutput(output: unknown, policy: GuardrailPolicy): GuardrailResu
 | tokens per task | 40K | context compression |
 | LLM judge cost | $0.10 per eval | sample smaller |
 
-Fallback policy: primary model fails → fallback model; expensive model over budget → small model + summary; judge unavailable → deterministic checks only + flag.
+Политика fallback: при отказе основной модели — fallback-модель; дорогая модель превысила бюджет → маленькая модель + суммаризация; судья недоступен → только детерминированные проверки + флаг.
 
 ### 2.5. Dashboards и incident response
 
-Must-have dashboards: success rate by agent, p50/p95 latency, cost per task, fallback rate, tool error rate, eval score trend, hallucination rate, guardrail rejection rate.
+Обязательные дашборды: success rate по агенту, p50/p95 latency, cost per task, fallback rate, tool error rate, eval score trend, hallucination rate, guardrail rejection rate.
 
 Incident questions: когда началась деградация, какой агент изменился, какая модель/провайдер, какой tool дал ошибку, какой eval first failed, был ли cost spike, есть ли security guardrail rejection.
 

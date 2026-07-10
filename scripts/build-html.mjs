@@ -6,7 +6,7 @@ import { MODULES } from './modules.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const OUTPUT = join(ROOT, 'index.html');
+const OUTPUT = join(ROOT, 'course.html');
 
 // Ensure dependencies are installed
 function ensureDeps() {
@@ -332,7 +332,7 @@ function searchModules(query) {
 
   writeFileSync(OUTPUT, html, 'utf-8');
 
-  console.log(`✅ Done. ${moduleCount} modules + glossary in index.html`);
+  console.log(`✅ Done. ${moduleCount} modules + glossary in course.html`);
   console.log(`📁 ${OUTPUT}`);
 }
 
