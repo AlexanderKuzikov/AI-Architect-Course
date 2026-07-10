@@ -320,7 +320,7 @@ function searchModules(query) {
     if (text.includes(query.toLowerCase())) {
       const id = h.closest('.module')?.id || '';
       const title = h.textContent.substring(0, 100);
-      html += '<a href="#' + id + '" onclick="document.getElementById(\'searchResults\').classList.remove(\'active\')">' + title + '</a>';
+      html += '<a href="#' + id + '" onclick="document.getElementById(&quot;searchResults&quot;).classList.remove(&quot;active&quot;)">' + title + '</a>';
     }
   });
   results.innerHTML = html || '<div style="padding: 8px 16px; color: #888;">Nothing found</div>';
