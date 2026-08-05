@@ -16,7 +16,9 @@
 ║       │               │                │              │          ║
 ║       ▼               ▼                ▼              ▼          ║
 ║  Documents ◄─────── Infra/DevOps ◄── Web Perf     Security      ║
-║                                                                   ║
+║       │                                                        ║
+║       ▼                                                        ║
+║  Desktop/Data ──► SQL/Схемы ──► Cost Engineering              ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
@@ -32,6 +34,9 @@
                          │  HTTP Caching, Diagnostics, Perf Budget
 41-47  Agent Systems     │  MCP, A2A, Agent Memory, Browser Use, Agentic RAG,
                          │  AgentOps, AI Security
+48     Desktop           │  Go + WebView, desktop-приложения, поставка клиенту
+49     Data              │  SQL, проектирование схем, индексы, миграции
+50     Cost              │  Cost engineering, каскады, бюджеты, fallback
 ```
 
 ---
@@ -113,7 +118,21 @@ N источников → queue → LLM batch → validation → storage
 | Retry / Resilience | 19 (HTTP clients), 18 §4 (DLQ) |
 | Caching | 20 (Backend Caching), 12 §3 (Embedding cache) |
 | Quality gates | 09 (Evaluator), 21 (Testing) |
-| Cost control | 11 §4 (Cascade Filter), 20 §7 (LLM cache) |
+| Cost control | 11 §4 (Cascade Filter), 20 §7 (LLM cache), 50 (Cost Engineering) |
+
+### Система 5: Desktop-приложение (локальный AI-инструмент)
+
+```
+Локальные файлы → Go-логика → VLM → результат рядом с файлом
+```
+
+| Слой | Модули |
+|------|--------|
+| UI-оболочка | 48 (Go+WebView, мост Go↔JS) |
+| Локальная обработка | 05 (Go), 15 (PDF), 16 (PDFium WASM), 10 (VLM) |
+| VLM-клиент | 19 (HTTP clients), 08 (Local Inference) |
+| Поставка | 48 §4 (сборка, code signing, антивирус) |
+| Хранение | 49 (SQLite/JSONL выбор) |
 
 ---
 
@@ -138,13 +157,13 @@ N источников → queue → LLM batch → validation → storage
 
 | Пробел | Почему важен | Когда добавить |
 |--------|-------------|----------------|
-| **SQL / Database schema design** | Архитектор проектирует схемы, индексы, миграции | При расширении RAG (12) до production |
 | **Frontend architecture** | AI-продукт = не только API | При появлении UI-ориентированных проектов |
 | **Domain-Driven Design** | Event storming, bounded context для AI pipeline | При усложнении agent systems |
-| **Cost engineering** | Total cost of ownership AI системы | Когда cost станет узким местом |
 | **Resilience patterns** | Bulkhead, Saga, Retry storm | При переходе к multi-agent |
 | **API design (general)** | Не LLM API, а general API design | При проектировании API для внешних потребителей |
 | **RBAC / API keys management** | OAuth 2.1/PKCE раскрыт в 41, но RBAC и управление ключами — нет | Когда появится multi-tenant |
+
+> Закрыто в 2026-08: SQL/схемы (49), Cost engineering (50), Desktop (48).
 
 ---
 
@@ -231,6 +250,17 @@ graph TD
         G2 --> G6
         G3 --> G5
         G4 --> G7
+    end
+
+    subgraph "Desktop / Data / Cost"
+        H1[48 Go+WebView Desktop]
+        H2[49 SQL & Schema]
+        H3[50 Cost Engineering]
+        A5[05 Go] --> H1
+        E2[19 HTTP Clients] --> H1
+        G6[46 AgentOps] --> H3
+        H2 --> H3
+        H2 -.-> G5
     end
 
     C1 -.-> E1

@@ -403,4 +403,4 @@ Prompt injection — громкая, но не самая частasilna угр�
 ---
 
 *Модуль 47 завершён.*
-*Курс пройден: от механики языков до Agent Systems. Следующий шаг — собственные production-системы.*
+*Следующий: [Модуль 48 — Desktop-приложения: Go + WebView](../48-go-webview-desktop/README.md)*
