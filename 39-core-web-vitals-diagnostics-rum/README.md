@@ -663,6 +663,8 @@ function checkVitals(lcpValues: number[], inpValues: number[], clsValues: number
 > 5. В Express/Next.js: POST `/api/vitals` → логировать в structured log (JSON).
 > 6. Не отправлять в development (`if (import.meta.env.PROD)`).»
 
+Формула: web-vitals в RUM-сбор + sendBeacon + фильтры (user-agent/device) + prod-only.
+
 ---
 
 **Плохая формулировка:**
@@ -677,6 +679,8 @@ function checkVitals(lcpValues: number[], inpValues: number[], clsValues: number
 > 5. Добавить `srcset` с размерами 400w, 800w, 1200w и соответствующий `sizes`.
 > 6. Убедиться что элемент присутствует в initial HTML (не рендерится JS после hydration).
 > 7. Измерить: PageSpeed Insights → LCP subparts → `loadDelay` должен уменьшиться.»
+
+Формула: LCP subparts-диагностика (TTFB/resource/load) + fetchpriority/preload + проверка через PSI subparts.
 
 ---
 

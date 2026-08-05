@@ -592,6 +592,8 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'))
 > 4. В `bundlemon.config.json`: добавить maxPercentIncrease: 5 для JS файлов.
 > Не запускать при push в main — только PR.»
 
+Формула: Lighthouse CI (budget-файл) + только PR-запуск + budget path/URL-набор.
+
 ---
 
 **Плохая формулировка:**
@@ -603,6 +605,8 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'))
 > 2. Запустить `npm run build` → открыть `stats.html`.
 > 3. Найти топ-5 модулей по gzip size. Для каждого: (a) проверить используется ли полный пакет или только часть, (b) есть ли более лёгкая альтернатива на bundlephobia.com, (c) можно ли перенести на dynamic import.
 > 4. Составить список предлагаемых замен с размерами до/после.»
+
+Формула: bundle analysis (source-map-explorer) + топ-чанки + план замен с размерами.
 
 ---
 
