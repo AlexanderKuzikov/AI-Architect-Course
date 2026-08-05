@@ -574,6 +574,59 @@ const CACHE_VERSION = __CACHE_VERSION__
 
 ---
 
+## 7. Реальный кейс: immutable-кеш и purge — две разные войны
+
+### Контекст
+
+WooCommerce-каталог (модули 30–35) за CDN: статика (JS/CSS/изображения) собирается Vite с хэшами, HTML — динамический PHP. Классическая схема: ассеты `immutable`, HTML `no-cache`.
+
+### Задача
+
+Раз в неделю — жалоба «не вижу новую версию страницы»: то картинка старая, то кнопка не обновилась. Инвалидация на CDN — вручную, через панель, «потому что так делаем».
+
+### Гипотеза
+
+Проблема не в CDN-настройках (они правильные: ассеты immutable + HTML no-cache), а в **процессе деплоя**: purge-вызовы руками, нет единого скрипта, нет проверки «что устарело».
+
+### Что получилось
+
+```yaml
+# deploy: единый скрипт вместо ручного purge
+- name: Deploy + purge
+  run: |
+    ./scripts/deploy.sh --bucket s3://$BUCKET --zone $CF_ZONE
+```
+
+```bash
+#!/bin/bash
+# deploy.sh — деплой с инвалидацией
+aws s3 sync dist/ s3://$BUCKET --exclude "*.html" --cache-control "public, max-age=31536000, immutable"
+aws s3 sync dist/ s3://$BUCKET --include "*.html" --cache-control "no-cache"
+
+# Purge только HTML + индекс — ассеты не трогаем (новые URL с хэшами)
+curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+  -H "Authorization: Bearer $CF_API_TOKEN" \
+  -d "{\"files\":[\"https://site.com/\",\"https://site.com/index.html\"]}"
+```
+
+- Деплой стал одной командой: sync + purge в одном скрипте, «ручной purge в панели» исчез;
+- ассеты не purge-ятся — у них новые имена с хэшами (старые URL валидны для старых страниц в кеше);
+- HTML purge — точечный (главная + index), не «purge everything» (дорого и не нужно).
+
+### Грабли, найденные в production
+
+1. **Пользовательский кеш не сдаётся**: даже после purge на CDN у пользователя в браузере мог быть старый HTML (no-cache обязывает ревалидировать, но SW/обходные кеши бывают). Фикс — `stale-while-revalidate` для HTML вместо жёсткого no-cache: фоновая ревалидация.
+2. **Пропущенный purge при «горячем» фиксе**: деплой без скрипта (вручную залили один файл) — главная осталась старой на 24 часа. Правило: деплой = скрипт, скрипт = purge.
+3. **Хэши в ассетах — контракт**: ручная правка файла без пересборки (пофиксили одну строчку в dist) ломала immutable-кеш: тот же URL, старое содержимое. Никогда не править dist руками — только пересборка.
+
+### Вывод, противоречащий интуиции
+
+Кэширование — это **контракт имён**: immutable-ассеты работают, пока у каждого артефакта уникальное имя (хэш). Инвалидация нужна только HTML; «purge everything» — признак того, что контракт нарушен (меняем содержимое по старым URL). Половина проблем ушла, когда деплой стал скриптом с точечным purge, а не «залили файлы и почистили в панели».
+
+**Практический вывод для архитектора:** проектируй кэш как контракт: хэшированные имена для ассетов (immutable), revalidate для HTML, purge-шаг внутри деплой-скрипта (не вручную). Любая «горячая правка» артефакта — нарушение контракта, ведущее к таинственным «старым версиям».
+
+---
+
 ## Антипаттерны
 
 **1. `Cache-Control: max-age=31536000` на HTML**
@@ -658,6 +711,8 @@ if (request.method !== 'GET') return  // Не перехватывать mutatio
 > 4. Создать `public/offline.html` — минимальная страница "нет соединения".
 > 5. Проверить: Chrome DevTools → Application → Service Workers → активен без ошибок.»
 
+Формула: SW-прекеш (CACHE_VERSION) + стратегии (network-first/stale-while-revalidate) + контрол клиентов + проверка в DevTools.
+
 ---
 
 **Плохая формулировка:**
@@ -670,6 +725,8 @@ if (request.method !== 'GET') return  // Не перехватывать mutatio
 > 3. GET `/api/` endpoints с публичными данными: `Cache-Control: public, max-age=60, stale-while-revalidate=3600, stale-if-error=86400`.
 > 4. GET `/api/` endpoints с user-specific данными: `Cache-Control: private, max-age=0, must-revalidate`.
 > 5. Добавить `ETag` middleware для `/api/` (content hash, не timestamp).»
+
+Формула: immutable-ассеты + no-cache/revalidate HTML + ETag по content-hash + CDN purge-политика.
 
 ---
 
