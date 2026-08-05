@@ -47,6 +47,9 @@ const MODULES = {
   45: { dir: '45-agentic-rag-graph-rag',    name: 'Agentic RAG / Graph RAG' },
   46: { dir: '46-agentops',                 name: 'AgentOps' },
   47: { dir: '47-ai-security-agents',       name: 'AI Security для агентов' },
+  48: { dir: '48-go-webview-desktop',       name: 'Desktop: Go + WebView' },
+  49: { dir: '49-sql-database-design',      name: 'SQL / Database Schema Design' },
+  50: { dir: '50-cost-engineering',         name: 'Cost Engineering для AI' },
 };
 
 function moduleLink(n) {

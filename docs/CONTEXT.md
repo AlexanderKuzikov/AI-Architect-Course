@@ -7,8 +7,9 @@
 |-----------|--------|----------------|
 | Модули 01–40 | Работают | Критические артефакты вычищены, версии актуализированы |
 | Модули 41–47 | Переписаны | Приведены к стандарту Prompt.md |
-| Служебные файлы | Обновлены | TOOLS_COMPARISON, QUICKREF, ARCHITECTURE_LANDSCAPE, EVOLUTION, корневой GLOSSARY |
-| Сборка | Работает | 47/47 модулей → course.html (5.7 MB) |
+| Модули 48–50 | Новые | Desktop (Go+WebView), SQL/схемы, Cost engineering |
+| Всего модулей | 50 | 01–50, финальный — Cost Engineering |
+| Сборка | Работает | 50/50 модулей → course.html |
 
 ## Open-проблемы
 | # | Priority | Описание |
@@ -27,11 +28,12 @@
 | 2026-08-05 | axios-инцидент (19) верифицирован (GitHub issue #10636, Snyk, Microsoft), битые ссылки заменены реальными |
 | 2026-08-05 | Модули 41–47 полностью переписаны до стандарта Prompt.md: фикс нумерации, «Один день изучения», top-level «Реальный кейс», граничные случаи, полные GLOSSARY |
 | 2026-08-05 | Новая практика интегрирована: конкурентный ансамбль (Conclave) в 42, SSRF-инцидент (CourtDesk) в 47, browser-use кейс (CourtDesk) в 44, golden dataset (DocuMind/AgentOps) в 46 |
-| 2026-08-05 | Служебные файлы: TOOLS_COMPARISON + секции 41–47, QUICKREF + блок 41–47, ARCHITECTURE_LANDSCAPE (фикс + пробел RBAC), EVOLUTION + Итерация 3, корневой GLOSSARY + 7 терминов |
-| 2026-08-05 | Устаревшие модели вне «Актуальные версии» заменены на плейсхолдеры `CURRENT_*` (03,04,06,08,09,11,12,13,14,15,20,22); починены битые Python-строки в 10 |
-| 2026-08-05 | GLOSSARY дополнены: 02 (import defer, erasableSyntaxOnly), 03 (PHP 8.4/8.5: Property Hooks, Asymmetric Visibility, Dom\HTMLDocument, Pipe Operator, Lazy Objects, mb_trim, array_find, NoDiscard), 04 (ruff, httpx, TaskGroup, ProcessPoolExecutor), 05 (os.Root, AddCleanup, weak), 23 (clock drift, RateLimit-*), 10 (алфавитный порядок, дубль D убран) |
-| 2026-08-05 | Кросс-модульные фиксы: useSharedStrings из DOCX (14), w:r/w:t из PDF (15), backoffStrategies (18), tini в alpine (24), RateLimit-Reset Unix-секунды (23), sliding window пояснение (23), Beasties вместо critters (29/36), web-vitals@5 (39), Next 16/Vite 8 (27/34), порядок разделов 01, нумерация 21, заголовки «Актуальные версии» 06/08/10, конфликты версий Go/DeepEval/lru-cache |
-| 2026-08-05 | Модуль 11: заглушка статистики заменена реальными данными cascade filter (30% gate, из EVOLUTION.md) |
+| 2026-08-05 | Устаревшие модели заменены на плейсхолдеры `CURRENT_*`; починены битые Python-строки в 10 |
+| 2026-08-05 | **Новые модули 48–50**: 48 Desktop (Go+WebView, практика PDFtoText/CourtDesk + knowledge go-webview-desktop), 49 SQL/схемы (практика судебных данных, SerpWatcher JSONL), 50 Cost engineering (cascade, бюджеты, из практики). Закрыты пробелы карты: SQL, Cost, Desktop |
+| 2026-08-05 | Служебные файлы под 50 модулей: ARCHITECTURE_LANDSCAPE (трек Desktop/Data/Cost, Система 5, граф), QUICKREF (48–50), TOOLS_COMPARISON (48–50), корневой GLOSSARY (+15 терминов), README, AGENTS, Prompt |
+| 2026-08-05 | GLOSSARY дополнены: 02, 03 (PHP 8.4/8.5), 04, 05, 10 (алфавит), 23 |
+| 2026-08-05 | Кросс-модульные фиксы: useSharedStrings (14), w:r/w:t (15), backoffStrategies (18), tini (24), RateLimit-Reset (23), Beasties (29/36), web-vitals@5 (39), Next 16/Vite 8 (27/34), порядок разделов 01, нумерация 21, конфликты версий |
+| 2026-08-05 | Модуль 11: заглушка статистики заменена реальными данными cascade filter (из EVOLUTION.md) |
 | 2026-07-30 | Аудит документации, создание docs/ |
 
 ## Структура проекта

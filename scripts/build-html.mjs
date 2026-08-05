@@ -40,6 +40,7 @@ function buildSidebar() {
     { name: 'Infrastructure',    range: [18, 26] },
     { name: 'Web Performance',   range: [27, 40] },
     { name: 'Agent Systems',     range: [41, 47] },
+    { name: 'Desktop / Data / Cost', range: [48, 50] },
   ];
 
   let h = `<div class="sidebar-overlay" onclick="closeSidebar()"></div>`;
@@ -114,10 +115,10 @@ async function main() {
 
   let body = '';
   let moduleCount = 0;
-  for (let i = 1; i <= 47; i++) {
+  for (let i = 1; i <= 50; i++) {
     const module = readModule(i);
     if (module?.content) { body += moduleToHtml(module, md); moduleCount++; }
-    process.stdout.write(`\r  ${i}/47 modules`);
+    process.stdout.write(`\r  ${i}/50 modules`);
   }
   body += buildGlossary(md);
 

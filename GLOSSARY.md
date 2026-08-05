@@ -1227,6 +1227,9 @@ HTTP заголовок: указывает клиенту сколько жда
 **sameAs** ([Модуль 30](../30-schema-org/README.md))
 Schema.org свойство: URL авторитетного источника о той же сущности (Wikipedia, Wikidata, LinkedIn, GitHub). Позволяет Google однозначно идентифицировать сущность и добавить в Knowledge Graph.
 
+**SQLite** ([Модуль 49](../49-sql-database-design/README.md))
+Встроенная файловая БД. Ноль инфры, single-writer. Для локальных инструментов и прототипов. Не для concurrent writes и multi-user.
+
 **sampling** ([Модуль 26](../26-logging/README.md), [Модуль 33](../33-web-performance-api/README.md))
 Выборочная запись/экспорт данных для контроля объёма. Head sampling: решение на входе span. Tail sampling: решение после завершения trace (позволяет сохранить ошибочные traces). Log sampling: логировать только N% успешных запросов.
 

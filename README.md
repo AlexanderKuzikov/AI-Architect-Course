@@ -4,13 +4,13 @@
 </p>
 
 <h1 align="center">AI-Architect-Course</h1>
-<p align="center">Курс для AI-архитекторов: 47 модулей</p>
+<p align="center">Курс для AI-архитекторов: 50 модулей</p>
 
 ---
 
-Курс для AI-архитекторов: 47 модулей covering RAG, MCP, A2A, agent memory. Мультиязычные примеры (JS/TS/PHP/Python/Go), Node build scripts.
+Курс для AI-архитекторов: 50 модулей covering RAG, MCP, A2A, agent memory, desktop, cost engineering. Мультиязычные примеры (JS/TS/PHP/Python/Go), Node build scripts.
 
-- **47 модулей** — RAG, MCP, A2A, agent memory и другие темы.
+- **50 модулей** — RAG, MCP, A2A, agent memory, desktop и другие темы.
 - **Мультиязычность** — примеры на JS, TS, PHP, Python, Go.
 - **Build scripts** — автоматизация сборки и публикации.
 
@@ -29,7 +29,7 @@ npm run build
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — архитектурные решения
 - [`ARCHITECTURE_LANDSCAPE.md`](ARCHITECTURE_LANDSCAPE.md) — карта связей модулей и production-систем
 - [`TOOLS_COMPARISON.md`](TOOLS_COMPARISON.md) — «когда брать / когда не брать» по всем инструментам
-- [`QUICKREF.md`](QUICKREF.md) — однострочная шпаргалка по 47 модулям
+- [`QUICKREF.md`](QUICKREF.md) — однострочная шпаргалка по 50 модулям
 - [`Prompt.md`](Prompt.md) — системный промпт для работы с курсом
 - [`GLOSSARY.md`](GLOSSARY.md) — мастер-глоссарий терминов по всем модулям
 
