@@ -494,11 +494,11 @@ async function extractCritical(url: string, cssPath: string): Promise<void> {
 
 ### Граничные случаи — где ломается
 
-**`content-visibility: auto` и поиск на странице**: Ctrl+F. Браузер не ищет в skipped content. Safari 18 fixed это частично, но полная поддержка Find-in-Page — всё ещё нестабильна. Не применять к контенту где важен browser search. [web:267]
+**`content-visibility: auto` и поиск на странице**: Ctrl+F. Браузер не ищет в skipped content. Safari 18 fixed это частично, но полная поддержка Find-in-Page — всё ещё нестабильна. Не применять к контенту где важен browser search. 
 
 **@property и SSR**: `@property` работает в CSS. При SSR — рендерится на сервере без проблем. Но TypeScript типы CSS custom properties — отдельная тема, нет автокомплита без дополнительных инструментов.
 
-**Container Queries и вложенность**: нельзя сделать query к собственному размеру — только к родителю-контейнеру. `container-type: inline-size` добавляет layout containment — элемент не может зависеть от своих children для определения размера (prevent infinite loops). [web:267]
+**Container Queries и вложенность**: нельзя сделать query к собственному размеру — только к родителю-контейнеру. `container-type: inline-size` добавляет layout containment — элемент не может зависеть от своих children для определения размера (prevent infinite loops). 
 
 **Почему это важно архитектору:** `content-visibility: auto` — единственная CSS-оптимизация дающая измеримый Lighthouse score improvement без изменения HTML. На страницах с 100+ card элементами — 200–500ms improvement в initial render.
 

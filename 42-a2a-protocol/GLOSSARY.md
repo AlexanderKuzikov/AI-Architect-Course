@@ -3,30 +3,104 @@
 ## A
 
 **A2A (Agent-to-Agent)**  
-Протокол коммуникации между агентами. Решает task submission, status, streaming, cancellation и artifact exchange.
+Протокол коммуникации между агентами. Решает задачи координации, делегирования, состояния и accountability между агентами.
 
 **Agent Card**  
-Метаданные агента: name, description, capabilities, URL, authentication. Используется для discovery и delegation.
+JSON-документ, публикуемый агентом для discovery: name, description, url, version, capabilities, authentication. Является контрактом SLA, по нему оркестратор принимает решение о делегировании.
+
+**Agent Discovery**  
+Механизм нахождения агентов и их Agent Cards: registry, каталог, DNS SRV. Без него оркестратор не знает, кому делегировать.
 
 **Artifact**  
-Результат работы агента: structured JSON, text, file reference или ссылка на raw data.
+Выход агента: структурированный результат задачи (JSON, документ, ссылки). Должен быть стабилен по формату и версионирован.
 
 ---
 
 ## C
 
+**Competitive Ensemble (Конкурентный ансамбль)**  
+Паттерн: несколько моделей/агентов выполняют задачу параллельно, результаты сравниваются, расхождения верифицируются по авторитативному источнику. Разногласие моделей — сигнал для глубокой проверки, а не шум.
+
 **Correlation ID**  
-Идентификатор, связывающий все вызовы одного workflow across agents. Нужен для tracing и incident investigation.
+Сквозной идентификатор сессии, проходящий через все вызовы агентов. По нему восстанавливается цепочка «кто кого вызвал» для blame.
+
+---
+
+## D
+
+**DAG (Directed Acyclic Graph)**  
+Ориентированный ациклический граф задач — паттерн pipeline-оркестрации для стабильных последовательностей шагов.
+
+**Delegation Limiter**  
+Компонент, запрещающий бесконечное делегирование: max depth, visited agents set, max tasks per session. Защита от циклов A → B → C → A.
+
+---
+
+## I
+
+**Idempotency Key**  
+Уникальный ключ write-операции (создание task, тикета). Повторный вызов с тем же ключом не создаёт дубль.
+
+---
+
+## M
+
+**mTLS**  
+Взаимная TLS-аутентификация между агентами. Используется для внутренних агентов с высоким trust.
+
+---
+
+## O
+
+**Orchestrator**  
+Агент-координатор: принимает пользовательскую задачу, разбивает на подзадачи, делегирует специалистам, собирает результат. Единственный источник accountability.
+
+---
+
+## P
+
+**Peer Agents**  
+Децентрализованный паттерн: агенты общаются напрямую, без оркестратора. Гибко, но сложнее tracing и blame.
+
+**Polling**  
+Режим получения результата: оркестратор периодически опрашивает статус task. Просто, но нагрузка = N агентов × N poll/сек.
+
+---
+
+## R
+
+**Reconciliation**  
+Механизм восстановления зависших working-тасок (после рестарта оркестратора). Поднимает таски старше N минут и переводит их в failed/retry.
+
+---
+
+## S
+
+**Scoped Token**  
+Credential с ограниченными правами и коротким TTL, выдаваемый на каждый хоп делегирования. Агент не получает полные права оркестратора.
+
+**SSE Streaming**  
+Режим realtime-получения результата через Server-Sent Events: оркестратор получает статус и дельты по одному соединению. Низкая latency, сложнее парсинг.
+
+**Session**  
+Группа связанных task: одна пользовательская задача → одна сессия → один correlationId.
 
 ---
 
 ## T
 
 **Task**  
-Единица работы в A2A. Имеет lifecycle: submitted → working → completed/failed/canceled.
+Единица работы между агентами: taskId, sessionId, agentId, input, status, output, metadata. Контракт между отправителем и исполнителем.
+
+**Task Lifecycle**  
+Конечный автомат статусов: submitted → working → completed/failed/canceled. Переходы должны быть защищены от невалидных (completed → working).
 
 **Task Store**  
-Durable хранилище состояния задач. Нужно для polling, retry, audit и восстановления после restart.
+Durable хранилище задач: create, updateStatus, get, listBySession, markCanceled. Необходимое условие для восстановления после рестарта.
 
-*Глоссарий модуля 42. Следующий: [Модуль 43 — Agent Memory и Knowledge Graphs](../43-agent-memory-knowledge-graphs/GLOSSARY.md)*
+**Trace**  
+Цепочка вызовов агентов в рамках сессии (W3C Trace Context). Вместе с Correlation ID даёт blame по pipeline.
 
+---
+
+*Глоссарий модуля 42. Следующий: [Модуль 43 — Agent Memory](../43-agent-memory-knowledge-graphs/GLOSSARY.md)*

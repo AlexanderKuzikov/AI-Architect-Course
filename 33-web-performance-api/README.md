@@ -374,7 +374,7 @@ function findCulpritScripts(interactionStart: number, interactionEnd: number) {
 
 **LoAF vs Long Tasks в CI**: в Playwright/Puppeteer `long-animation-frame` entries могут быть недоступны в headless режиме. Для lab testing — использовать DevTools Performance API напрямую.
 
-**Third-party scripts и LoAF**: по данным 2026, third-party скрипты в LoAF — 60–70% сайтов. Tag manager (GTM) появляется в LoAF ~45% случаев. Если `sourceURL` — внешний домен → delay load до первого user interaction. [web:223]
+**Third-party scripts и LoAF**: по данным 2026, third-party скрипты в LoAF — 60–70% сайтов. Tag manager (GTM) появляется в LoAF ~45% случаев. Если `sourceURL` — внешний домен → delay load до первого user interaction. 
 
 **`blockingDuration` vs `duration`**: `duration` > 50ms не всегда означает проблему INP. `blockingDuration` — время непосредственной блокировки input обработки. Только `blockingDuration > 0` — прямая причина плохого INP.
 

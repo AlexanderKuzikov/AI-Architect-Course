@@ -770,12 +770,12 @@ function generateMetaDescription(string $content): string {
     $pipes
   );
 
-  fwrite($pipes, $payload);
-  fclose($pipes);
+  fwrite($pipes[0], $payload);
+  fclose($pipes[0]);
 
-  $output = stream_get_contents($pipes);[^1]
-  fclose($pipes);[^1]
-  fclose($pipes);[^2]
+  $output = stream_get_contents($pipes[1]);
+  fclose($pipes[1]);
+  fclose($pipes[2]);
   proc_close($proc);
 
   $response = json_decode($output, true);

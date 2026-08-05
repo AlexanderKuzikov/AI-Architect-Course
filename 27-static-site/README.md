@@ -30,8 +30,7 @@
 | Vite | **6.x** | Build tooling под Astro |
 | sharp | **0.34+** | Image optimization в build pipeline |
 
-> Astro приобретён Cloudflare в январе 2026. Framework остаётся MIT open-source.
-> Astro 6.0 (beta → stable в Q2 2026): workerd dev server, Live Content Collections, auto CSP.
+> Astro 6.x: workerd dev server, Live Content Collections, auto CSP.
 
 ---
 

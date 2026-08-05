@@ -113,7 +113,7 @@ app.get('/api/products', (req, res) => {
 
 // Cloudflare: stale-while-revalidate теперь полностью асинхронный
 // Первый запрос после expiry → немедленный ответ stale +
-// фоновый запрос к origin. [web:289]
+// фоновый запрос к origin. 
 ```
 
 ### Граничные случаи — где ломается
@@ -290,7 +290,7 @@ async function purgeAllCache(): Promise<void> {
 
 ### Граничные случаи — где ломается
 
-**`Vary` header и CDN**: `Vary: Accept-Encoding` — CDN кеширует отдельно gzip и non-gzip. `Vary: Cookie` — CDN не кеширует (каждый пользователь разный cookie). `Vary: Accept-Language` — CDN кеширует по языку. Cloudflare игнорирует `Vary: Cookie` для cache key по умолчанию. [web:289][web:291]
+**`Vary` header и CDN**: `Vary: Accept-Encoding` — CDN кеширует отдельно gzip и non-gzip. `Vary: Cookie` — CDN не кеширует (каждый пользователь разный cookie). `Vary: Accept-Language` — CDN кеширует по языку. Cloudflare игнорирует `Vary: Cookie` для cache key по умолчанию. 
 
 **stale-if-error и критичные данные**: `stale-if-error=86400` на API с финансовыми данными → при падении origin пользователи 24 часа видят устаревшие цены. Для критичных данных: `stale-if-error` с коротким TTL или не использовать.
 

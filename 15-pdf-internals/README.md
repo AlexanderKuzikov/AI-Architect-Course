@@ -946,7 +946,7 @@ const PDF_ROUTES: Record<string, PdfRoute> = {
 > «Извлеки текст с позициями»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `extractStructuredText(buffer: ArrayBuffer): Promise<StructuredPage[]>`. Тип `StructuredPage`: `{ pageNum: number, width: number, height: number, lines: TextLine[] }`, `TextLine`: `{ text: string, y: number, x: number, fontSize: number, items: TextItem[] }`. Группировать TextItem по строкам: items с |y1 - y2| <= 5px считаются одной строкой. Внутри строки — сортировка по x. Координаты: Y от верха страницы (height - pdfjs_y). fontSize = abs(transform[^3]). Пропускать items с пустым str. Не использовать regexp.»
+> «Реализуй TypeScript функцию `extractStructuredText(buffer: ArrayBuffer): Promise<StructuredPage[]>`. Тип `StructuredPage`: `{ pageNum: number, width: number, height: number, lines: TextLine[] }`, `TextLine`: `{ text: string, y: number, x: number, fontSize: number, items: TextItem[] }`. Группировать TextItem по строкам: items с |y1 - y2| <= 5px считаются одной строкой. Внутри строки — сортировка по x. Координаты: Y от верха страницы (height - pdfjs_y). fontSize = abs(transform[3]). Пропускать items с пустым str. Не использовать regexp.»
 
 Формула: полные типы + алгоритм группировки с допуском + система координат + ограничения.
 

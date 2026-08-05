@@ -215,7 +215,7 @@ function firstItem<T>(arr: T[]): T | undefined {
   return arr;
 }
 
-const num = firstItem([^1][^2][^3]);    // тип: number | undefined
+const num = firstItem([1, 2, 3]);    // тип: number | undefined
 const str = firstItem(['a', 'b']);   // тип: string | undefined
 ```
 
@@ -708,7 +708,7 @@ export {}; // пустой export превращает файл в модуль
 При включении `noUncheckedIndexedAccess: true` (рекомендуется в 5.9):
 
 ```typescript
-const arr =;[^1][^2][^3]
+const arr = [1, 2, 3];
 
 // ❌ С noUncheckedIndexedAccess тип arr = number | undefined
 const first: number = arr; // ошибка компиляции

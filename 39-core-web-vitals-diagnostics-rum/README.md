@@ -45,7 +45,7 @@
 | INP | ≤ 200ms | 200ms – 500ms | > 500ms |
 | CLS | ≤ 0.1 | 0.1 – 0.25 | > 0.25 |
 
-**Критерий Google**: 75-я перцентиль реальных пользователей из CrUX должна попадать в «хорошо». [web:150]
+**Критерий Google**: 75-я перцентиль реальных пользователей из CrUX должна попадать в «хорошо». 
 
 ### Field data vs Lab data — принципиальная разница
 
@@ -200,7 +200,7 @@ Element render delay (load end → paint):
 
 **Несколько `fetchpriority="high"`**: если поставить на 5 изображений — все конкурируют за bandwidth с одинаковым приоритетом, итог = никакого прироста. Ровно один `fetchpriority="high"` — на LCP элемент.
 
-**`loading="lazy"` на LCP**: lazy loading добавляет intersection observer delay. LCP элемент должен быть `loading="eager"` (дефолт) или явно `loading="eager"`. [web:301][web:303][web:305]
+**`loading="lazy"` на LCP**: lazy loading добавляет intersection observer delay. LCP элемент должен быть `loading="eager"` (дефолт) или явно `loading="eager"`. 
 
 **Почему это важно архитектору:** LCP = первое впечатление пользователя. Архитектурное решение: LCP image должен быть в initial HTML (не JS), с правильным форматом (AVIF), srcset и одним `fetchpriority="high"`.
 
@@ -357,7 +357,7 @@ button.addEventListener('click', () => {
 
 ### Граничные случаи — где ломается
 
-**TBT хороший, INP плохой**: Total Blocking Time — lab метрика, измеряет blocking time при загрузке. INP измеряет отзывчивость после загрузки. Можно иметь TBT < 200ms и INP 500ms если event handlers тяжёлые. [web:300][web:304][web:307]
+**TBT хороший, INP плохой**: Total Blocking Time — lab метрика, измеряет blocking time при загрузке. INP измеряет отзывчивость после загрузки. Можно иметь TBT < 200ms и INP 500ms если event handlers тяжёлые. 
 
 **Third-party scripts и INP**: Google Tag Manager, чат-виджеты, A/B testing скрипты регулярно занимают main thread в произвольные моменты → input delay. Диагноз через LoAF: `entry.scripts[].sourceURL` покажет vendor файлы. Решение: `type="module"` + defer для third-party, или Web Worker если возможно.
 

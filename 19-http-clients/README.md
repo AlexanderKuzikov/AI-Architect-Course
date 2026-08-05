@@ -833,9 +833,9 @@ function parseDurationMs(value: string | null): number | undefined {
   const minutes = value.match(/(\d+)m/);
   const seconds = value.match(/(\d+\.?\d*)s/);
   const milliseconds = value.match(/(\d+)ms/);
-  if (minutes) ms += parseInt(minutes) * 60_000;[^1]
-  if (seconds) ms += parseFloat(seconds) * 1_000;[^1]
-  if (milliseconds) ms += parseInt(milliseconds);[^1]
+  if (minutes) ms += parseInt(minutes) * 60_000;
+  if (seconds) ms += parseFloat(seconds) * 1_000;
+  if (milliseconds) ms += parseInt(milliseconds);
   return ms || undefined;
 }
 
@@ -1037,7 +1037,7 @@ const sdk = new NodeSDK({
 
 ### Что произошло
 
-31 марта 2026 в npm были опубликованы `axios@1.14.1` и `axios@0.30.4` через скомпрометированный аккаунт мейнтейнера `jasonsaayman`. [web:151][web:152]
+31 марта 2026 в npm были опубликованы `axios@1.14.1` и `axios@0.30.4` через скомпрометированный аккаунт мейнтейнера `jasonsaayman`. [Post mortem в GitHub issue](https://github.com/axios/axios/issues/10636), [анализ Snyk](https://snyk.io/blog/axios-npm-package-compromised-supply-chain-attack-delivers-cross-platform/), [Microsoft Threat Intelligence](https://www.microsoft.com/en-us/security/blog/2026/04/01/mitigating-the-axios-npm-supply-chain-compromise/).
 
 **Механизм атаки:**
 ```
@@ -1232,7 +1232,7 @@ Retry-After = стабильнее чем агрессивный retry.
 > «Сделай HTTP клиент для AI API»
 
 Хорошая формулировка:
-> «Реализуй TypeScript класс `AiApiClient` использующий undici 7.24.6 Pool. Конструктор принимает `{baseUrl: string, apiKey: string, poolSize?: number, inferenceTimeoutMs?: number}`. Дефолты: poolSize=10, inferenceTimeoutMs=120000. Метод `complete(prompt: string, signal?: AbortSignal): Promise<string>` — POST /v1/chat/completions, model: process.env.CURRENT_TEXT_MODEL || "current-text-model", парсить choices[^0].message.content. Retry через p-retry 6.x: maxAttempts=4, exponential backoff с jitter (randomize: true), ретраить только 429/500/502/503/504 и network ошибки. Для 429 — читать Retry-After заголовок и ждать указанное время. AbortError — немедленно выбрасывать без retry. Метод `getStats()` возвращает `{connected, free, pending}` из Pool stats.»
+> «Реализуй TypeScript класс `AiApiClient` использующий undici 7.24.6 Pool. Конструктор принимает `{baseUrl: string, apiKey: string, poolSize?: number, inferenceTimeoutMs?: number}`. Дефолты: poolSize=10, inferenceTimeoutMs=120000. Метод `complete(prompt: string, signal?: AbortSignal): Promise<string>` — POST /v1/chat/completions, model: process.env.CURRENT_TEXT_MODEL || "current-text-model", парсить choices[0].message.content. Retry через p-retry 6.x: maxAttempts=4, exponential backoff с jitter (randomize: true), ретраить только 429/500/502/503/504 и network ошибки. Для 429 — читать Retry-After заголовок и ждать указанное время. AbortError — немедленно выбрасывать без retry. Метод `getStats()` возвращает `{connected, free, pending}` из Pool stats.»
 
 Формула: pooling + retry семантика + Retry-After + AbortError handling + stats.
 
@@ -1256,7 +1256,7 @@ Retry-After = стабильнее чем агрессивный retry.
 > «Проксируй стриминг от AI API»
 
 Хорошая формулировка:
-> «Реализуй Express middleware `streamAiProxy(req: Request, res: Response): Promise<void>`. Читать prompt из `req.body.prompt` (string). Устанавливать заголовки SSE: Content-Type=text/event-stream, Cache-Control=no-cache, Connection=keep-alive. Использовать undici 7.24.6 request к https://api.openai.com/v1/chat/completions с stream:true. Парсить SSE: каждая строка начинающаяся с "data: " — extract JSON, взять choices[^0].delta.content, писать в res через `res.write("data: " + JSON.stringify({delta}) + "\\n\\n")`. При получении "[DONE]" — `res.write("data: [DONE]\\n\\n")` и `res.end()`. При `req.on("close")` — AbortController.abort(). Ошибки 429 — писать `data: {"error":"rate_limited"}` и завершать.»
+> «Реализуй Express middleware `streamAiProxy(req: Request, res: Response): Promise<void>`. Читать prompt из `req.body.prompt` (string). Устанавливать заголовки SSE: Content-Type=text/event-stream, Cache-Control=no-cache, Connection=keep-alive. Использовать undici 7.24.6 request к https://api.openai.com/v1/chat/completions с stream:true. Парсить SSE: каждая строка начинающаяся с "data: " — extract JSON, взять choices[0].delta.content, писать в res через `res.write("data: " + JSON.stringify({delta}) + "\\n\\n")`. При получении "[DONE]" — `res.write("data: [DONE]\\n\\n")` и `res.end()`. При `req.on("close")` — AbortController.abort(). Ошибки 429 — писать `data: {"error":"rate_limited"}` и завершать.»
 
 Формула: SSE формат + SSE парсинг + AbortController + error events + chunked write.
 

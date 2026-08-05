@@ -853,8 +853,8 @@ def add_item(item, collection=[]):
   collection.append(item)
   return collection
 
-add_item(1)  #[^1]
-add_item(2)  #  — неожиданно![^2][^1]
+add_item(1)  # ❌ [1]
+add_item(2)  # ❌ [1, 2] — неожиданно!
 
 # ✅ Правильно — None как sentinel
 def add_item(item, collection=None):
@@ -869,11 +869,11 @@ def add_item(item, collection=None):
 ```python
 # ❌ i захватывается по ссылке, не по значению
 funcs = [lambda: i for i in range(5)]
-[f() for f in funcs]  #  — все вернут 4![^3]
+[f() for f in funcs]  # ❌ [4, 4, 4, 4, 4] — все вернут 4!
 
 # ✅ Зафиксировать значение в default argument
 funcs = [lambda i=i: i for i in range(5)]
-[f() for f in funcs]  #[^4][^1][^2][^3]
+[f() for f in funcs]  # ✅ [0, 1, 2, 3, 4]
 ```
 
 ### Ловушка 3 — Блокирующий код в asyncio

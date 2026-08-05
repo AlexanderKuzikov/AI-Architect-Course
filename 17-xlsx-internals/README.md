@@ -244,8 +244,8 @@ function a1ToRowCol(a1: string): { row: number; col: number } {
   const match = a1.match(/^([A-Z]+)(\d+)$/);
   if (!match) throw new Error(`Invalid A1: ${a1}`);
   return {
-    row: parseInt(match),[^1]
-    col: letterToColIndex(match),[^2]
+    row: parseInt(match[2]),
+    col: letterToColIndex(match[1]),
   };
 }
 
@@ -859,7 +859,7 @@ function parseSharedStrings(xml: string): string[] {
   // Упрощённый парсер shared strings через regexp — только для демонстрации
   // В production — SAX или xmldom
   return [...xml.matchAll(/<si>[\s\S]*?<t[^>]*>([\s\S]*?)<\/t>[\s\S]*?<\/si>/g)]
-    .map(m => m.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>'));[^2]
+    .map(m => m[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
 }
 ```
 
@@ -887,7 +887,7 @@ function addSheetToExisting(
   // 1. Определить следующий sheetId
   const workbookXml = zip.file('xl/workbook.xml')!.asText();
   const existingIds = [...workbookXml.matchAll(/sheetId="(\d+)"/g)]
-    .map(m => parseInt(m));[^2]
+    .map(m => parseInt(m[1]));
   const newSheetId = Math.max(...existingIds) + 1;
   const newRId = `rId${newSheetId + 10}`; // избегать конфликта с существующими rId
 
@@ -1001,7 +1001,7 @@ function parse1CDate(value: unknown): Date | null {
   if (typeof value !== 'string') return null;
   const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
   if (!match) return null;
-  return new Date(`${match[^3]}-${match[^2]}-${match[^1]}`);
+  return new Date(`${match[3]}-${match[2]}-${match[1]}`);
 }
 ```
 

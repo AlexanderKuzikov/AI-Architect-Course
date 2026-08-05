@@ -46,7 +46,7 @@
 | Инструмент | Когда брать | Когда не брать | Модуль |
 |-----------|-------------|----------------|--------|
 | **LM Studio** | Desktop dev + headless server, OpenAI-compatible, VLM | Docker-only, низкий overhead (Ollama) | 08 |
-| **Ollama** | Docker, CI, простота запуска | CURRENT_LOCAL_VLM-GGUF, сложные кастомные модели | 08 |
+| **Ollama** | Docker, CI, простота запуска | Кастомные GGUF-модели, сложные конфигурации | 08 |
 | **vLLM** | Production serving, multi-GPU, batching, enterprise | Одна consumer GPU, прототип | 08 |
 | **llama.cpp** | Прямой контроль, batch pipeline без HTTP overhead | Multi-tenant, параллельные клиенты | 08 |
 | **Pydantic** (Python) | Python pipeline, JSON Schema generation, validation | TypeScript pipeline (zod) | 07 |

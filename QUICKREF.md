@@ -60,7 +60,7 @@
 | Модуль | Ключевая концепция |
 |--------|-------------------|
 | 27 SSG | Build-time vs Runtime спектр; Astro Islands |
-| 28 CWV | LCP < 2.5s, FID < 100ms, CLS < 0.1 |
+| 28 CWV | LCP < 2.5s, INP < 200ms, CLS < 0.1 |
 | 29 Critical CSS | < 14KB inline; media="print" onload trick |
 | 30 Schema.org | JSON-LD в `<head>` для SEO |
 | 31 Mobile-first | `@container` queries вместо `@media` |

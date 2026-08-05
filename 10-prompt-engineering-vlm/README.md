@@ -501,7 +501,7 @@ with torch.no_grad():
     )
 
 output = processor.batch_decode(
-    [generated_ids[inputs.input_ids.shape:]],[^2]
+    [generated_ids[inputs.input_ids.shape:]],
     skip_special_tokens=True,
 )
 
@@ -665,10 +665,10 @@ def denormalize_bbox(
     img_height: int,
 ) -> tuple[int, int, int, int]:
     return (
-        int(bbox / 1000 * img_width),
-        int(bbox / 1000 * img_height),[^2]
-        int(bbox / 1000 * img_width),[^3]
-        int(bbox / 1000 * img_height),[^4]
+        int(bbox[0] / 1000 * img_width),
+        int(bbox[1] / 1000 * img_height),
+        int(bbox[2] / 1000 * img_width),
+        int(bbox[3] / 1000 * img_height),
     )
 
 def crop_region(img: Image.Image, bbox_norm: list[int], padding: int = 10) -> Image.Image:

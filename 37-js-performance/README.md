@@ -162,7 +162,7 @@ map.set(computedKey(), value)  // Map оптимизирован для dynamic 
 
 **Deoptimization в production незаметна без профилировщика**: TurboFan может деоптимизировать функцию вызываемую миллион раз в день из-за одного вызова с другим типом. Симптом: внезапный 3x regression без изменений в логике. Диагностика: `--trace-deopt` флаг V8 или Chrome DevTools → Performance → bottom-up.
 
-**Maglev и числовые операции**: Maglev (V8 2023+) значительно ускорил числовые операции без ожидания TurboFan. Для большинства кода Maglev достаточно — TurboFan применяется к действительно горячим циклам. [web:280][web:284]
+**Maglev и числовые операции**: Maglev (V8 2023+) значительно ускорил числовые операции без ожидания TurboFan. Для большинства кода Maglev достаточно — TurboFan применяется к действительно горячим циклам. 
 
 **Почему это важно архитектору:** V8 оптимизации — не про микрооптимизации синтаксиса. Ключевое: монотипизированные функции и стабильные object shapes. Это архитектурное решение уровня data modeling, не уровня кода.
 
@@ -374,7 +374,7 @@ class DatabaseConnection implements Disposable {
 
 **WeakRef и microtask queue**: даже если объект eligible for GC, он может оставаться живым пока выполняется текущая microtask queue. `deref()` в том же synchronous block скорее всего вернёт объект — но это не гарантия.
 
-**FinalizationRegistry в Node.js**: в Node.js GC callbacks из FinalizationRegistry выполняются в отдельном потоке (libuv). Нельзя трогать JS объекты из callback напрямую — только через `process.nextTick` / `setImmediate`. [web:276]
+**FinalizationRegistry в Node.js**: в Node.js GC callbacks из FinalizationRegistry выполняются в отдельном потоке (libuv). Нельзя трогать JS объекты из callback напрямую — только через `process.nextTick` / `setImmediate`. 
 
 **Почему это важно архитектору:** WeakRef не замена явным lifecycle паттернам. Это safety net для кешей. Если SPA держит в памяти 50 закрытых модальных компонентов — проблема не в отсутствии WeakRef, а в том что компоненты не unmount.
 
@@ -471,9 +471,9 @@ Atomics.compareExchange(arr, 0, expected, desired)  // CAS операция
 
 **Worker и DOM**: Workers не имеют доступа к DOM, `window`, `document`. Нельзя вызвать `querySelector` из Worker. Только чистые вычисления + fetch (в dedicated worker) + IndexedDB.
 
-**SharedArrayBuffer и Spectre mitigation**: SharedArrayBuffer требует `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Embedder-Policy: require-corp` на ответе сервера. Без этих заголовков — `SharedArrayBuffer` недоступен (security mitigation). Нарушает некоторые third-party iframes. [web:62][web:281]
+**SharedArrayBuffer и Spectre mitigation**: SharedArrayBuffer требует `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Embedder-Policy: require-corp` на ответе сервера. Без этих заголовков — `SharedArrayBuffer` недоступен (security mitigation). Нарушает некоторые third-party iframes. 
 
-**Transfer после использования**: после передачи buffer через transferable — он detached в source thread. Любое обращение к нему бросает `TypeError: Cannot perform %TypedArray%.prototype.set on a detached ArrayBuffer`. [web:62]
+**Transfer после использования**: после передачи buffer через transferable — он detached в source thread. Любое обращение к нему бросает `TypeError: Cannot perform %TypedArray%.prototype.set on a detached ArrayBuffer`. 
 
 **Почему это важно архитектору:** Web Workers — единственный способ избежать main thread блокировки для CPU-bound кода. Comlink убирает boilerplate до уровня обычного async/await. Transferables решают проблему копирования больших данных. Это не преждевременная оптимизация — это правильный инструмент для CPU-bound задач.
 
@@ -544,7 +544,7 @@ async function processLargeArray(items: Item[]): Promise<Result[]> {
 
 **`scheduler.yield()` и priority inheritance**: yield возобновляет задачу с тем же приоритетом. Но если между chunks появится более приоритетная задача — она выполнится первой. Для UI-критичного кода использовать `user-blocking` priority чтобы не быть вытесненным.
 
-**`scheduler.postTask()` и Safari < 17**: Baseline 2024 означает Safari 17.4+. Для более старых — полифил через `MessageChannel` или `setTimeout`. [web:62][web:281]
+**`scheduler.postTask()` и Safari < 17**: Baseline 2024 означает Safari 17.4+. Для более старых — полифил через `MessageChannel` или `setTimeout`. 
 
 **Почему это важно архитектору:** `scheduler.yield()` — правильная замена `setTimeout(fn, 0)` для chunking. setTimeout добавляет минимум 4ms задержку. yield — немедленное продолжение после обработки приоритетных задач.
 

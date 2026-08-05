@@ -188,7 +188,7 @@ jobs:
 
 **size-limit и dynamic imports**: `size-limit` по умолчанию считает только entry файл без динамических импортов. `--why` флаг показывает что именно занимает место, но не dynamic chunks. Для полного анализа — `rollup-plugin-visualizer`.
 
-**Почему это важно архитектору:** Bundle size — единственная performance метрика которая меняется детерминированно с каждым PR. Lighthouse score скачет ±10 баллов от запроса к запросу. Bundle size точен. Это делает его идеальным hard fail в CI. [web:314][web:316]
+**Почему это важно архитектору:** Bundle size — единственная performance метрика которая меняется детерминированно с каждым PR. Lighthouse score скачет ±10 баллов от запроса к запросу. Bundle size точен. Это делает его идеальным hard fail в CI. 
 
 ---
 
@@ -477,7 +477,7 @@ build: {
 
 **manualChunks и circular dependencies**: если модуль A и B в разных chunks импортируют друг друга → runtime error. Vite предупреждает, но не всегда. Диагноз: `rollup-plugin-visualizer` с `template: 'network'` показывает граф зависимостей.
 
-**Tree-shaking и side effects**: `package.json` библиотеки должен иметь `"sideEffects": false` чтобы bundler агрессивно tree-shake. Если нет — импорт любого экспорта тянет весь файл. Проверять через `--why` в size-limit или `rollup --input --perf`. [web:320]
+**Tree-shaking и side effects**: `package.json` библиотеки должен иметь `"sideEffects": false` чтобы bundler агрессивно tree-shake. Если нет — импорт любого экспорта тянет весь файл. Проверять через `--why` в size-limit или `rollup --input --perf`. 
 
 **Почему это важно архитектору:** `rollup-plugin-visualizer` — первый инструмент который нужно открыть при росте bundle. Treemap мгновенно показывает кандидатов для оптимизации. Типичный результат: moment.js занимает 30% bundle — один PR с заменой на dayjs экономит 60+ KB.
 
@@ -639,4 +639,4 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'))
 
 *Модуль 40 завершён.*
 *Блок «Web Performance» (модули 28–40) завершён.*
-*Следующий слой курса — security, implementation notes и production-patterns — будет добавлен отдельным блоком после базового ядра.*
+*Следующий: [Модуль 41 — MCP: Tool Server Architecture](../41-mcp-tool-server-architecture/README.md)*

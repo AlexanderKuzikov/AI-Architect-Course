@@ -46,9 +46,9 @@
 | **JPEG XL** | −40–60% | <50% (2026) | Среднее | Архивное хранение, не web |
 | **SVG** | N/A (vector) | 100% | N/A | Иконки, логотипы, диаграммы |
 
-> AVIF в 2026 — primary формат для фотографий. WebP — fallback. JPEG — fallback для legacy. [web:245][web:247]
+> AVIF в 2026 — primary формат для фотографий. WebP — fallback. JPEG — fallback для legacy. 
 >
-> JPEG XL: Safari поддерживает, Chrome — нет (2026). Слишком рано для production web. [web:247]
+> JPEG XL: Safari поддерживает, Chrome — нет (2026). Слишком рано для production web. 
 
 ### Когда что использовать
 
@@ -178,11 +178,11 @@ async function generateLQIP(inputPath: string): Promise<string> {
 
 ### Граничные случаи — где ломается
 
-**AVIF `effort` vs build time**: `effort: 9` на 1000 изображений — может занимать 30+ минут. В CI/CD — использовать `effort: 4-6`, `effort: 9` только для offline batch обработки. Sharp 0.34.x обрабатывает AVIF в 25x быстрее чем squoosh-cli. [web:248]
+**AVIF `effort` vs build time**: `effort: 9` на 1000 изображений — может занимать 30+ минут. В CI/CD — использовать `effort: 4-6`, `effort: 9` только для offline batch обработки. Sharp 0.34.x обрабатывает AVIF в 25x быстрее чем squoosh-cli. 
 
 **`withoutEnlargement: true` и srcset**: если оригинал 600px, запрос на 1200px вариант → Sharp вернёт 600px файл с именем `image-1200w.avif`. Нужно либо проверять output metadata, либо не генерировать variants больше оригинала.
 
-**sharp и serverless**: sharp использует native binaries (libvips). В AWS Lambda, Vercel Functions — требует platform-specific binary. Sharp 0.34.x поддерживает `sharp-linux-x64`, `sharp-linux-arm64` как отдельные пакеты. Docker: явно указывать platform. [web:254]
+**sharp и serverless**: sharp использует native binaries (libvips). В AWS Lambda, Vercel Functions — требует platform-specific binary. Sharp 0.34.x поддерживает `sharp-linux-x64`, `sharp-linux-arm64` как отдельные пакеты. Docker: явно указывать platform. 
 
 **Почему это важно архитектору:** sharp нельзя просто импортировать в serverless функцию без конфигурации платформы. Архитектурное решение — обрабатывать изображения при upload в отдельном сервисе/worker, не inline в request handler.
 
