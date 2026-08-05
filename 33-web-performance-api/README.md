@@ -513,6 +513,58 @@ async function measureMemory() {
 
 ---
 
+## 7. Реальный кейс: LoAF вместо догадок про INP
+
+### Контекст
+
+Тот же SEO-проект (модуль 28): позиции просели после редизайна, field INP на мобильных — Poor. Lighthouse не даёт INP, CrUX — только p75 за 28 дней без деталей «что именно тормозит». Нужны данные о блокировках main thread у реальных пользователей.
+
+### Задача
+
+Найти источники INP-проблем без воспроизведения: какой скрипт, какая функция блокирует main thread у мобильных пользователей.
+
+### Гипотеза
+
+Long Animation Frames (LoAF) через PerformanceObserver дают то, чего нет в других API: длительность блока, список контрактных скриптов (`script`), время начала. Собираем LoAF в RUM — получаем «живые» данные о блокировках.
+
+### Что получилось
+
+```typescript
+// RUM: LoAF collector (модуль 33 §5)
+const observer = new PerformanceObserver((list) => {
+  for (const entry of list.getEntries() as PerformanceLongAnimationFrameTiming[]) {
+    if (entry.duration < 200) continue   // интересуют только тяжёлые блоки
+
+    const scripts = entry.scripts.map(s => ({
+      url: s.name.slice(0, 120),
+      duration: Math.round(s.duration),
+      invoker: s.invoker?.slice(0, 80),  // функция-источник
+    }))
+
+    buffer.add({ type: 'loaf', duration: Math.round(entry.duration), scripts })
+  }
+})
+observer.observe({ type: 'long-animation-frame', buffered: true })
+```
+
+- За неделю собраны LoAF ≥ 200ms по мобильным: два источника — тяжёлый обработчик фильтра каталога (600ms) и инициализация чат-виджета (450ms) на первой загрузке;
+- `invoker` из LoAF назвал функцию — фикс точечный, без «оптимизации всего подряд»;
+- фильтр каталога разбит через `scheduler.yield()` (модуль 28 §3), виджет — отложен в `requestIdleCallback` (модуль 28 §3).
+
+### Грабли, найденные в production
+
+1. **LoAF ≥ 200ms — порог, не абсолют**: на слабых Android-устройствах блокировки 100–200ms тоже портят INP, но на пучок телефонов пришлось бы собирать мегабайты. Порог 200ms + отдельная выборочная выборка без порога.
+2. **`buffered: true` важен**: LoAF, произошедшие до подключения observer (ранний скрипт), теряются без буфера.
+3. **CrUX не подтверждал фиксы 28 дней**: RUM по LoAF показал уменьшение тяжёлых блоков за дни — первичный источник, CrUX — подтверждение ранжированию.
+
+### Вывод, противоречащий интуиции
+
+Проблема INP решалась не «оптимизацией JS», а **измерением с точностью до функции**: LoAF дал имя функции и скрипт — фиксы стали точечными и проверяемыми за дни. До этого тратили недели на Lighthouse-гадание. Для «не видно, что тормозит» — LoAF-сбор это первый инструмент, не последний.
+
+**Практический вывод для архитектора:** RUM-пайплайн обязан включать LoAF-сбор: это единственный способ увидеть блокировки main thread у реальных пользователей. Порог + буфер + дедупликация — минимальная конфигурация; дальше фиксы становятся проверяемыми гипотезами, а не шаманством.
+
+---
+
 ## Антипаттерны
 
 **1. `performance.timing` (L1 deprecated)**
@@ -583,6 +635,8 @@ BFCache restores дают аномально низкий LCP (~0ms). Prefetch n
 > 5. Flush при `visibilitychange → hidden`.
 > 6. Импортировать и вызывать `initVitals()` в entry point после first paint (не в head).»
 
+Формула: web-vitals 5 + sendBeacon + sampling 10% + flush при hidden + точка инициализации после first paint.
+
 ---
 
 **Плохая формулировка:**
@@ -595,6 +649,8 @@ BFCache restores дают аномально низкий LCP (~0ms). Prefetch n
 > 3. Фильтр: отправлять только entries с `blockingDuration > 50ms`.
 > 4. Только если `'long-animation-frame' in PerformanceObserver.supportedEntryTypes` (feature detect).
 > 5. Подключить только на production (`import.meta.env.PROD`).»
+
+Формула: LoAF observer (buffered) + фильтр blockingDuration + sendBeacon + feature-detect + prod-only.
 
 ---
 
