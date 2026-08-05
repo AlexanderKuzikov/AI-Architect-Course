@@ -987,6 +987,12 @@ Vendor-neutral стандарт для instrumentation: API + SDK + проток
 **PasswordException** ([Модуль 15](../15-pdf-internals/README.md))
 Исключение pdfjs-dist при работе с зашифрованным PDF. Два кода: `NEED_PASSWORD (1)` — пароль требуется, `INCORRECT_PASSWORD (2)` — пароль неверен. Обязательно обрабатывать явно в production pipeline.
 
+**Pass Rate** ([Модуль 50](../50-cost-engineering/README.md))
+Доля запросов, прошедших gate в дорогую модель каскада. Определяет экономику: 30% в дорогую + 70% в дешёвую = cost −2–3×. Измеряется, иначе каскад — лишняя сложность.
+
+**PostgreSQL** ([Модуль 49](../49-sql-database-design/README.md))
+Production-БД: связи, транзакции, индексы, полнотекст, векторы (pgvector). Выбор по характеру запросов, не по объёму.
+
 **Patch** ([Модуль 10](../10-prompt-engineering-vlm/README.md))
 Фрагмент изображения фиксированного размера (в CURRENT_VLM_MODEL: 32×32 пикселя). Каждый патч → один visual token после проекции. Количество патчей = (width / patch_size) × (height / patch_size).
 
