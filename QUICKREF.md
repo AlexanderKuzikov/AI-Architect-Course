@@ -86,6 +86,14 @@
 | 46 AgentOps | Per-agent traces, cost, quality evals |
 | 47 AI Security | Retrieved content = untrusted; tool allowlist, не blocklist |
 
+## Desktop / Data / Cost (48–50)
+
+| Модуль | Ключевая концепция |
+|--------|-------------------|
+| 48 Go+WebView | Bind только функции; loopback-сервер не SetHtml; `-H windowsgui`; без `-s -w` в release |
+| 49 SQL | Схема по семантике (TEXT номера, NUMERIC деньги); индекс по EXPLAIN; миграции append-only |
+| 50 Cost | Cascade по pass rate; cost per task KPI; fallback помечать; кэш embeddings |
+
 ## Cross-cutting
 
 | Концепция | Где искать |

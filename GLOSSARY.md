@@ -98,6 +98,12 @@ Pre-processing шаг: определение ориентации докуме�
 **backoff** (Модули 18–19)
 Стратегия задержки между retry попытками. Типы: `exponential` — задержка удваивается (`delay * factor^attemptNumber`), cap рекомендован ≤30s; `fixed` — постоянная задержка; `linear` — линейный рост. Без jitter в multi-instance деплое приводит к thundering herd.
 
+**Bind (Go+WebView)** ([Модуль 48](../48-go-webview-desktop/README.md))
+Механизм моста JS→Go в webview_go: `w.Bind("name", fn)`. Биндит ТОЛЬКО функции, не структуры. В JS имя становится глобальной функцией.
+
+**Business Key** ([Модуль 49](../49-sql-database-design/README.md))
+Бизнес-идентификатор (номер дела, код ОКТМО) — отличается от суррогатного `id`. Уникальность по business key — отдельный constraint, тип — TEXT (ведущие нули, дефисы).
+
 **Backpressure** ([Модуль 01](../01-javascript-nodejs/README.md), [Модуль 18](../18-task-queues/README.md), [Модуль 22](../22-worker-threads/README.md))
 Механизм сдерживания producer когда consumer не успевает обрабатывать. В контексте очередей: проверять `queue.getWaitingCount()` перед добавлением задач, ждать если очередь превышает порог. Без backpressure — Redis заполняется быстрее чем воркеры обрабатывают.
 
@@ -175,8 +181,17 @@ HTTP заголовок управляющий кэшированием. Дир�
 **canonical URL** ([Модуль 27](../27-static-site/README.md))
 `<link rel="canonical">` тег, указывающий поисковику предпочтительный URL страницы при наличии дублей (с/без trailing slash, параметры сортировки). Защита от пенализации за дублированный контент.
 
-**Cascade Filter** ([Модуль 11](../11-multi-model-orchestration/README.md))
-Архитектурный паттерн: первая (gate) модель выполняет классификацию/детекцию, вторая (main) обрабатывает только объекты, прошедшие порог. Снижает число вызовов дорогой модели до `p × N`, где `p` — доля объектов прошедших gate.
+**CREATE_NO_WINDOW** ([Модуль 48](../48-go-webview-desktop/README.md))
+Флаг создания процесса (0x08000000) для console-процессов из GUI-приложения. Без него Windows создаёт новую консоль — чёрное окно мигает при каждом запуске.
+
+**Cascade Filter** ([Модуль 11](../11-multi-model-orchestration/README.md), [Модуль 50](../50-cost-engineering/README.md))
+Архитектурный паттерн: первая (gate) модель выполняет классификацию/детекцию, вторая (main) обрабатывает только объекты, прошедшие порог. Снижает число вызовов дорогой модели до `p × N`, где `p` — доля объектов прошедших gate. Экономика зависит от pass rate: 30% в дорогую + 70% в дешёвую = cost −2–3×.
+
+**Cost Model** ([Модуль 50](../50-cost-engineering/README.md))
+Формула cost per task: входные/выходные токены, tools, memory, rerankers, judge, retries. Прогноз бюджета до запуска.
+
+**Cost per Task** ([Модуль 50](../50-cost-engineering/README.md))
+Стоимость одной задачи агента. KPI архитектуры наравне с latency и accuracy. Сравнение моделей — по cost per task, не по цене токена.
 
 **cascade layer (@layer)** ([Модуль 31](../31-mobile-first-css/README.md))
 CSS механизм (2022): позволяет явно задавать приоритет групп стилей независимо от specificity и порядка в файле. `@layer base, components, overrides` — overrides всегда выигрывает у base. Упрощает mobile-first override management.
@@ -386,6 +401,12 @@ ES модульный синтаксис: `import('./module')` — асинхр�
 **E2E (end-to-end)** ([Модуль 21](../21-testing/README.md))
 Тест, проверяющий систему целиком через внешний интерфейс (браузер, HTTP). Медленный (≈3–10s/тест), реалистичный, дорогой в поддержке. Применять только для critical user paths, не для CRUD-деталей.
 
+**Eval (Go+WebView)** ([Модуль 48](../48-go-webview-desktop/README.md))
+Механизм моста Go→JS: `w.Eval("document.title = 'x'")` — выполняет JS в контексте страницы. Не работает для `document.title` на Windows-реализации (заголовок окна не обновляется).
+
+**EXPLAIN** ([Модуль 49](../49-sql-database-design/README.md))
+План запроса PostgreSQL: показывает использование индексов, сканирование, стоимость. Основа решения «какой индекс нужен».
+
 **Eager init** ([Модуль 16](../16-pdfium-wasm/README.md))
 Стратегия инициализации: `PDFiumLibrary.init()` вызывается при старте сервера до первого запроса. Противопоставляется lazy init. Устраняет cold start на первый запрос. Добавляет 500ms–1s к startup time приложения.
 
@@ -515,6 +536,9 @@ HTML атрибут (`high`/`low`/`auto`): подсказка браузеру �
 
 **G-Eval** ([Модуль 09](../09-evaluator-benchmark/README.md))
 Паттерн LLM-оценки с явным chain-of-thought: судья описывает шаги оценки перед выставлением итоговой оценки. Снижает variance по сравнению с прямым scoring. Реализован нативно в DeepEval 3.9.2.
+
+**GIN index** ([Модуль 49](../49-sql-database-design/README.md))
+Индекс PostgreSQL для полнотекстового поиска: `to_tsvector('russian', text)` + `@@`. Для `%LIKE%` — триграммный (`pg_trgm`).
 
 **Garbage Collection (GC)** ([Модуль 01](../01-javascript-nodejs/README.md))
 автоматическое управление памятью в V8. Освобождает объекты, на которые нет ссылок. В Node.js — поколенческий GC, который может вызывать паузы (STW). Утечки памяти = объекты, на которые остаётся ссылка дольше нужного.
@@ -684,6 +708,9 @@ Web API: асинхронное наблюдение за пересечение
 **JBIG2** ([Модуль 15](../15-pdf-internals/README.md))
 Формат сжатия бинарных изображений в PDF. Высокая степень сжатия для чёрно-белых сканов. Как CCITTFax — признак сканированного документа.
 
+**JSONL** ([Модуль 49](../49-sql-database-design/README.md), [Модуль 18](../18-task-queues/README.md))
+Формат журнала: одна JSON-запись на строку, append-only. Для инкрементальной истории и аудита без БД. Минус: полный скан при сложных запросах.
+
 **JIT (Just-In-Time Compiler)** ([Модуль 03](../03-php/README.md))
 компилятор в PHP 8+, транслирующий байткод в машинный код во время выполнения. Улучшен в PHP 8.4. Даёт прирост для CPU-интенсивных операций. Включается через `opcache.jit=tracing`.
 
@@ -730,6 +757,9 @@ Namespace для Redis-ключей в rate-limiter-flexible. Формат: `rl:
 **lab data** ([Модуль 28](../28-core-web-vitals-intro/README.md), [Модуль 33](../33-web-performance-api/README.md), [Модуль 39](../39-core-web-vitals-diagnostics-rum/README.md))
 Данные из контролируемой тестовой среды (Lighthouse, PageSpeed Insights): фиксированное устройство, сеть, без extensions. Воспроизводимо. Не отражает реальный опыт пользователей, не влияет на Rankings напрямую.
 
+**Loopback HTTP-сервер** ([Модуль 48](../48-go-webview-desktop/README.md))
+Встроенный `http.Server` на `127.0.0.1:0` внутри desktop-приложения. UI отдаётся через `Navigate`. Рендерится надёжнее `SetHtml` и тестируется как обычные HTTP-эндпоинты.
+
 **Late Fusion** ([Модуль 10](../10-prompt-engineering-vlm/README.md))
 Архитектурный подход предшественников CURRENT_VLM_MODEL: vision encoder и LLM обучались раздельно, затем стыковались через проекционный слой. Источник галлюцинаций на нестандартных изображениях из-за несоответствия пространств.
 
@@ -773,6 +803,9 @@ PEFT метод: обновление весов аппроксимируетс�
 
 **Maglev** ([Модуль 37](../37-js-performance/README.md))
 V8 mid-tier JIT компилятор (добавлен 2023): быстрая компиляция горячего кода (≈100 вызовов). Между Ignition и TurboFan. Значительно ускоряет числовые операции без ожидания полной TurboFan оптимизации.
+
+**Migration** ([Модуль 49](../49-sql-database-design/README.md))
+Версионируемое изменение схемы: `001_init.sql`, `002_add_column.sql`. Append-only: не редактировать опубликованные, добавлять новые. Отслеживается в `schema_migrations`.
 
 **manualChunks** ([Модуль 34](../34-lazy-loading/README.md), [Модуль 40](../40-performance-budget/README.md))
 Vite/Rollup конфиг: явное управление разбивкой bundle на chunks. Позволяет вынести vendor библиотеки в отдельные файлы с долгим кешем. Риск: circular dependencies между chunks → runtime error.
@@ -1537,6 +1570,9 @@ Production inference сервер с PagedAttention — эффективное �
 
 **WaitGroup (sync.WaitGroup)** ([Модуль 05](../05-go/README.md))
 Примитив ожидания завершения группы горутин. `wg.Add(n)` — добавить счётчик, `wg.Done()` — уменьшить, `wg.Wait()` — блокировать до нуля. Стандартный паттерн параллельной обработки без каналов.
+
+**WebView2** ([Модуль 48](../48-go-webview-desktop/README.md))
+Системный движок рендеринга Windows (Edge Chromium). Встроен в Win10/11. Не полноценный браузер: нет расширений, разное поведение между платформами.
 
 **waiting-children** ([Модуль 18](../18-task-queues/README.md))
 Состояние родительской задачи FlowProducer: ждёт завершения всех дочерних задач. Переходит в `waiting` когда последний child завершился. Остаётся в `waiting-children` навсегда если child исчерпал попытки — критическая метрика для мониторинга.
