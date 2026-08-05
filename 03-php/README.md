@@ -503,7 +503,7 @@ declare(strict_types=1);
 
 // $argv — имя скрипта
 // $argv[1..n] — аргументы командной строки
-$outputDir = $argv ?? 'dist';[1]
+$outputDir = $argv[1] ?? 'dist';
 
 echo "Building to: {$outputDir}\n";
 ```
@@ -619,8 +619,8 @@ function runParallel(array $commands): array {
   $results = [];
   foreach ($processes as $key => $proc) {
     $results[$key] = [
-      'stdout' => stream_get_contents($pipes[$key]),[1]
-      'stderr' => stream_get_contents($pipes[$key]),[2]
+      'stdout' => stream_get_contents($pipes[$key][1]),
+      'stderr' => stream_get_contents($pipes[$key][2]),
       'code'   => proc_close($proc),
     ];
   }
@@ -650,9 +650,7 @@ function renderCard(array $data): string {
   ob_start(); ?>
 
   <article class="card <?= htmlspecialchars($data['modifier'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-    ```
     <h2 class="card__title"><?= htmlspecialchars($data['title'], ENT_QUOTES, 'UTF-8') ?></h2>
-    ```
     <?php if (!empty($data['image'])): ?>
       <img
         src="<?= htmlspecialchars($data['image']['src'], ENT_QUOTES, 'UTF-8') ?>"
@@ -754,7 +752,7 @@ function validateGeneratedHtml(string $html): array {
 // Вызов локального LLM для генерации SEO-контента
 function generateMetaDescription(string $content): string {
   $payload = json_encode([
-    'model'  => 'qwen3:8b',
+    'model'  => 'CURRENT_OLLAMA_MODEL',
     'prompt' => "Напиши мета-описание до 160 символов для: {$content}",
     'stream' => false,
   ], JSON_UNESCAPED_UNICODE);
@@ -1055,16 +1053,10 @@ json_encode($data,
 // В HTML-атрибутах — ENT_QUOTES обязателен
 <input value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>">
 
-// В HTML-контенте
-```
-
- ```
-
-// В JavaScript-контексте — htmlspecialchars НЕ ПОМОЖЕТ  
+// В JavaScript-контексте — htmlspecialchars НЕ ПОМОЖЕТ
 // Нужен json_encode с JSON_HEX_TAG
 
 // Частая ошибка AI-кодеров: htmlspecialchars везде без учёта контекста
-
 ```
 
 ### mb_trim, mb_ltrim, mb_rtrim (PHP 8.4)
@@ -1298,4 +1290,4 @@ if (file_put_contents($path, $content) === false) {
 ---
 
 *Модуль 03 завершён.*  
-*Следующий: [Модуль 04 — Python*](../04-python/README.md)
+*Следующий: [Модуль 04 — Python](../04-python/README.md)*

@@ -22,7 +22,9 @@
 
 ---
 
-## Актуальный local-inference стек
+## Актуальные версии
+
+> Проверено: август 2026
 
 Локальный inference зависит от модели, backend, driver stack и quantization. Поэтому курс не пинит конкретные версии в тексте. Перед запуском проверь:
 
@@ -402,7 +404,7 @@ for model in models["data"]:
 ```bash
 # ❌ GGUF с отдельным vision projector может быть несовместим с Ollama
 # Причина: backend может не поддерживать split weights / vision projector
-ollama run qwen3.5:9b   # ошибка загрузки модели
+ollama run CURRENT_LOCAL_MODEL   # ошибка загрузки модели
 
 # ✅ Для CURRENT_LOCAL_MODEL — только llama.cpp-совместимые backends
 # LM Studio 0.4.x (llama.cpp b8xxx), llama-cpp-python, llama.cpp CLI
@@ -434,7 +436,7 @@ Ollama 0.19
 ### Modelfile — архитектура и параметры
 
 ```dockerfile
-FROM ./qwen3.5-9b-q4_k_m.gguf
+FROM ./current-local-model-q4_k_m.gguf
 
 # Chat template — переопределяет встроенный из GGUF
 TEMPLATE """<|im_start|>system

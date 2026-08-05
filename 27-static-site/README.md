@@ -20,14 +20,14 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Август 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Astro | **6.1** (stable) | Island architecture SSG/SSR |
 | Eleventy | **3.1.5** (stable) / 4.0.0-alpha | Zero-JS SSG, максимальная гибкость |
-| Next.js | **15.x** | SSG + ISR + hybrid rendering |
-| Vite | **6.x** | Build tooling под Astro |
+| Next.js | **16.x** | SSG + ISR + hybrid rendering |
+| Vite | **8.x** | Build tooling под Astro |
 | sharp | **0.34+** | Image optimization в build pipeline |
 
 > Astro 6.x: workerd dev server, Live Content Collections, auto CSP.

@@ -552,7 +552,7 @@ inset-inline: auto 1rem;  /* = left: auto; right: 1rem (LTR) */
 /* ❌ Шрифт не масштабируется при zoom → fail WCAG */
 .body { font-size: 14px; }
 
-/* ✅ rem + fluid type (из модуля 28) */
+/* ✅ rem + fluid type (clamp) */
 .body { font-size: var(--text-base); }  /* clamp(1rem, ...) */
 ```
 

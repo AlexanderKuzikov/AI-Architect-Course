@@ -61,7 +61,7 @@
 - Модуль 14 vs 15: `docx npm` vs raw XML vs PizZip (14 §7)
 - Модуль 15 vs 16: PDF.js vs PDFium WASM (16 §1)
 - Модуль 10 vs 04: VLM vs pytesseract + text LLM (10 §7, Real case)
-- Модуль 18 vs 18: BullMQ vs pg-boss (18 §1)
+- Модуль 18: BullMQ vs pg-boss (18 §1)
 
 ### Система 2: AI Agent / Assistant
 
@@ -144,7 +144,7 @@ N источников → queue → LLM batch → validation → storage
 | **Cost engineering** | Total cost of ownership AI системы | Когда cost станет узким местом |
 | **Resilience patterns** | Bulkhead, Saga, Retry storm | При переходе к multi-agent |
 | **API design (general)** | Не LLM API, а general API design | При проектировании API для внешних потребителей |
-| **Auth / IAM** | OAuth 2.1, RBAC, API keys management | Когда появится multi-tenant |
+| **RBAC / API keys management** | OAuth 2.1/PKCE раскрыт в 41, но RBAC и управление ключами — нет | Когда появится multi-tenant |
 
 ---
 

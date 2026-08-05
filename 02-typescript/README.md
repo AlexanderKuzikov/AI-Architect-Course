@@ -405,9 +405,7 @@ type UserForm = WithValidation<User>;
 ### Template Literal Types
 
 ```typescript
-```
 type EventName<T extends string> = `on${Capitalize<T>}`;
-```
 
 type DOMEvents = EventName<'click' | 'change' | 'submit'>;
 // 'onClick' | 'onChange' | 'onSubmit'
@@ -660,9 +658,7 @@ function isUser(data: unknown): data is User {
 
 ```typescript
 // ❌ Избыточно — TypeScript сам выведет тип
-```
 const users: Array<User> = new Array<User>();
-```
 const count: number = 0;
 const name: string = 'Alex';
 

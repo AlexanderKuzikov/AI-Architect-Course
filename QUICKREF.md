@@ -52,7 +52,7 @@
 | 22 Worker Threads | transferList для zero-copy; Piscina для пула |
 | 23 Rate Limiting | Token bucket vs leaky; per-user vs per-model vs global |
 | 24 Docker | Multi-stage + `USER node` + BuildKit cache mounts |
-| 25 CI/CD | `maxRetriesPerRequest: null` для BullMQ; OIDC вместо PAT |
+| 25 CI/CD | OIDC вместо PAT; quality gates в пайплайн |
 | 26 Logging | Pino + OpenTelemetry; stdout как единственный транспорт |
 
 ## Web Performance (27–40)
@@ -81,7 +81,7 @@
 | 41 MCP | Tool server ≠ API proxy; STDIO vs HTTP/SSE vs WebSocket |
 | 42 A2A | Agent Card → Task → Artifact; orchestrator vs peer vs pipeline |
 | 43 Agent Memory | Episodic vs procedural vs semantic; provenance обязателен |
-| 44 Browser Use | Playwright + VLM: click, type, extract |
+| 44 Browser Use | Адаптер/скрипт надёжнее агента; URL allowlist, капча, WAF-backoff |
 | 45 Agentic RAG | Multi-step retrieval: plan → search → verify → answer |
 | 46 AgentOps | Per-agent traces, cost, quality evals |
 | 47 AI Security | Retrieved content = untrusted; tool allowlist, не blocklist |
@@ -104,4 +104,4 @@
 
 ---
 
-*Последнее обновление: июль 2026*
+*Последнее обновление: август 2026*

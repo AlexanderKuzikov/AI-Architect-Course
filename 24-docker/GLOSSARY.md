@@ -115,7 +115,7 @@ BuildKit `--mount=type=secret,id=NAME,target=PATH`: файл с секретом
 ## T
 
 **tini**  
-Минималистичный init process (версия 0.19.0). Корректно обрабатывает SIGTERM, forwards сигналы дочерним процессам, reaps zombie-процессы. Встроен в node:*-alpine образы. Использовать как `ENTRYPOINT ["/sbin/tini", "--"]`.
+Минималистичный init process (версия 0.19.0). Корректно обрабатывает SIGTERM, forwards сигналы дочерним процессам, reaps zombie-процессы. Ставится через `apk add --no-cache tini` (в node:*-alpine по умолчанию не встроен). Использовать как `ENTRYPOINT ["/sbin/tini", "--"]`.
 
 ---
 

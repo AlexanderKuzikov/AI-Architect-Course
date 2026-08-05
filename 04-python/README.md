@@ -423,7 +423,7 @@ from typing import AsyncIterator
 
 async def stream_llm_response(
   prompt: str,
-  model: str = "qwen3:8b"
+  model: str = "CURRENT_OLLAMA_MODEL"
 ) -> AsyncIterator[str]:
   async with aiohttp.ClientSession() as session:
     async with session.post(
@@ -443,7 +443,7 @@ async def compare_models(prompt: str) -> dict:
       model: tg.create_task(
         collect_stream(stream_llm_response(prompt, model))
       )
-      for model in ["qwen3:8b", "qwen3:14b"]
+      for model in ["CURRENT_OLLAMA_MODEL", "CURRENT_OLLAMA_MODEL_LARGE"]
     }
   return {model: task.result() for model, task in tasks.items()}
 ```
@@ -625,7 +625,7 @@ import httpx  # async HTTP клиент
 
 async def call_ollama(
   prompt: str,
-  model: str = "qwen3:8b",
+  model: str = "CURRENT_OLLAMA_MODEL",
   *,
   temperature: float = 0.7,
   max_tokens: int = 2048,
@@ -660,7 +660,7 @@ class DocumentAnalysis(BaseModel):
 
 async def analyze_document(
   text: str,
-  model: str = "qwen3:14b"
+  model: str = "CURRENT_OLLAMA_MODEL_LARGE"
 ) -> DocumentAnalysis:
   schema = DocumentAnalysis.model_json_schema()
 

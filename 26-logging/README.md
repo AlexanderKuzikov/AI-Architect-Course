@@ -27,7 +27,7 @@
 | pino | **9.x** | Structured JSON logger |
 | pino-http | **10.x** | HTTP request logging middleware |
 | pino-pretty | **13.x** | Human-readable dev output |
-| @opentelemetry/sdk-node | **2.x / 0.220+** | OTel SDK для Node.js |
+| @opentelemetry/sdk-node | **2.x** | OTel SDK для Node.js |
 | @opentelemetry/auto-instrumentations-node | **0.58+** | Auto-instrument HTTP, Express, pg, Redis |
 | Grafana Loki | **3.7.0** | Log aggregation |
 

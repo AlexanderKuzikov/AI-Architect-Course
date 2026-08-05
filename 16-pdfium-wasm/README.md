@@ -751,9 +751,7 @@ class PdfWorkerPool {
     worker.postMessage(msg);
   }
 
-  ```
   async send<T>(type: string, payload: object): Promise<T> {
-  ```
     if (!this.initialized) throw new Error('Pool not initialized');
 
     const id = randomUUID();

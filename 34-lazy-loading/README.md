@@ -25,7 +25,7 @@
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Vite | **6.x** | Bundler + dev server |
+| Vite | **8.x** | Bundler + dev server |
 | Rollup | **4.x** | Bundler (Vite использует под капотом) |
 | @vitejs/plugin-react | **4.x** | React + HMR |
 | rollup-plugin-visualizer | **5.x** | Bundle analysis |
@@ -230,7 +230,7 @@ async function lazyLoadChart(container: HTMLElement) {
 
 **IntersectionObserver и display:none**: элементы с `display: none` или visibility: hidden никогда не пересекают viewport (нет intersection). `isIntersecting` всегда false. Для toggle visibility — использовать `opacity: 0` или `height: 0`.
 
-**Почему это важно архитектору:** IntersectionObserver — не полная замена нативного `loading="lazy"`. Нативный использует browser preloader (scanirует HTML до парсинга DOM). IntersectionObserver — только после DOM ready. Для `<img>` — всегда нативный атрибут.
+**Почему это важно архитектору:** IntersectionObserver — не полная замена нативного `loading="lazy"`. Нативный использует browser preloader (сканирует HTML до парсинга DOM). IntersectionObserver — только после DOM ready. Для `<img>` — всегда нативный атрибут.
 
 ---
 

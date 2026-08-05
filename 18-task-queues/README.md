@@ -314,10 +314,8 @@ const fixedBackoff = {
   backoff: { type: 'fixed', delay: 30_000 }, // 3 попытки каждые 30s
 };
 
-// Custom backoff через глобальный settings
-import { Worker, backoffStrategies } from 'bullmq';
-// backoffStrategies не экспортируется напрямую в 5.x
-// Кастомный backoff — через attemptsMade в processor
+// Custom backoff — через attemptsMade в processor
+// (backoffStrategies не экспортируется напрямую в BullMQ 5.x)
 
 async function processorWithCustomBackoff(
   job: Job

@@ -1,4 +1,4 @@
-# GLOSSARY — Caching стратегии: HTTP, Service Worker, CDN
+# GLOSSARY — HTTP / Service Worker caching
 
 Термины из модуля по алфавиту. Латиница — первой, затем кириллица.
 

@@ -213,8 +213,8 @@ cosine_sim("цена доставки", "рецепт борща") ≈ 0.12
 
 | Модель | Dims | Max tokens | RU качество | Где запускать |
 |:--|:--|:--|:--|:--|
-| text-embedding-3-small (OpenAI) | 1536 | 8191 | ✅ | Cloud |
-| text-embedding-3-large (OpenAI) | 3072 | 8191 | ✅ | Cloud |
+| Актуальная облачная embedding-модель | 1536 | 8191 | ✅ | Cloud |
+| Актуальная облачная embedding-large | 3072 | 8191 | ✅ | Cloud |
 | CURRENT_LOCAL_EMBEDDING_MODEL | зависит от модели | зависит от модели | ✅ Native | LM Studio |
 | multilingual-e5-large | 1024 | 512 | ✅ | Local |
 | nomic-embed-text | 768 | 8192 | ⚠️ EN-first | Local |
@@ -241,7 +241,7 @@ cosine_sim("цена доставки", "рецепт борща") ≈ 0.12
 
 ```sql
 -- ✅ Хранить версию embedding модели с каждым вектором
-ALTER TABLE embeddings ADD COLUMN model_version VARCHAR(64) NOT NULL DEFAULT 'text-embedding-3-small-v1';
+ALTER TABLE embeddings ADD COLUMN model_version VARCHAR(64) NOT NULL DEFAULT 'CURRENT_EMBEDDING-v1';
 -- При запросе — фильтровать только по текущей версии
 ```
 

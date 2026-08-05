@@ -111,6 +111,13 @@ build Python 3.13+.
 
 ---
 
+### H
+
+**httpx**
+Современный HTTP-клиент: sync + async API, HTTP/2, типизированные ответы. Совместим с `pytest` через `respx`/`httpx.MockTransport`. Альтернатива `requests` для новых проектов.
+
+---
+
 ### I
 
 **Iterator Protocol**
@@ -169,6 +176,16 @@ shared memory (`multiprocessing.shared_memory`).
 эти методы, считается совместимым — без явного `implements`.
 Аналог интерфейсов TypeScript.
 
+**ProcessPoolExecutor**
+Пул процессов из `concurrent.futures`: обходит GIL для CPU-bound задач. Каждый worker — отдельный процесс с собственным интерпретатором. Данные передаются через pickle — неэффективно для больших объектов.
+
+---
+
+### R
+
+**ruff**
+Линтер и форматтер на Rust (замена flake8 + black + isort). В 100-1000× быстрее flake8. Конфиг в `pyproject.toml` (`[tool.ruff]`). Дефолт для новых проектов.
+
 ---
 
 ### S
@@ -195,6 +212,9 @@ Python 3.14 (PEP 734) добавил официальный stdlib API (`interpr
 возвращает объект `Template`, который можно передать
 в кастомный форматтер. Позволяет безопасную обработку
 (SQL-инъекции, HTML-экранирование) на уровне синтаксиса.
+
+**TaskGroup**
+EOF-контекстный менеджер Python 3.11+ для управления задачами asyncio: `async with asyncio.TaskGroup() as tg: tg.create_task(...)`. Ждёт все задачи, собирает ошибки всех (в отличие от `asyncio.gather`). Заменяет ручной сбор результатов.
 
 **Type Alias**
 Псевдоним типа. С Python 3.12: `type Vector = list[float]`.

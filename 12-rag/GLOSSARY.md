@@ -187,5 +187,5 @@ RAG, учитывающий версии документов, valid_from/valid_
 
 ---
 
-*Глоссарий модуля 12. Следующий: [Модуль 13 — Fine-tuning / LoRA*](../13-fine-tuning/GLOSSARY.md)
+*Глоссарий модуля 12. Следующий: [Модуль 13 — Fine-tuning / LoRA](../13-fine-tuning/GLOSSARY.md)*
 

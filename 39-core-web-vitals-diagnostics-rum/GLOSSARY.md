@@ -1,4 +1,4 @@
-# GLOSSARY — Core Web Vitals: LCP, INP, CLS
+# GLOSSARY — Core Web Vitals: диагностика, RUM и fixes
 
 Термины из модуля по алфавиту. Латиница — первой, затем кириллица.
 

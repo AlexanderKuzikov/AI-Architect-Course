@@ -85,7 +85,7 @@ Redis структура данных: ключ → множество field-val
 Инвалидация ключей по паттерну через `SCAN` + `DEL`. Не использовать `KEYS` — блокирует Redis. Паттерн: `prefix:*`. Итеративный обход с `COUNT 100` за итерацию — не блокирует event loop Redis.
 
 **ioredis**  
-Node.js Redis клиент. Версия 5.9.3 (март 2026). Поддерживает pipeline, cluster, sentinel, pub/sub, TLS. Параметры для кэша: `maxRetriesPerRequest: 3` (для обычных команд), `commandTimeout`, `retryStrategy`.
+Node.js Redis клиент. Версия 5.11.1 (июнь 2026). Поддерживает pipeline, cluster, sentinel, pub/sub, TLS. Параметры для кэша: `maxRetriesPerRequest: 3` (для обычных команд), `commandTimeout`, `retryStrategy`.
 
 ---
 
@@ -108,7 +108,7 @@ Distributed кэш: Redis. Разделяется между всеми инст
 HTTP заголовок: дата последнего изменения ресурса. Используется в `If-Modified-Since` для conditional GET. Менее точен чем ETag (точность до секунды). Использовать для файлов где `mtime` доступен.
 
 **lru-cache**  
-npm пакет. Версия 11.2.6 (март 2026). LRU + TTL + size-based eviction. Ключевые опции: `max`, `maxSize`, `sizeCalculation`, `ttl`, `allowStale`, `fetchMethod`, `dispose`. ESM-only начиная с версии 10.x.
+npm пакет. Версия 11.5.1 (июнь 2026). LRU + TTL + size-based eviction. Ключевые опции: `max`, `maxSize`, `sizeCalculation`, `ttl`, `allowStale`, `fetchMethod`, `dispose`. ESM-only начиная с версии 10.x.
 
 **LRU (Least Recently Used)**  
 Алгоритм вытеснения: при превышении лимита удаляется запись к которой дольше всего не обращались. Эффективен для рабочих множеств (working set): часто используемые данные остаются, редкие вытесняются.
@@ -239,4 +239,4 @@ HTTP заголовок: указывает по каким заголовкам
 
 ---
 
-*Глоссарий модуля 20. Следующий: [Модуль 21 — Тестирование: unit, integration, e2e*](../21-testing/GLOSSARY.md)
+*Глоссарий модуля 20. Следующий: [Модуль 21 — Тестирование: unit, integration, e2e](../21-testing/GLOSSARY.md)*

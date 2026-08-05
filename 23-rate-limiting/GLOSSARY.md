@@ -12,6 +12,9 @@
 **burst capacity**  
 Максимальный токен/запрос накопленный в Token Bucket. Определяет разрешённый мгновенный burst: при полном bucket клиент может сделать B запросов за любое время. После исчерпания — только со скоростью пополнения R/sec.
 
+**clock drift**  
+Расхождение часов между серверами. Ломает алгоритмы, зависящие от времени: fixed window на разных нодах считает разные окна, TTL кэшей смещается. Контроль: NTP, лимиты на основе Redis-времени, а не локального.
+
 ---
 
 ## F
@@ -66,6 +69,9 @@ Namespace для Redis-ключей в rate-limiter-flexible. Формат: `rl:
 ---
 
 ## R
+
+**RateLimit-* headers**
+Стандарт `draft-ietf-httpapi-ratelimit-headers`: `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` (Unix-секунды до сброса). Отдаются при каждом ответе, не только 429. Клиент знает лимит заранее — меньше 429.
 
 **RateLimiterRes**  
 Объект, который rate-limiter-flexible бросает при превышении лимита. Поля: `remainingPoints` (0 при блокировке), `msBeforeNext` (миллисекунды до сброса), `consumedPoints` (текущее потребление). Используется для заголовков `Retry-After` и `RateLimit-Remaining`.

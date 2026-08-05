@@ -851,7 +851,7 @@ const safeFeatures = [
 шапкой, подписями и QR-кодом. Дизайн контролируется юристами — меняется
 раз в квартал.
 
-**Стек:** Node.js 24, docxtemplater 3.66, PizZip 3.x, Sharp 0.34, Qwen 3 9B
+**Стек:** Node.js 24, docxtemplater 3.66, PizZip 3.x, Sharp 0.34, актуальная локальная LLM
 через Ollama (для AI-генерации описания работ).
 
 **Гипотеза:** docxtemplater — правильный выбор: шаблон в Word, данные из
@@ -1008,7 +1008,7 @@ validation в LibreOffice.
 - [ ] Использовать docx npm для редактирования существующих документов — docx создаёт с нуля, не редактирует
 - [ ] Парсить только `w:t` без учёта tracked changes — `w:delText` даст дублированный текст
 - [ ] Не тестировать в LibreOffice — Word исправляет нарушения схемы, LibreOffice нет
-- [ ] Ставить `useSharedStrings: true` для уникальных строк — shared strings только для повторов
+- [ ] Менять `w:numPr` или `w:listPr` через строку — номерованные списки сломаются, нужен XML-патч по схеме
 - [ ] Игнорировать `xml:space="preserve"` — XML парсер обрежет значимые пробелы
 - [ ] Добавлять изображение в document.xml без обновления .rels — Word покажет broken link
 

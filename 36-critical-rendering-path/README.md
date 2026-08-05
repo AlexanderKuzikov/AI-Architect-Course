@@ -29,7 +29,7 @@
 | CSS `@property` | **Baseline 2024** | Chrome 85+, FF 128+, Safari 16.4+ |
 | Container Queries | **Baseline 2023** | Chrome 105+, FF 110+, Safari 16+ |
 | `content-visibility: auto` | **Широкая поддержка** | Chrome 85+, FF 125+, Safari 18+ |
-| `critters` (inline critical CSS) | **актуален** | Vite/Webpack plugin |
+| `beasties` (inline critical CSS) | **актуален** | наследник Critters, Vite/Webpack |
 | `penthouse` | **актуален** | CLI/Node critical CSS extractor |
 
 ---
@@ -193,16 +193,16 @@ First Contentful Paint (FCP) ✓
   → Лучше оптимизировать bundle размер целиком
 ```
 
-### Автоматическая extraction — Vite + critters
+### Автоматическая extraction — Vite + Beasties
 
 ```typescript
-// vite.config.ts
+// vite.config.ts — Beasties (наследник Critters, см. модуль 29)
 import { defineConfig } from 'vite'
-import { critters } from 'vite-plugin-critters'  // или 'critters' напрямую
+import BeastiesPlugin from 'beasties/webpack'  // или vite-интеграция Beasties
 
 export default defineConfig({
   plugins: [
-    critters({
+    BeastiesPlugin({
       // Inline critical CSS + async load остального автоматически
       strategy: 'critical',  // только above-fold
       preload: 'media',      // async pattern через media="print" trick

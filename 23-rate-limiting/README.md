@@ -63,10 +63,10 @@ Trade-offs Fixed Window:
 ```
 Текущий момент: 75s (внутри окна [60s–120s])
 
-Вес предыдущего окна [0s–60s]: (60 - 15) / 60 = 0.75
-Вес текущего окна [60s–120s]: 15/60 = 0.25 (прошло 15s)
+Прошло 15s текущего окна → вес предыдущего окна [0s–60s]: (60 - 15) / 60 = 0.75
+Текущее окно [60s–120s] учитывается целиком
 
-Счётчик: prev_count × 0.75 + curr_count
+Счётчик (аппроксимация): prev_count × 0.75 + curr_count
          8 × 0.75 + 3 = 9 → в пределах лимита
 ```
 
@@ -316,7 +316,7 @@ const unionLimiter = new RateLimiterUnion(
 await unionLimiter.consume(userId)
 ```
 
-### Graничные случаи — где ломается
+### Граничные случаи — где ломается
 
 **RateLimiterRedis без страховки**: при Redis недоступности `consume()` бросает `Error`, а не `RateLimiterRes`. Без insurance limiter — все запросы проходят (fail open) или все блокируются (необработанное исключение). Явная обработка двух типов ошибок обязательна.
 
@@ -426,7 +426,7 @@ function rateLimitHeaders(rateLimiterRes: RateLimiterRes) {
   return {
     'RateLimit-Limit': rateLimiterRes.remainingPoints + rateLimiterRes.consumedPoints,
     'RateLimit-Remaining': Math.max(0, rateLimiterRes.remainingPoints),
-    'RateLimit-Reset': new Date(Date.now() + rateLimiterRes.msBeforeNext).toISOString(),
+    'RateLimit-Reset': Math.ceil(rateLimiterRes.msBeforeNext / 1000), // Unix-секунды до сброса
     'Retry-After': Math.ceil(rateLimiterRes.msBeforeNext / 1000),
   }
 }

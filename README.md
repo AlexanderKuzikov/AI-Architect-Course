@@ -27,6 +27,11 @@ npm run build
 
 - [`docs/CONTEXT.md`](docs/CONTEXT.md) — состояние проекта
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — архитектурные решения
+- [`ARCHITECTURE_LANDSCAPE.md`](ARCHITECTURE_LANDSCAPE.md) — карта связей модулей и production-систем
+- [`TOOLS_COMPARISON.md`](TOOLS_COMPARISON.md) — «когда брать / когда не брать» по всем инструментам
+- [`QUICKREF.md`](QUICKREF.md) — однострочная шпаргалка по 47 модулям
+- [`Prompt.md`](Prompt.md) — системный промпт для работы с курсом
+- [`GLOSSARY.md`](GLOSSARY.md) — мастер-глоссарий терминов по всем модулям
 
 ## Статус
 

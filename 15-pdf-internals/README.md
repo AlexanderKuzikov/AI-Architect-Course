@@ -803,7 +803,7 @@ async function extractFormFields(
 решений в формате PDF. Источники: ГАС «Правосудие», kad.arbitr.ru,
 1С-документы. Каждый источник — свой класс PDF.
 
-**Стек:** Node.js 24, pdfjs-dist 5.6, Sharp 0.34, LM Studio + Qwen 3 9B.
+**Стек:** Node.js 24, pdfjs-dist 5.6, Sharp 0.34, LM Studio + CURRENT_LOCAL_MODEL.
 
 **Гипотеза:** text extraction + LLM будет достаточно для >90%
 документов. Только image-only PDF потребуют render → OCR.
@@ -961,7 +961,7 @@ const PDF_ROUTES: Record<string, PdfRoute> = {
 - [ ] Наличие пароля обрабатывается явно (PasswordException)
 
 ### Text extraction
-- [ ] Все `w:r/w:t` → все `str` из всех TextItem параграфа конкатенированы
+- [ ] Все `str` из всех TextItem параграфа конкатенированы, не только первый
 - [ ] Координатная система учтена: PDF Y от низа → конвертация к Y от верха
 - [ ] Многоколоночный текст — детектирован и обработан отдельно
 - [ ] Форм-данные (AcroForms) — через `getAnnotations()`, не через `getTextContent()`

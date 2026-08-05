@@ -151,4 +151,4 @@ XML файл в папке `_rels/` описывающий relationships кон�
 
 ---
 
-*Глоссарий модуля 14. Следующий: [Модуль 15 — PDF internals*](../15-pdf-internals/GLOSSARY.md)
+*Глоссарий модуля 14. Следующий: [Модуль 15 — PDF internals](../15-pdf-internals/GLOSSARY.md)*

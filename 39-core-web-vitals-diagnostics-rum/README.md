@@ -477,7 +477,7 @@ element.animate([
 ### web-vitals npm — полный setup
 
 ```typescript
-// npm install web-vitals@4
+// npm install web-vitals@5
 import { onLCP, onINP, onCLS, onFCP, onTTFB } from 'web-vitals/attribution'
 
 type Metric = {
@@ -656,7 +656,7 @@ function checkVitals(lcpValues: number[], inpValues: number[], clsValues: number
 
 **Хорошая формулировка:**
 > «Добавить RUM мониторинг Core Web Vitals:
-> 1. `npm install web-vitals@4`.
+> 1. `npm install web-vitals@5`.
 > 2. В `src/analytics/vitals.ts`: импортировать `onLCP, onINP, onCLS, onFCP, onTTFB` из `web-vitals/attribution`.
 > 3. Каждый callback: отправлять через `navigator.sendBeacon('/api/vitals', JSON.stringify({ metric, value, rating, attribution, url }))`.
 > 4. В `src/main.ts`: вызвать все пять функций после DOMContentLoaded.
@@ -684,7 +684,7 @@ function checkVitals(lcpValues: number[], inpValues: number[], clsValues: number
 
 **Измерение**
 - [ ] Google Search Console → CWV report подключён
-- [ ] web-vitals@4 с attribution установлен, отправляет в RUM
+- [ ] web-vitals@5 с attribution установлен, отправляет в RUM
 - [ ] Алерт при деградации 75-й перцентили
 
 **LCP**

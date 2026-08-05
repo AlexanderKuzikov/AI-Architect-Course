@@ -94,6 +94,69 @@
 | **Piscina** | Пул однотипных CPU-bound задач | Долгоживущий поток с постоянным обменом (raw Worker) | 22 |
 | **Worker Threads (raw)** | Двусторонний канал, сложный протокол | Простые задачи (Piscina проще) | 22 |
 
+## MCP (41)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **MCP SDK (`@modelcontextprotocol/sdk`)** | 10+ инструментов, несколько клиентов, нужен contract | Один клиент, один инструмент (прямой SDK) | 41 |
+| **MCP STDIO** | Локальный desktop-агент, dev | Remote multi-user server | 41 |
+| **MCP HTTP/SSE** | Production tool server, multi-user | Локальный агент (STDIO проще) | 41 |
+| **Playwright MCP** | Browser как MCP tool server | Скрипт без агента | 41, 44 |
+| **OAuth 2.1 + PKCE** | Remote MCP, user-scoped permissions | Локальный STDIO без пользователей | 41 |
+
+## A2A / Multi-Agent (42)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **A2A SDK (`a2a-js`)** | Агент вызывает агентов, нужен контракт | Один агент, прямая интеграция | 42 |
+| **Orchestrator + specialists** | Сложный доменный pipeline, accountability | Простые линейные задачи | 42 |
+| **Конкурентный ансамбль** | Юридические/финансовые решения, верификация | Задачи с однозначным ответом | 42 |
+| **SSE streaming** | Realtime-агенты, низкая latency | Долгие batch-задачи (poll достаточен) | 42 |
+
+## Agent Memory (43)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **Vector store + metadata** | Semantic memory, FAQ | Нужны связи и multi-hop | 43 |
+| **Neo4j / Graphiti** | Knowledge graph, multi-hop, explainability | Простая память без связей | 43 |
+| **Graph + vector hybrid** | Entities + семантика, production | Прототип | 43 |
+
+## Browser Use (44)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **Playwright** | Browser automation, cross-browser, trace | Только Chrome (Puppeteer) | 44 |
+| **Browser-use agent** | Нет API, legacy, нестандартные страницы | Есть API (script/API надёжнее) | 44 |
+| **Playwright script** | Стабильный UI, известные селекторы | Нестабильный UI (агент) | 44 |
+| **Computer Use / CUA** | Desktop-приложения без API | Есть браузер (browser-use надёжнее) | 44 |
+
+## Agentic / Graph RAG (45)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **Standard RAG** | FAQ, «что в документах?» | Multi-hop, противоречия | 45 |
+| **Agentic RAG** | Юридические/финансовые, верификация | Простые запросы (дорого) | 45 |
+| **Graph RAG** | Entity-heavy KB, multi-hop | Нет связей между фактами | 45 |
+| **Temporal RAG** | Контракты, политики, версии законов | Нет версионности | 45 |
+
+## AgentOps (46)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **OpenTelemetry** | Traces + metrics, vendor-agnostic, `gen_ai.*` | Dev-only прототип | 46 |
+| **Langfuse** | Traces, evals, playground | Нужен только сбор (OTel) | 46 |
+| **Promptfoo** | Evals, YAML config, CI gates | Python pytest-пайплайн (DeepEval) | 09, 46 |
+| **DeepEval** | pytest-compatible evals, Python | TypeScript stack | 09, 46 |
+
+## AI Security (47)
+
+| Инструмент | Когда брать | Когда не брать | Модуль |
+|-----------|-------------|----------------|--------|
+| **Tool allowlist** | Всегда | — | 47 |
+| **OPA / Rego** | Policy-as-code, audit trail | Прототип (конфиг достаточно) | 47 |
+| **Trivy** | Dependencies, secrets, SBOM | — | 24, 47 |
+| **Guardrails-библиотеки** | Injection detection, output validation | Не взамен sandbox/approvals | 47 |
+
 ---
 
 ## Легенда

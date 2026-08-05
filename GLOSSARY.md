@@ -18,6 +18,9 @@
 **Action Schema** ([Модуль 44](../44-browser-use-computer-use/README.md))
 Typed contract допустимых действий браузера: goto, fill, click, wait, extract, screenshot. Нужен для validation и policy enforcement.
 
+**Agent Card** ([Модуль 42](../42-a2a-protocol/README.md))
+JSON-документ агента для discovery: name, description, url, version, capabilities, authentication. Является контрактом SLA для делегирования.
+
 **Agent Loop** ([Модуль 06](../06-prompt-engineering/README.md))
 Архитектурный паттерн: LLM в цикле — генерирует действие → получает результат → генерирует следующее действие. Цикл продолжается до цели или лимита шагов. Базовая форма: `while not done: action = llm(history); result = execute(action); history.append(result)`. На слабых моделях ломается бесконечными петлями — нужен hard limit шагов и fallback.
 
@@ -258,6 +261,9 @@ Astro механизм для типизированного контента: `
 
 **Context (context.Context)** ([Модуль 05](../05-go/README.md))
 Стандартный механизм для распространения: дедлайнов, таймаутов, сигналов отмены и пользовательских значений через дерево вызовов. `context.WithCancel`, `context.WithTimeout`, `context.WithDeadline`. Первый аргумент каждой I/O функции в Go.
+
+**Computer Use Agent** ([Модуль 44](../44-browser-use-computer-use/README.md))
+Агент, управляющий экраном/мышью/клавиатурой ОС (screenshot → VLM → coordinate action). Применяется для desktop-приложений без API. Наименее надёжный слой автоматизации — требует human-in-the-loop.
 
 **Context Assembly** ([Модуль 12](../12-rag/README.md))
 Этап RAG-pipeline: формирование финального промпта из retrieved чанков. Включает отбор по token budget, переупорядочивание (lost in the middle mitigation), форматирование с метками источников.
@@ -552,6 +558,9 @@ HTML атрибут (`high`/`low`/`auto`): подсказка браузеру �
 **Graph RAG** ([Модуль 12](../12-rag/README.md), [Модуль 45](../45-agentic-rag-graph-rag/README.md))
 RAG, использующий knowledge graph: entities, relations, communities, paths. Полезен для multi-hop вопросов и объяснимости.
 
+**Graph Retriever** ([Модуль 45](../45-agentic-rag-graph-rag/README.md))
+Retriever, работающий по рёбрам графа: multi-hop пути, связи сущностей, community summaries. Компонент agentic RAG и hybrid retrieval.
+
 **Grounding** ([Модуль 06](../06-prompt-engineering/README.md), [Модуль 10](../10-prompt-engineering-vlm/README.md))
 Привязка ответа модели к конкретным источникам: документам, БД, API. Снижает hallucination за счёт того, что модель отвечает на основе переданного контекста, а не параметрических знаний. RAG — основная архитектурная реализация grounding.
 
@@ -773,6 +782,12 @@ Vite/Rollup конфиг: явное управление разбивкой bun
 
 **matrix strategy** ([Модуль 25](../25-cicd/README.md))
 Параметризованный запуск одного job с разными значениями. `matrix: { node: [20, 22, 24] }` создаёт 3 параллельных job. Поддерживает несколько измерений: OS × Node версия.
+
+**MCP Client** ([Модуль 41](../41-mcp-tool-server-architecture/README.md))
+Компонент host, который подключается к MCP server'ам и вызывает tools/resources/prompts (list_tools, call_tool, read_resource).
+
+**MCP Host** ([Модуль 41](../41-mcp-tool-server-architecture/README.md))
+Runtime, управляющий агентом, UI, permissions, approvals и подключёнными MCP clients.
 
 **MCP Server** ([Модуль 41](../41-mcp-tool-server-architecture/README.md))
 Сервис, предоставляющий tools/resources/prompts через Model Context Protocol. Хороший MCP server является security boundary, а не просто proxy к API.
@@ -1114,6 +1129,9 @@ Pino механизм маскирования чувствительных да
 **Reranker** ([Модуль 12](../12-rag/README.md))
 Модель постобработки retrieved чанков: переупорядочивает top-k результатов по точной релевантности. Cross-encoder реранкер точнее embedding similarity, но требует N дополнительных inference вызовов.
 
+**Resource (MCP)** ([Модуль 41](../41-mcp-tool-server-architecture/README.md))
+Именованный источник данных в MCP: документ, тикет, CRM-запись или virtual URI (dms://documents/12345). Не обязан быть файлом.
+
 **Resource (OTel)** ([Модуль 26](../26-logging/README.md))
 Набор атрибутов, описывающих источник telemetry данных: `service.name`, `service.version`, `deployment.environment`. Прикрепляется ко всем spans и metrics от процесса.
 
@@ -1355,6 +1373,9 @@ React компонент: показывает fallback UI пока lazy ком�
 **Tagged PDF** ([Модуль 15](../15-pdf-internals/README.md))
 PDF с логической структурной разметкой: иерархия тегов (Document, Sect, P, H1–H6, Table, TR, TD и др.). Требование PDF/UA. Позволяет извлекать документ как структурированные данные, не просто поток текстовых позиций.
 
+**Task Store** ([Модуль 42](../42-a2a-protocol/README.md))
+Durable хранилище задач multi-agent: create, updateStatus, get, listBySession, markCanceled. Обеспечивает восстановление после рестарта и idempotency.
+
 **TBT (Total Blocking Time)** ([Модуль 28](../28-core-web-vitals-intro/README.md), [Модуль 39](../39-core-web-vitals-diagnostics-rum/README.md))
 Lab метрика: сумма blocking time всех long tasks между FCP и Time to Interactive. Proxy для INP в lab условиях. TBT хороший при плохом INP = event handlers тяжёлые (не load-time проблема).
 
@@ -1396,6 +1417,9 @@ RAG, учитывающий версии документов, valid_from/valid_
 
 **Token Healing** ([Модуль 07](../07-json-schema/README.md))
 Техника коррекции токенизации на стыке prefix и генерируемого суффикса. При constrained decoding граница между prompt и generated частью может попасть в середину мультисимвольного токена — token healing откатывает последний токен prefix и перегенерирует его как часть constrained последовательности. Реализован в llama.cpp; важен при генерации кода и строго форматированных данных.
+
+**Tool (MCP)** ([Модуль 41](../41-mcp-tool-server-architecture/README.md))
+Действие, которое агент может вызвать через MCP. Должно иметь schema, validation, timeout, audit log, idempotency для write и ограниченный результат.
 
 **Tool Abuse** ([Модуль 47](../47-ai-security-agents/README.md))
 Сценарий, где agent вызывает разрешённый инструмент не по назначению или под влиянием вредного input.

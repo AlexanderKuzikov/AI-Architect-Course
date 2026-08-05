@@ -491,7 +491,7 @@ async function processAndStoreImage(
 }
 ```
 
-### Graничные случаи — где ломается
+### Граничные случаи — где ломается
 
 **`imagesrcset` на `<link rel="preload">`**: атрибут именно `imagesrcset` (не `srcset`) и `imagesizes` (не `sizes`). Без них браузер preload-ит только `href` — фиксированный размер без учёта viewport.
 

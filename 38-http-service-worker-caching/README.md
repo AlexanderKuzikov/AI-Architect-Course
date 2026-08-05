@@ -452,8 +452,8 @@ const bgSyncPlugin = new BackgroundSyncPlugin('mutations-queue', {
 })
 
 registerRoute(
-  ({ url }) => url.pathname.startsWith('/api/') &&
-    ['POST', 'PUT'].includes(/* request.method */  ''),  // в реальности через request
+  ({ url, request }) => url.pathname.startsWith('/api/') &&
+    (request.method === 'POST' || request.method === 'PUT'),
   new NetworkOnly({ plugins: [bgSyncPlugin] })
 )
 ```

@@ -29,7 +29,7 @@ import openai, json, sys
 
 def extract(text: str) -> dict:
     resp = openai.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o-mini",  # исторический пример: модель 2024 года
         messages=[{"role": "user",
           "content": f"Извлеки реквизиты: {text}"}],
     )
@@ -210,6 +210,83 @@ jobs:
 
 ---
 
+## Итерация 3: Multi-agent («нужна оркестрация, память, security»)
+
+### Задача
+2000 документов/день + юридический анализ. Заказчик хочет: «агент сам проверит договор и подготовит тикет юристу». Нужны: оркестрация, память о клиентах, observability, security.
+
+### Что изменилось
+
+```mermaid
+flowchart LR
+    A["Договор"] --> B["Orchestrator<br/>(A2A)"]
+    B --> C["Extraction Agent<br/>(MCP DMS + VLM)"]
+    B --> D["Risk Agent<br/>(конкурентный ансамбль)"]
+    B --> E["Summary Agent"]
+    B --> F["Memory<br/>(клиент, договоры)"]
+    C --> G["Ticket Agent<br/>(idempotency)"]
+    D --> G
+    G --> H["AgentOps<br/>(traces, evals, cost)"]
+    H --> I["Security Layer<br/>(allowlist, audit, SSRF)"]
+```
+
+### Ключевые решения
+
+**1. MCP как boundary инструментов** (Модуль 41)
+```typescript
+// DMS, OCR, Policy, Tickets — отдельные MCP servers
+// documents:read без approval, tickets:create с idempotencyKey
+// documents:write — только после human approval
+```
+
+**2. A2A-оркестрация** (Модуль 42)
+```text
+contract:DOC-789 → extraction (12s) → risk (8s, ансамбль) → summary (6s)
+→ ticket LEGAL-1042 (idempotencyKey, без дублей)
+Всё логируется с correlationId, blame по pipeline восстановим
+```
+
+**3. Agent Memory** (Модуль 43)
+```text
+(Company:ООО Ромашка) -[HAS_CONTRACT]-> (Contract:DOC-789)
+Каждый факт — с provenance и tenantId. GDPR-delete работает.
+```
+
+**4. AgentOps** (Модуль 46)
+```yaml
+quality-gate:
+  - run: agentops-gate --results results.json --baseline baseline.json
+        --max-regression 0.03 --min-score 0.80
+```
+
+**5. Security** (Модуль 47)
+```text
+Retrieved documents = untrusted
+Tool allowlist: only documents:read, policy:read, tickets:create
+URL allowlist на всех fetch (SSRF-фикс из реального инцидента)
+Immutable audit trail каждого tool call
+```
+
+### Итоговые метрики
+
+| Метрика | Итерация 2 | Итерация 3 |
+|---------|-----------|-----------|
+| Критичные пропущенные риски | — | −33% (ансамбль) |
+| Дубликаты тикетов | периодически | 0 (idempotency) |
+| Время ручной проверки юриста | 15 мин/договор | 5 мин/договор |
+| Инциденты безопасности | SSRF найден в проде | закрыт allowlist |
+
+### Задействованные модули (дополнительно)
+- **41** — MCP (tool boundary, idempotency, kill switch)
+- **42** — A2A (orchestrator + specialists, конкурентный ансамбль)
+- **43** — Agent Memory (graph, provenance, GDPR)
+- **44** — Browser Use (только для legacy-систем без API)
+- **45** — Agentic RAG (verifier, temporal, abstain)
+- **46** — AgentOps (traces, golden dataset, cost)
+- **47** — AI Security (threat model, allowlist, SSRF, audit)
+
+---
+
 ## Вывод
 
 Каждая итерация решает проблемы предыдущей и открывает новые.
@@ -220,7 +297,8 @@ jobs:
 Итерация 0:  простота       → «не работает на production данных»
 Итерация 1:  надёжность     → «дорого и медленно»
 Итерация 2:  эффективность  → «нужен evaluator чтобы не потерять качество»
-Следующая:   multi-agent    → «нужна оркестрация, память, security»
+Итерация 3:  multi-agent    → «нужна security, память и observability»
+Следующая:   самообучение   → «нужны контур обратной связи и fine-tuning»
 ```
 
 Каждый шаг — осознанный trade-off, а не компромисс.

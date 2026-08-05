@@ -1367,7 +1367,7 @@ for _, item := range items {
 ## 12. Чеклист архитектора
 
 ### Конфигурация проекта
-- [ ] `go 1.24` и `toolchain go1.24.x` в `go.mod`
+- [ ] `go 1.26` и `toolchain go1.26.x` в `go.mod`
 - [ ] Tool dependencies через `tool` директиву (не `tools.go`)
 - [ ] `GOMEMLIMIT` установлен для контейнерных деплоев
 - [ ] `-race` в CI тестах

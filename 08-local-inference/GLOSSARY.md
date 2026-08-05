@@ -153,7 +153,7 @@ Ollama не поддерживает split weights с отдельным mmproj 
 
 ```
 
-FROM llama3.2
+FROM current-local-model
 SYSTEM "Ты экстрактор данных. Возвращаешь только JSON."
 PARAMETER temperature 0.1
 PARAMETER num_ctx 8192

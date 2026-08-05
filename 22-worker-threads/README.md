@@ -86,7 +86,7 @@ import { Worker } from 'worker_threads'
 const worker = new Worker('./worker.js', {
   workerData: {
     dbUrl: process.env.DATABASE_URL,   // ✅ конфигурация
-    modelPath: '/models/qwen3.5-4b',   // ✅ пути
+    modelPath: '/models/current-local-model',   // ✅ пути
     // ❌ нельзя: функции, классы с методами, Promises, WeakMap
   }
 })
@@ -496,7 +496,7 @@ app.post('/process', async (req, res) => {
 - [ ] Тяжёлые ресурсы (модели, соединения) инициализированы на уровне модуля, не в функции-обработчике
 - [ ] ESM filename через `new URL('./worker.js', import.meta.url)`
 
-**Memoria и безопасность**
+**Память и безопасность**
 - [ ] `UV_THREADPOOL_SIZE` задан если воркеры используют native addons (Sharp, bcrypt)
 - [ ] `Atomics.wait()` присутствует только в воркерах, не в main thread
 - [ ] Переполнение `maxQueue` обрабатывается с backpressure, не retry

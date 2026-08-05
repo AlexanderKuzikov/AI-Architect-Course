@@ -484,7 +484,7 @@ JUDGE_FEW_SHOT = """
 
 ### DeepEval — pytest-style evaluation
 
-DeepEval 3.7.9 — наиболее полный фреймворк для Python.  
+DeepEval 3.9.2 — наиболее полный фреймворк для Python.  
 50+ метрик, интеграция с pytest, поддержка мультимодальных кейсов:
 
 ```python
@@ -564,7 +564,7 @@ class LocalLMStudioJudge(DeepEvalBaseLLM):
     def get_model_name(self) -> str:
         return self.model_name
 
-local_judge = LocalLMStudioJudge("lmstudio-community/Llama-3.2-8B-GGUF")
+local_judge = LocalLMStudioJudge("CURRENT_LOCAL_JUDGE_MODEL")
 
 # Использовать локальную модель как судью
 metric = GEval(
@@ -687,7 +687,7 @@ deepeval.confident_ai_configs.request_timeout = 120  # секунд
 from langchain_openai import ChatOpenAI
 
 local_langchain_llm = ChatOpenAI(
-    model="qwen3.5-9b",
+    model="CURRENT_LOCAL_MODEL",
     base_url="http://localhost:1234/v1",
     api_key="lm-studio",
     temperature=0.0,
@@ -1011,7 +1011,7 @@ judge_response = client.chat.completions.create(
 
 ```
 ❌ Антипаттерн:
-   500 тест-кейсов × GPT-4o как судья = $15 за прогон
+   500 тест-кейсов × сильная облачная модель как судья = $15 за прогон
    20 PR в день = $300/день
    Команда начинает пропускать evaluation "чтобы не тратить"
 
@@ -1030,7 +1030,7 @@ judge_response = client.chat.completions.create(
 - [ ] Одна метрика для принятия решений — success_rate 99.8% скрывает semantic_rate 94.2%
 - [ ] LLM-as-Judge без калибровки против human labels — spearman_r < 0.7 = ненадёжно
 - [ ] Судья с `temperature > 0` — variance ±0.2 на одном кейсе, gate нестабилен
-- [ ] Игнорировать стоимость evaluation — 500 кейсов × GPT-4o = $15/прогон, забросят через неделю
+- [ ] Игнорировать стоимость evaluation — 500 кейсов × сильная облачная модель = $15/прогон, забросят через неделю
 - [ ] Baseline без даты и версии модели — через месяц непонятно с чем сравнивать
 
 ## Задачи AI-кодеру
@@ -1060,7 +1060,7 @@ judge_response = client.chat.completions.create(
 
 Хорошая формулировка:
 
-> «Напиши класс `LMStudioJudge(DeepEvalBaseLLM)` для DeepEval 3.7.9,  
+> «Напиши класс `LMStudioJudge(DeepEvalBaseLLM)` для DeepEval 3.9.2,  
 > использующий OpenAI-compatible API на localhost:1234.  
 > Реализуй методы `load_model`, `generate`, `a_generate`, `get_model_name`.  
 > В `generate` и `a_generate`: temperature=0.0, max_tokens=1024, timeout=120 сек.  
@@ -1122,4 +1122,4 @@ judge_response = client.chat.completions.create(
 ---
 
 *Модуль 09 завершён.*  
-*Следующий: [Модуль 10 — Prompt Engineering (VLM)*](../10-prompt-engineering-vlm/README.md)
+*Следующий: [Модуль 10 — Prompt Engineering (VLM)](../10-prompt-engineering-vlm/README.md)*

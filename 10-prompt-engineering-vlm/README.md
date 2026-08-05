@@ -22,7 +22,9 @@
 
 ---
 
-## Актуальный VLM-стек и модельная свежесть
+## Актуальные версии
+
+> Проверено: август 2026
 
 VLM-модели, vision encoder, projector, context length и reasoning режимы меняются быстрее, чем успевают обновляться учебные таблицы. Поэтому в этом модуле нет статичного leaderboard. Перед использованием нужно проверить:
 
@@ -198,7 +200,7 @@ CURRENT_VLM_MODEL принимает произвольные разрешени
 from transformers import AutoProcessor
 
 # ❌ Дефолт — нативное разрешение без ограничений
-processor = AutoProcessor.from_pretrained("os.environ.get("CURRENT_VLM_MODEL", "current-vlm")")
+processor = AutoProcessor.from_pretrained(os.environ.get("CURRENT_VLM_MODEL", "current-vlm"))
 # A4 скан 2480×3508 → (2480/32) × (3508/32) ≈ 77 × 109 = 8393 visual tokens
 # При n_ctx=8192 — не помещается вместе с текстом
 
@@ -207,7 +209,7 @@ min_pixels = 256 * 32 * 32    # 256 tokens минимум
 max_pixels = 1280 * 32 * 32   # 1280 tokens максимум
 
 processor = AutoProcessor.from_pretrained(
-    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
+    os.environ.get("CURRENT_VLM_MODEL", "current-vlm"),
     min_pixels=min_pixels,
     max_pixels=max_pixels,
 )
@@ -255,7 +257,7 @@ print(calculate_visual_tokens(800, 600))    # Scan low  → ~468 tokens
 ```python
 # Стратегия 1: Высокое разрешение — для мелкого шрифта
 high_res_processor = AutoProcessor.from_pretrained(
-    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
+    os.environ.get("CURRENT_VLM_MODEL", "current-vlm"),
     min_pixels=1024 * 32 * 32,
     max_pixels=4096 * 32 * 32,   # до 4096 tokens
 )
@@ -454,12 +456,12 @@ class DocumentRecord(BaseModel):
     confidence: dict[str, str] = {}  # поле → "high"/"medium"/"low"
 
 model = AutoModelForCausalLM.from_pretrained(
-    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
+    os.environ.get("CURRENT_VLM_MODEL", "current-vlm"),
     torch_dtype=torch.float16,
     device_map="cuda",
 )
 processor = AutoProcessor.from_pretrained(
-    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
+    os.environ.get("CURRENT_VLM_MODEL", "current-vlm"),
     min_pixels=512 * 32 * 32,
     max_pixels=2048 * 32 * 32,
 )
@@ -875,7 +877,7 @@ extraction, 4B для medium сложности. Все с Reasoning и Vision. 
 ```python
 # CLOUD_VLM_MODEL vision через GGUF — не работает
 # Vision поддерживается только через vLLM
-# ❌ Попытка запустить K2.5 через llama.cpp с mmproj
+# ❌ Попытка запустить облачную VLM через llama.cpp с mmproj
 # → vision недоступен, только text inference
 
 # ✅ CLOUD_VLM_MODEL vision — только vLLM production setup:
@@ -950,12 +952,12 @@ CURRENT_VLM_MODEL + pre-processing pipeline:
 
 ```python
 # ❌ processor без max_pixels на production данных
-processor = AutoProcessor.from_pretrained("os.environ.get("CURRENT_VLM_MODEL", "current-vlm")")
+processor = AutoProcessor.from_pretrained(os.environ.get("CURRENT_VLM_MODEL", "current-vlm"))
 # A4 300dpi → OOM или деградация из-за превышения n_ctx
 
 # ✅
 processor = AutoProcessor.from_pretrained(
-    "os.environ.get("CURRENT_VLM_MODEL", "current-vlm")",
+    os.environ.get("CURRENT_VLM_MODEL", "current-vlm"),
     max_pixels=1280 * 32 * 32,
 )
 ```
@@ -1001,7 +1003,7 @@ def preprocess(path: str) -> Image.Image:
 **5. CLOUD_VLM_MODEL через GGUF для vision задач**
 
 ```python
-# ❌ Ожидать vision через llama.cpp / LM Studio для K2.5
+# ❌ Ожидать vision через llama.cpp / LM Studio для CLOUD_VLM_MODEL
 # Vision support в GGUF зависит от модели/backend; для некоторых VLM нужен отдельный projector или vLLM
 
 # ✅ CLOUD_VLM_MODEL vision — только vLLM с полной моделью

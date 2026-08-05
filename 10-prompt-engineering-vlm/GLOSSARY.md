@@ -28,6 +28,10 @@ Batch из изображений разного размера → KV-cache = m
 
 ## C
 
+**CLOUD_VLM_MODEL**
+Текущая cloud VLM/reasoning model, выбранная после проверки evals/backend/license.
+Vision support зависит от backend: GGUF/llama.cpp может не поддерживать projector, vLLM может требовать отдельной конфигурации.
+
 **Confidence Anchoring**
 Техника VLM промптинга: запрос у модели оценки читаемости каждого поля
 (`"high"/"medium"/"low"`).
@@ -49,6 +53,12 @@ Batch из изображений разного размера → KV-cache = m
 Параметр OpenAI-compatible API для VLM: `"low"` / `"high"` / `"auto"`.
 `"high"` ≈ max_pixels высокого разрешения — для OCR и сложных документов.
 `"low"` ≈ экономный режим — для pre-screening и классификации.
+
+**Document Intelligence**
+Комплексный pipeline из OCR, layout detection, VLM, parsers и structured output для извлечения данных из документов, таблиц и форм.
+
+**Document Parser**
+Компонент, который преобразует DOCX/XLSX/PDF в markdown/html/table representation перед VLM или LLM extraction.
 
 **Dynamic Resolution**
 Механика VLM принимающей изображения произвольного разрешения без фиксированного resize.
@@ -93,12 +103,6 @@ Batch из изображений разного размера → KV-cache = m
 Линейный — для длинных последовательностей, стандартный — для задач требующих точного matching.
 Позволяет одновременно обрабатывать длинный контекст и сложные визуальные паттерны.
 
-## K
-
-**CLOUD_VLM_MODEL**
-Текущая cloud VLM/reasoning model, выбранная после проверки evals/backend/license.
-Vision support зависит от backend: GGUF/llama.cpp может не поддерживать projector, vLLM может требовать отдельной конфигурации.
-
 ## L
 
 **Late Fusion**
@@ -126,10 +130,6 @@ Padding цвет для документов: белый (255, 255, 255).
 Позиционные эмбеддинги с тремя осями: 1D для текста, 2D для изображений, 3D для видео.
 Даёт модели реальную информацию о пространственном расположении патчей.
 Основа для spatial anchoring в промптах: «верхний правый угол» — не метафора.
-
-**Vision encoder**
-Модуль CLOUD_VLM_MODEL/CURRENT_VLM_MODEL, преобразующий image/video в visual tokens.
-Архитектура и patch size зависят от модели; в production их нужно проверять по выбранной VLM.
 
 ## P
 
@@ -177,6 +177,10 @@ Stage 2 — extraction (высокое разрешение, только най
 
 ## V
 
+**Vision encoder**
+Модуль CLOUD_VLM_MODEL/CURRENT_VLM_MODEL, преобразующий image/video в visual tokens.
+Архитектура и patch size зависят от модели; в production их нужно проверять по выбранной VLM.
+
 **Visual Token**
 Единица представления изображения в LLM контексте.
 Один патч изображения → один visual token после проекции через MLP.
@@ -192,8 +196,6 @@ Stage 2 — extraction (высокое разрешение, только най
 Специфичен для мультимодальных моделей — в text-only LLM отсутствует.
 Митигация: явный запрет в system prompt с инструкцией использовать `[?]` для неразличимых символов.
 
-## W
-
 **VRAM Budget (VLM)**
 Расчёт: `свободный VRAM = total - веса модели - overhead`.
 KV-cache одного VLM запроса (1280 visual + 300 text tokens) ≈ 0.25 Гб на GTX 1660.
@@ -201,11 +203,5 @@ KV-cache одного VLM запроса (1280 visual + 300 text tokens) ≈ 0.2
 
 ---
 
-## D
-
-**Document Intelligence**  
-Комплексный pipeline из OCR, layout detection, VLM, parsers и structured output для извлечения данных из документов, таблиц и форм.
-
-**Document Parser**  
-Компонент, который преобразует DOCX/XLSX/PDF в markdown/html/table representation перед VLM или LLM extraction.
+*Глоссарий модуля 10. Следующий: [Модуль 11 — Multi-model Orchestration](../11-multi-model-orchestration/GLOSSARY.md)*
 
