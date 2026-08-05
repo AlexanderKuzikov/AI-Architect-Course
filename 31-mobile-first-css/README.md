@@ -667,6 +667,8 @@ Mobile-first cascade (базовый layout под мобильный, `min-widt
 > 5. Для изображения: `aspect-ratio: 1; object-fit: cover; inline-size: 100%`.
 > Не использовать media queries для этого компонента — только container queries.»
 
+Формула: container-based (container-type + @container) + базовый layout до CQ + границы правок (только container queries).
+
 ---
 
 **Плохая формулировка:**
@@ -678,6 +680,8 @@ Mobile-first cascade (базовый layout под мобильный, `min-widt
 > 2. Добавить fallback выше: `min-height: 100vh; min-height: 100svh`.
 > 3. Для `.hero-content` добавить `padding-block: var(--space-8)` чтобы контент не упирался в UI браузера.
 > Проверить в Chrome DevTools с симуляцией iPhone 14 Pro (393×852, Safari style).»
+
+Формула: логические свойства + svh/dvh + clamp-типографика + реальная проверка на mobile viewport.
 
 ---
 
