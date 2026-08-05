@@ -19,6 +19,9 @@
 ║       │                                                        ║
 ║       ▼                                                        ║
 ║  Desktop/Data ──► SQL/Схемы ──► Cost Engineering              ║
+║       │                                                        ║
+║       ▼                                                        ║
+║  API Design ──► Resilience Patterns                           ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
@@ -37,6 +40,8 @@
 48     Desktop           │  Go + WebView, desktop-приложения, поставка клиенту
 49     Data              │  SQL, проектирование схем, индексы, миграции
 50     Cost              │  Cost engineering, каскады, бюджеты, fallback
+51     API Design        │  Контракты, версии, пагинация, ошибки, идемпотентность
+52     Resilience        │  Retry storm, Bulkhead, Saga, CB, Fallback
 ```
 
 ---
@@ -145,7 +150,7 @@ N источников → queue → LLM batch → validation → storage
 | **Security** | 47 (AI Security), 06 §7 (Prompt Injection) | 24 §4 (Docker hardening), 19 §10 (Supply chain), 01 §5 (Permission Model) |
 | **Cost** | 11 §4 (Cascade economics), 08 §1 (VRAM budget), 09 §6 (CI cost) | 20 (Caching), 19 §7 (Connection pooling) |
 | **Observability** | 26 (Logging), 09 (Evaluator) | 18 §9 (Queue metrics), 19 §9 (HTTP metrics), 20 §9 (Cache metrics) |
-| **Resilience** | 19 §6 (Circuit breaker), 19 §5 (Retry), 18 §4 (DLQ) | 23 (Rate Limiting), 18 §8 (Graceful shutdown) |
+| **Resilience** | 52 (Retry storm, Bulkhead, Saga), 19 §6 (Circuit breaker), 19 §5 (Retry) | 23 (Rate Limiting), 18 §4 (DLQ), 18 §8 (Graceful shutdown) |
 | **Testing** | 21 (Testing) | 09 (Eval dataset), 19 §2 (undici MockAgent), 05 §6 (Go table tests) |
 | **Performance** | 36 (Critical Rendering Path), 37 (JS Perf), 08 §7 (TTF/TPS) | 04 §2 (GIL), 22 (Worker Threads), 20 (Caching) |
 
@@ -159,11 +164,9 @@ N источников → queue → LLM batch → validation → storage
 |--------|-------------|----------------|
 | **Frontend architecture** | AI-продукт = не только API | При появлении UI-ориентированных проектов |
 | **Domain-Driven Design** | Event storming, bounded context для AI pipeline | При усложнении agent systems |
-| **Resilience patterns** | Bulkhead, Saga, Retry storm | При переходе к multi-agent |
-| **API design (general)** | Не LLM API, а general API design | При проектировании API для внешних потребителей |
 | **RBAC / API keys management** | OAuth 2.1/PKCE раскрыт в 41, но RBAC и управление ключами — нет | Когда появится multi-tenant |
 
-> Закрыто в 2026-08: SQL/схемы (49), Cost engineering (50), Desktop (48).
+> Закрыто в 2026-08: SQL/схемы (49), Cost engineering (50), Desktop (48), API design (51), Resilience patterns (52).
 
 ---
 
@@ -261,6 +264,15 @@ graph TD
         G6[46 AgentOps] --> H3
         H2 --> H3
         H2 -.-> G5
+    end
+
+    subgraph "API / Resilience"
+        I1[51 API Design]
+        I2[52 Resilience Patterns]
+        H2 --> I1
+        I1 --> I2
+        E2 --> I2
+        E1[18 Task Queues] --> I2
     end
 
     C1 -.-> E1

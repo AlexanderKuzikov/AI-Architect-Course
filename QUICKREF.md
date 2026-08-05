@@ -1,6 +1,6 @@
 # Quick Reference — шпаргалка по курсу
 
-> 50 модулей. Одна строка на ключевой концепт.
+> 52 модуля. Одна строка на ключевой концепт.
 
 ---
 
@@ -93,6 +93,13 @@
 | 48 Go+WebView | Bind только функции; loopback-сервер не SetHtml; `-H windowsgui`; без `-s -w` в release |
 | 49 SQL | Схема по семантике (TEXT номера, NUMERIC деньги); индекс по EXPLAIN; миграции append-only |
 | 50 Cost | Cascade по pass rate; cost per task KPI; fallback помечать; кэш embeddings |
+
+## API / Resilience (51–52)
+
+| Модуль | Ключевая концепция |
+|--------|-------------------|
+| 51 API Design | Контракт на годы: версия в URL, cursor для выгрузок, идемпотентность, `request_id`, 1С-форматы |
+| 52 Resilience | Retry с jitter вне CB; bulkhead по ресурсам; общий rate limit; saga с идемпотентными шагами |
 
 ## Cross-cutting
 

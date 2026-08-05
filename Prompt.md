@@ -15,7 +15,7 @@
 **Вспомогательные файлы (ознакомиться перед работой с модулем):**
 - [`ARCHITECTURE_LANDSCAPE.md`](ARCHITECTURE_LANDSCAPE.md) — карта связей между модулями и production-системами
 - [`TOOLS_COMPARISON.md`](TOOLS_COMPARISON.md) — таблицы «когда брать / когда не брать» по всем инструментам
-- [`QUICKREF.md`](QUICKREF.md) — однострочная шпаргалка по 50 модулям
+- [`QUICKREF.md`](QUICKREF.md) — однострочная шпаргалка по 52 модулям
 - [`ADR_TEMPLATE.md`](ADR_TEMPLATE.md) — шаблон архитектурных решений
 
 ---

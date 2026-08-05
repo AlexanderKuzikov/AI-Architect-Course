@@ -50,6 +50,8 @@ const MODULES = {
   48: { dir: '48-go-webview-desktop',       name: 'Desktop: Go + WebView' },
   49: { dir: '49-sql-database-design',      name: 'SQL / Database Schema Design' },
   50: { dir: '50-cost-engineering',         name: 'Cost Engineering для AI' },
+  51: { dir: '51-api-design',                name: 'API Design для интеграций' },
+  52: { dir: '52-resilience-patterns',       name: 'Resilience Patterns' },
 };
 
 function moduleLink(n) {

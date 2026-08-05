@@ -6,7 +6,7 @@
 
 ## Conventions
 - Multi-language курс (JS/TS/PHP/Python/Go)
-- 50 модулей: от основ до RAG, MCP, A2A, agent memory, desktop, cost
+- 52 модуля: от основ до RAG, MCP, A2A, agent memory, desktop, cost, API design, resilience
 - Node.js scripts для сборки HTML
 
 ## Structure

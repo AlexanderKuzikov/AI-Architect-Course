@@ -411,6 +411,53 @@ export default async function process(task: Task): Promise<Result> {
 
 ---
 
+## 6. Реальный кейс: PDF-рендер в Worker pool
+
+### Контекст
+
+PDFtoText — обработка PDF (судебные решения, договоры, сканы 1С): рендер страниц через PDFium WASM, ~500 PDF/день, до 300 страниц в документе. Рендер страницы A4 @ 200dpi — CPU-bound, на выходе RGBA bitmap ~8 МБ.
+
+### Задача
+
+Не блокировать event loop: Express-сервис параллельно отдаёт HTTP-ответы, health-check должен отвечать всегда. Рендер в main thread блокировал event loop на 100–500ms на страницу.
+
+### Гипотеза
+
+Worker pool (Piscina): 2 воркера на core — 4 для Ryzen 5. Bitmap передавать через `transferList` (zero-copy). PDFiumLibrary — singleton в каждом воркере (инициализация WASM 500ms–1s только при старте воркера).
+
+### Что получилось
+
+```typescript
+// Реальный конфиг: 4 воркера, очередь ограничена
+const pool = new Piscina({
+  filename: new URL('./workers/render.worker.js', import.meta.url),
+  maxThreads: 4,
+  maxQueue: 50,              // ❌ 'auto' в production — burst → OOM
+  resourceLimits: { maxOldGenerationSizeMb: 256 },
+});
+
+// Zero-copy: 8 МБ bitmap передаётся без копирования
+worker.postMessage({ type: 'render', data: bitmap }, [bitmap.buffer]);
+```
+
+- Рендер страницы ~26ms, event loop свободен, health-check отвечает;
+- **Краш воркера абсорбируется пулом**: WASM-ошибка памяти (`memory access out of bounds`) убивает воркер, Piscina создаёт новый — один битый PDF не роняет сервис;
+- Время восстановления воркера = повторная инициализация PDFium (~500ms), поэтому рендер тяжёлых PDF шёл через воркеры со «свежей» инициализацией — приемлемо.
+
+### Грабли, найденные в production
+
+1. **Без `transferList`** — каждое postMessage копировало 8 МБ: рендер работал, но GC-давление и 2× памяти на страницу. Zero-copy — не микрооптимизация, а требование к объёмам.
+2. **`maxQueue: 'auto'`** — burst из 100 запросов накопил очередь до OOM процесса. `maxQueue: 50` + backpressure (503 при переполнении) — обязательно.
+3. **Инициализация PDFium на каждую задачу** — холодный старт 500ms–1s на каждый рендер, пул превратился в последовательную обработку. Модель/библиотека — на уровне модуля воркера, не в функции-обработчике.
+
+### Вывод, противоречащий интуиции
+
+Worker pool для PDF-рендера дал не «ускорение» (рендер в воркере не быстрее сам по себе), а **изоляцию**: краши и тяжёлые задачи перестали влиять на остальной сервис. Главная ценность пула — абсорбция отказов и стабильный event loop, а не throughput.
+
+**Практический вывод для архитектора:** CPU-bound задачи в воркер — не для скорости, а для стабильности. Пул с ограниченной очередью, zero-copy transfer и ресурсы на уровне воркера — три обязательных решения; любое из них, пропущенное «для простоты», ломается первым же burst-ом.
+
+---
+
 ## Антипаттерны
 
 **1. Worker Threads для I/O-bound задач**
@@ -465,6 +512,8 @@ app.post('/process', async (req, res) => {
 > В main — экспортировать синглтон `imagePool`. При `queue is full` — бросать `ServiceUnavailableError`.
 > UV_THREADPOOL_SIZE выставить в README к модулю.»
 
+Формула: конкретный пул (Piscina 5.1.4) + конфиг (maxThreads/maxQueue/resourceLimits) + workerWrapper + backpressure + синглтон.
+
 ---
 
 **Плохая формулировка:**
@@ -475,6 +524,8 @@ app.post('/process', async (req, res) => {
 > В воркере инкрементировать через `Atomics.add`, не через прямое присваивание.
 > В main thread читать через `Atomics.load`. `Atomics.wait()` не использовать — только в воркерах.
 > Передавать буфер через `workerData` при создании Piscina пула.»
+
+Формула: конкретный буфер (Int32Array × 2) + Atomics-операции (add/load) + границы применения (только воркеры) + передача через workerData.
 
 ---
 

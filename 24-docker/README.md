@@ -476,6 +476,52 @@ volumes:
 
 ---
 
+## 6. Реальный кейс: 680 MB → 82 MB за счёт WASM
+
+### Контекст
+
+PDF-рендер-сервис (обработка судебных PDF, PDFtoText): рендер страниц в bitmap для VLM-пайплайна. Первая версия — PDF.js + canvas.
+
+### Задача
+
+Рендер-сервис в Docker: первая версия собиралась с `apt-get install libcairo2-dev` — системная библиотека для canvas. Образ раздулся до 680 MB, сборка CI замедлилась, каждый слой с apt-пакетами — отдельная точка отказа.
+
+### Гипотеза
+
+PDFium WASM (чистый Node.js, без native deps) уберёт системные пакеты: образ станет маленьким, а заодно уйдёт проблема «собери libcairo в Alpine».
+
+### Что получилось
+
+| Метрика | PDF.js + canvas | PDFium WASM |
+|---------|----------------|-------------|
+| Docker образ | 680 MB + libcairo2-dev | **82 MB** (WASM) |
+| Системные пакеты | apt-get install | нет |
+| Сборка в CI | apt-слой кэшируется плохо | только npm ci |
+
+```
+# Финальный Dockerfile (реальный)
+FROM node:24-alpine AS runner
+USER node                          # не root
+COPY --chown=node:node dist/ dist/
+COPY --chown=node:node node_modules/ node_modules/
+ENTRYPOINT ["tini", "--"]          # PID 1: сигналы работают
+CMD ["node", "dist/server.js"]
+```
+
+### Грабли, найденные в production
+
+1. **`ENTRYPOINT ["node", ...]` без tini**: контейнер с Node как PID 1 не обрабатывает SIGTERM — `docker stop` убивает через SIGKILL после таймаута, graceful shutdown не работает. tini как ENTRYPOINT — обязателен, а не «для красоты».
+2. **Холодный старт WASM**: PDFiumLibrary инициализируется 500ms–1s — в контейнере это значит медленный старт при каждом рестарте/масштабировании. Модель инициализируется один раз при старте процесса, а не по запросу.
+3. **82 MB ≠ быстро**: сжатие образа не компенсирует ~10 МБ WASM-бинаря при каждой загрузке слоя в CI/CD — docker-слой кэшируется, но при cold pull выигрыш всё равно в 8× против 680 MB.
+
+### Вывод, противоречащий интуиции
+
+Проблема была не в Docker, а в выборе библиотеки: **архитектура определила образ**. Переход на WASM сократил образ на 88% без единой строчки Dockerfile-оптимизаций. Docker-навыки (multi-stage, cache mounts) дали бы 20–30%; выбор инструмента — 88%.
+
+**Практический вывод для архитектора:** размер образа — производная от выбора зависимостей: native deps → apt-слои и multi-stage-хореография; WASM/чистый JS → маленький образ и простой Dockerfile. При проектировании сервиса закладывай «каким будет образ» ещё на этапе выбора библиотек.
+
+---
+
 ## Антипаттерны
 
 **1. Один большой RUN с &&**
@@ -535,6 +581,8 @@ RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci
 > COPY с --chown=node:node. Expose 3000. CMD exec форма.
 > .dockerignore: node_modules, .git, .env*, coverage/, **/*.test.ts.»
 
+Формула: multi-stage (deps/builder/runner) + BuildKit cache + user/права (USER node, chown) + tini + .dockerignore.
+
 ---
 
 **Плохая формулировка:**
@@ -547,6 +595,8 @@ RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci
 > Compose watch для ./src (action: sync) и package.json (action: rebuild).
 > Переменные окружения через env_file: .env.local.
 > Без volume bind mount для node_modules.»
+
+Формула: compose-сервисы (app/postgres/redis) + healthcheck + depends_on с condition + develop.watch + env_file.
 
 ---
 
