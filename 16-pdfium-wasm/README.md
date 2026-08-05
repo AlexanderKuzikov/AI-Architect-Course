@@ -990,7 +990,7 @@ sharp(opts.data, {
 качество рендеринга для VLM pipeline.
 
 **Стек:** Node.js 24, @hyzyla/pdfium 2.1, Sharp 0.34, Docker,
-LM Studio с CURRENT_VLM_MODEL.
+локальная VLM (LM Studio).
 
 **Гипотеза:** PDFium будет стабильнее и быстрее PDF.js на
 1С-сгенерированных PDF с Type1 шрифтами и битым ToUnicode.
