@@ -1008,6 +1008,45 @@ async function batchEnqueueWithBackpressure(
 
 **Практический вывод для архитектора:** `waitUntilFinished` — удобный Request-reply, но держит HTTP соединение открытым на время обработки. Для документов с обработкой >5s — лучше webhook/polling паттерн: сразу вернуть `jobId`, клиент поллит `/status/:jobId`.
 
+### Инкрементальный cron-сбор (SerpWatcher-паттерн)
+
+Периодический сбор данных (SEO-позиции, курсы, статусы) — не «всегда обрабатывать всё», а **инкрементально: пропускать уже обработанное сегодня**.
+
+```typescript
+// Паттерн: cron-задача + инкрементальная фильтрация + идемпотентность
+class IncrementalCollector {
+  constructor(private store: { checkedToday: (id: string) => boolean }) {}
+
+  async collect(queryIds: string[]): Promise<{ enqueued: number; skipped: number }> {
+    let enqueued = 0, skipped = 0;
+    for (const id of queryIds) {
+      if (this.store.checkedToday(id)) { skipped++; continue; }  // ✅ пропуск
+      await collectQueue.add('collect', { queryId: id, date: today() }, {
+        jobId: `collect:${id}:${today()}`,  // ✅ идемпотентность через jobId
+      });
+      enqueued++;
+    }
+    return { enqueued, skipped };
+  }
+}
+```
+
+Ключевые решения:
+
+```text
+1. jobId = f(id, date) → повторный enqueue не создаёт дубль (BullMQ dedup)
+2. Пропуск «проверенных сегодня» → ночной батч не трогает свежие данные
+3. JSONL append как хранилище результатов → at-least-once, аудит
+4. Снапшоты (JSON) для текущего состояния + история (JSONL) отдельно
+```
+
+Когда этот паттерн вместо «просто очередь»:
+- данные периодические и повторные сборы не нужны (SEO, мониторинг цен);
+- история append-only (аудит, графики);
+- важно «сколько пропущено» как метрика работы коллектора.
+
+**Почему это важно архитектору:** инкрементальный сбор — это идемпотентность на уровне планировщика, а не только на уровне задачи. Он экономит API-квоты (каждый повторный вызов платит) и делает cron предсказуемым.
+
 ---
 
 ## 11. Реальный кейс

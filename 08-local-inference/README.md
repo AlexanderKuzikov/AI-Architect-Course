@@ -894,6 +894,27 @@ hard → cloud/fallback model
 
 Главное правило: SLM/edge не должен «угадывать» критичные факты. Его зона — routing, classification, pre-screening, validation и простые extraction-задачи с deterministic fallback.
 
+### Российский рынок: RouterAI как cloud-fallback
+
+Для локального пайплайна на российском рынке облачный fallback — это не обязательно OpenAI/Anthropic. RouterAI (routerai.ru) — российский роутер LLM API:
+
+| Свойство | Значение |
+|:--|:--|
+| Оплата | рубли, по карте РФ |
+| Совместимость | OpenAI-compatible (`/api/v1/chat/completions`) |
+| Модели | qwen/qwen3.7-flash и др. (VLM, контекст 1M) |
+| PDF direct | приём PDF как `type:"file"` base64, без растрирования |
+| Reasoning | `reasoning.effort`: none/minimal/low/medium/high/max |
+| Цена | ~3,11₽/1M вход, 13₽/1M выход (qwen3.7-flash) |
+
+Паттерн: локальный VLM/OCR решает простые случаи (70–80%), RouterAI — сложные (сканы низкого качества, нестандартные документы). Ключ хранится локально (профиль), в бинарник не зашивается без необходимости.
+
+Грабли RouterAI (проверено эмпирически, см. knowledge/routerai-api.md):
+- `error` в ответе — строка, не объект: парсить оба варианта;
+- сломанный PDF → HTTP 200 с маркером `<file status="error">` в контенте — детектить регуляркой;
+- `</think>`-обрывки в content у VLM даже при effort=none — чистить `strings.ReplaceAll(content, "</think>", "")`;
+- поведение параметров может различаться между провайдерами (умная маршрутизация по цене).
+
 ---
 
 ## 9. Реальный кейс

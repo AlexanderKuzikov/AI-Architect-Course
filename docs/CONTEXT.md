@@ -34,6 +34,7 @@
 | 2026-08-05 | GLOSSARY дополнены: 02, 03 (PHP 8.4/8.5), 04, 05, 10 (алфавит), 23 |
 | 2026-08-05 | Кросс-модульные фиксы: useSharedStrings (14), w:r/w:t (15), backoffStrategies (18), tini (24), RateLimit-Reset (23), Beasties (29/36), web-vitals@5 (39), Next 16/Vite 8 (27/34), порядок разделов 01, нумерация 21, конфликты версий |
 | 2026-08-05 | Модуль 11: заглушка статистики заменена реальными данными cascade filter (из EVOLUTION.md) |
+| 2026-08-05 | Обогащения практикой: RouterAI в 08 (cloud-fallback для РФ, из knowledge/routerai-api.md) и 19 (провайдеры AI API, грабли RouterAI); инкрементальный cron-сбор (SerpWatcher) в 18 |
 | 2026-07-30 | Аудит документации, создание docs/ |
 
 ## Структура проекта
