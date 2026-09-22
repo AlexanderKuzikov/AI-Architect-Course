@@ -31,7 +31,7 @@
 | OpenAPI | 3.1 | контракт REST API (JSON Schema 2020-12) |
 | RFC 9457 | Problem Details | стандарт тела ошибок (заменил RFC 7807) |
 | Go | 1.26 | серверная часть CourtDesk API |
-| PostgreSQL | 17.x | хранение (схема из модуля 49) |
+| PostgreSQL | 18.x | хранение (схема из модуля 49) |
 | 1С:Предприятие | 8.3.x | потребитель API (HTTP-сервисы, JSON) |
 | JSON | RFC 8259 | формат обмена |
 

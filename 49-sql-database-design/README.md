@@ -24,7 +24,7 @@
 
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
-| PostgreSQL | 17.x | production-БД, полный набор |
+| PostgreSQL | 18.x (практика на 18.6) | production-БД, полный набор |
 | SQLite | 3.5x | встроенная, файловая |
 | pgvector | 0.8.x | векторный поиск в Postgres |
 | Flyway / golang-migrate | mature | миграции |

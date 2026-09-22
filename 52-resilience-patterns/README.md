@@ -31,8 +31,8 @@
 | Node.js | 24.x LTS | встроенные: `AbortSignal.timeout()`, `fetch` |
 | Go | 1.26 | `context.WithTimeout`, `net/http` timeouts |
 | opossum | 8.x | circuit breaker (Node.js) |
-| Redis | 7.x | общий rate-limit/идемпотентность-кэш |
-| PostgreSQL | 17.x | очередь на `pg-boss` (модуль 18) |
+| Redis | 8.x | общий rate-limit/идемпотентность-кэш |
+| PostgreSQL | 18.x | очередь на `pg-boss` (модуль 18) |
 
 ---
 

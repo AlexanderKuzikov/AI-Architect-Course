@@ -28,7 +28,7 @@
 | pgvector | 0.8.2 | март 2026 |
 | Qdrant | 1.17.0 | март 2026 |
 | LM Studio | 0.4.8 | март 2026 |
-| PostgreSQL | 17.x | март 2026 |
+| PostgreSQL | 18.x | март 2026 |
 
 ---
 

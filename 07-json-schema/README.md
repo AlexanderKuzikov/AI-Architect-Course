@@ -39,7 +39,7 @@
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Pydantic | 2.x | Схемы и валидация, Python |
-| zod | 3.x | Схемы и валидация, TypeScript/Node.js |
+| zod | 4.x (stable; практика на 4.4.3) | Схемы и валидация, TypeScript/Node.js; v3 — legacy, миграция по гайду |
 | jsonschema | 4.x | Валидация JSON Schema, Python |
 | Outlines | 0.1.x | Constrained generation поверх HuggingFace / llama.cpp |
 | llama.cpp | b4xxx | Grammar sampling (GBNF) |

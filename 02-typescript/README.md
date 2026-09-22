@@ -21,15 +21,16 @@
 
 ---
 
-## Актуальные версии (апрель 2026)
+## Актуальные версии (сентябрь 2026)
 
 | Версия | Дата | Ключевые изменения |
 |--------|------|-------------------|
 | TypeScript 5.8 | Февраль 2025 | `--erasableSyntaxOnly`, `require()` ESM в `--module nodenext` |
 | TypeScript 5.9 | Июль 2025 | `import defer`, `strictInference` в `strict`, stable Decorator Metadata |
-| **TypeScript 6.0.3** | **Апрель 2026** | **npm latest; перед миграцией проверять changelog и breaking changes** |
+| TypeScript 6.0.3 | Апрель 2026 | Предыдущий стабильный; мост для тулинга (`@typescript/typescript6`, `tsc6`) |
+| **TypeScript 7.0.2** | **Июль 2026** | **npm latest; нативный Go-порт, 8–12x на полных сборках; programmatic API для тулинга — только с 7.1** |
 
-Актуальная версия для нового проекта: **TypeScript 6.0.3**
+Актуальная версия для нового проекта: **TypeScript 7.0.2** (компилятор), тулинг — через TS 6 рядом до поддержки 7.1
 
 ---
 

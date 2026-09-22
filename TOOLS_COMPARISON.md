@@ -8,7 +8,7 @@
 
 | Инструмент | Когда брать | Когда не брать | Модуль |
 |-----------|-------------|----------------|--------|
-| **BullMQ** | >1K задач/с, нужен DAG (FlowProducer), Redis уже в стеке | Нет Redis, нужен exactly-once | 18 |
+| **BullMQ** | >1K задач/с, нужен DAG (FlowProducer), Redis уже в стеке; v6: repeat→Job Schedulers, ioredis ставится явно | Нет Redis, нужен exactly-once | 18 |
 | **pg-boss** | Есть Postgres, финансовые гарантии, exactly-once | >5K задач/с, нужен DAG | 18 |
 | **In-process queue** (p-queue) | <100 задач, один процесс, простые сценарии | >100 задач, multi-process, нужна persistence | 18 |
 
@@ -186,6 +186,7 @@
 | **SQLite** | Локальный инструмент, один процесс | Concurrent writes, multi-user | 49 |
 | **JSONL + append** | Инкрементальная история, аудит без БД | Нужны запросы по нескольким полям | 49, 18 |
 | **pgvector** | Векторный поиск + реляционные связи в одном | Только семантика (отдельный vector store) | 49, 12 |
+| **Drizzle** | Близко к SQL, нативные JSONB и триграммы, читаемые миграции | Нужна «магия» ActiveRecord (тогда другой ORM) | 49 |
 | **golang-migrate / Flyway** | Миграции, versioned schema | Нет схемы | 49 |
 
 ## Cost Engineering (50)
