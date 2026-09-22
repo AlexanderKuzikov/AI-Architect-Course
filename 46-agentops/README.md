@@ -25,7 +25,7 @@
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
 | OpenTelemetry | 1.x | tracing standard (gen_ai.* conventions) |
-| OpenTelemetry LLM Conventions | proposta stabile | semantic conventions для LLM |
+| OpenTelemetry LLM Conventions | stable | semantic conventions для LLM |
 | Langfuse | active | traces, evals, playground |
 | LangTrace | active | OTel-native LLM tracing |
 | Promptfoo | 0.12x | evals и CI gates |
