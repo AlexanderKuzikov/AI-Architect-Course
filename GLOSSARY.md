@@ -1449,7 +1449,7 @@ Durable хранилище задач multi-agent: create, updateStatus, get, li
 Lab метрика: сумма blocking time всех long tasks между FCP и Time to Interactive. Proxy для INP в lab условиях. TBT хороший при плохом INP = event handlers тяжёлые (не load-time проблема).
 
 **TCP slow start** ([Модуль 29](../29-critical-css/README.md))
-Механизм TCP: новое соединение начинает с ≈14KB данных в первом round-trip, постепенно увеличивая. Если HTML + critical CSS умещается в 14KB — приходят в одном round-trip без ожидания. Обоснование для лимита critical CSS.
+Механизм TCP: соединение стартует с начального congestion window ≈14KB (10 сегментов × ~1460 байт) и растёт от RTT к RTT. Если HTML + critical CSS умещаются в эти 14KB — приходят в одном round-trip без ожидания. Обоснование для лимита critical CSS.
 
 **Temperature** ([Модуль 06](../06-prompt-engineering/README.md))
 Скалярный множитель логитов перед softmax. `0` — всегда наиболее вероятный токен. `1` — вероятности без изменений. `temperature=0` не гарантирует полный детерминизм при параллельном GPU-инференсе из-за нестабильности floating point операций.

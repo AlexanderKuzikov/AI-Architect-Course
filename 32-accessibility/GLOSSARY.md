@@ -19,7 +19,7 @@ ARIA атрибут: связывает элемент с его меткой ч
 ARIA атрибут: объявляет регион как «живой» — изменения содержимого объявляются screen reader автоматически. `polite` — при свободном screen reader; `assertive` — немедленно, прерывая текущее.
 
 **axe-core**  
-Open-source движок автоматической проверки accessibility от Deque. Основа Lighthouse accessibility audit, Chrome DevTools, @axe-core/playwright. Выявляет ~30-40% реальных нарушений.
+Open-source движок автоматической проверки accessibility от Deque. Основа Lighthouse accessibility audit, Chrome DevTools, @axe-core/playwright. Выявляет меньше трети реальных нарушений.
 
 ---
 

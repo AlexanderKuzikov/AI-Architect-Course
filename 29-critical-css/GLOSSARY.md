@@ -84,7 +84,7 @@ Beasties опция: при `true` — удалять inlined стили из о
 ## T
 
 **TCP slow start**  
-Механизм TCP: новое соединение начинает с ~14KB данных в первом round-trip, постепенно увеличивая. Если HTML + critical CSS умещается в 14KB — приходят в одном round-trip без ожидания. Обоснование для лимита critical CSS.
+Механизм TCP: соединение стартует с начального congestion window ≈14KB (10 сегментов × ~1460 байт) и растёт от RTT к RTT. Если HTML + critical CSS умещаются в эти 14KB — приходят в одном round-trip без ожидания. Обоснование для лимита critical CSS.
 
 ---
 

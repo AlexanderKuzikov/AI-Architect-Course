@@ -183,7 +183,7 @@ First Contentful Paint (FCP) ✓
 ### Critical CSS — размер
 
 ```
-Цель: < 14KB (один TCP congestion window)
+Цель: < 14KB gzip (начальный TCP congestion window ≈ 10 сегментов по 1460 байт)
 Рекомендация: < 8KB gzipped
 Максимум: < 20KB (выше — теряем ROI inlining)
 

@@ -657,7 +657,7 @@ CrUX работает на уровне URL. Плохой INP на /checkout и�
 
 **Измерение**
 - [ ] `web-vitals` library установлена, метрики отправляются в analytics
-- [ ] Lighthouse CI с budget gates в pipeline (LCP < 2500ms, TBT < 300ms)
+- [ ] Lighthouse CI с budget gates в pipeline (LCP < 2500ms, TBT < 200ms)
 - [ ] CrUX данные проверяются (Search Console → Core Web Vitals report)
 - [ ] Мобильные пользователи измеряются отдельно от desktop
 

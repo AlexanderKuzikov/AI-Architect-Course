@@ -122,13 +122,13 @@ Above-the-fold = viewport пользователя
 ### Размер critical CSS
 
 ```
-Цель: < 14KB (gzip) — помещается в первый TCP window
-Хорошо: < 10KB gzip
+Цель: < 14KB (gzip) — помещается в начальный TCP congestion window
+Хорошо: < 8KB gzip
 Плохо: > 20KB — inline теряет смысл, лучше preload быстрый CSS файл
 
 14KB — не случайное число:
-  TCP slow start: первый round-trip передаёт ~14KB
-  Всё что fits = приходит вместе с HTML, без дополнительных round-trips
+  Начальный TCP congestion window ≈ 14KB (10 сегментов × ~1460 байт MSS)
+  Всё что влезло в первый RTT = приходит вместе с HTML, без дополнительных round-trips
 ```
 
 ---
