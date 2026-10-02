@@ -1,2 +1,5 @@
 scripts/node_modules/
 course.html
+index.html
+.playwright-mcp/
+shot-*.png

@@ -33,7 +33,7 @@ CSS дескриптор: показывает fallback шрифт сразу, �
 ## I
 
 **INP (Interaction to Next Paint)**  
-Core Web Vital с марта 2024 (заменил FID): время от user interaction до следующего paint. Порог «хорошо»: ≤ 200ms. Измеряет worst-case interaction за сессию (75-я перцентиль). Три компонента: input delay + processing time + presentation delay.
+Core Web Vital с марта 2024 (заменил FID): время от user interaction до следующего paint. Порог «хорошо»: ≤ 200ms. Берёт 98-ю перцентиль всех взаимодействий за сессию (то есть почти худшее). 75-я перцентиль — это уже правило агрегации CrUX по пользователям, а не самой метрики. Три компонента: input delay + processing time + presentation delay.
 
 **input delay**  
 Компонент INP: время от user action до начала обработки event handler. Причина: main thread занят long task в момент взаимодействия. Fix: `scheduler.postTask` с правильными приоритетами, defer third-party scripts.
@@ -90,7 +90,7 @@ Lab метрика: сумма blocking time всех long tasks между FCP 
 ## W
 
 **web-vitals**  
-npm библиотека (версия 4.x): измерение CWV в браузере. Импорт из `web-vitals/attribution` даёт диагностические данные (LCP element URL, INP interaction target + LoAF entries, CLS shift target).
+npm библиотека (версия 5.x): измерение CWV в браузере. Импорт из `web-vitals/attribution` даёт диагностические данные (LCP element URL, INP interaction target + LoAF entries, CLS shift target).
 
 ---
 

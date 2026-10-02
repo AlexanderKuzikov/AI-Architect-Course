@@ -178,7 +178,7 @@ async function classifyPdf(buffer: ArrayBuffer): Promise<PdfClass> {
 }
 ```
 
-**Практический вывод для архитектора:** Класс PDF определяет pipeline. `native-text` → text extraction. `image-only` → render → VLM/OCR. `hybrid` → либо доверять existing text layer (быстро, риск ошибок), либо render → OCR (медленно, надёжно). Выбор зависит от источника документа и требований к точности.
+**Практический вывод для архитектора:** Класс PDF определяет pipeline. `native-text` → text extraction. `image-only` → render → VLM/OCR. `hybrid` → либо доверять готовому текстовому слою (быстро, риск ошибок), либо render → OCR (медленно, надёжно). Выбор зависит от источника документа и требований к точности.
 
 ---
 
@@ -270,7 +270,7 @@ async function diagnoseEncoding(buffer: ArrayBuffer): Promise<void> {
 ❌ Ненадёжные источники: 1С Print, старые госсистемы, сканы
 ```
 
-**Практический вывод для архитектора:** Для российского документооборота — всегда проверяй класс PDF и наличие ToUnicode проблем перед text extraction. Render → VLM надёжнее для 1С-generated PDF чем попытка распарсить побитый text layer.
+**Практический вывод для архитектора:** Для российского документооборота — всегда проверяй класс PDF и наличие ToUnicode проблем перед text extraction. Render → VLM надёжнее для PDF, сгенерированных 1С, чем попытка распарсить побитый текстовый слой.
 
 ---
 

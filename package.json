@@ -3,6 +3,8 @@
   "private": true,
   "description": "AI Architect Course — build tooling",
   "scripts": {
-    "build": "cd scripts && npm install --silent && node glossary-links.mjs && node build-html.mjs"
+    "build": "cd scripts && npm install --silent && node glossary-links.mjs && node build-html.mjs",
+    "audit": "cd scripts && node audit.mjs",
+    "check": "cd scripts && node glossary-links.mjs && node build-html.mjs && node audit.mjs"
   }
 }

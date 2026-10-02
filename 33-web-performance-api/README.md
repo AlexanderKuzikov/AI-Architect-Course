@@ -530,7 +530,7 @@ Long Animation Frames (LoAF) через PerformanceObserver дают то, че�
 ### Что получилось
 
 ```typescript
-// RUM: LoAF collector (модуль 33 §5)
+// RUM: LoAF collector (см. §5 этого модуля)
 const observer = new PerformanceObserver((list) => {
   for (const entry of list.getEntries() as PerformanceLongAnimationFrameTiming[]) {
     if (entry.duration < 200) continue   // интересуют только тяжёлые блоки

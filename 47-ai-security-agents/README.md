@@ -242,7 +242,7 @@ Blast radius: зависит от layer 2 (tool permissions) и layer 3 (approva
 | Retrieved documents = untrusted | Indirect injection через RAG |
 | No secrets in prompt | Prompt leaking через модель |
 | Tool allowlist, не blocklist | Allowlist нельзя обойти |
-| Scoped short-lived tokens | Комpromised agent = ограниченный ущерб |
+| Scoped short-lived tokens | Compromised agent = ограниченный ущерб |
 | Logs без raw secrets | Логи = новый attack surface |
 | Human approval для write | Destructive action требует человека |
 | Immutable audit trail | Расследование инцидентов |
@@ -272,7 +272,7 @@ Blast radius: зависит от layer 2 (tool permissions) и layer 3 (approva
 
 ### Вывод, противоречащий интуиции
 
-Prompt injection — громкая, но не самая частasilna угроза. Реальные пробы — это классические веб-уязвимости (SSRF, IDOR, path traversal) в инструментах, которые агент вызывает. Агент не создаёт новые уязвимости — он **масштабирует те, что уже есть**, потому что автоматизирует их вызов тысячами.
+Prompt injection — громкая, но не самая частая угроза. Реальные пробы — это классические веб-уязвимости (SSRF, IDOR, path traversal) в инструментах, которые агент вызывает. Агент не создаёт новые уязвимости — он **масштабирует те, что уже есть**, потому что автоматизирует их вызов тысячами.
 
 ### Дополнение из практики: шифрование ПДн и гигиена секретов (сентябрь 2026)
 

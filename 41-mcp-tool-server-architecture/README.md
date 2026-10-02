@@ -305,7 +305,7 @@ POST /call_tool { tool: "create_ticket", args: {...}, idempotencyKey: "run-42" }
 
 **Размер результата**: tool вернул 2MB JSON → context window агента забит, cost вырос, качество упало. Каждый tool обязан иметь budget на output.
 
-**Почему это важно архитектору:** из пяти пунктов production checklist ровно три (timeout, idempotency, schema validation) всплывают только при первом инциденте. Их дешевле спроектировать заранее, чем чинить после «дубль тикетов в проде».
+**Почему это важно архитектору:** из 5 пунктов production checklist ровно 3 (timeout, idempotency, schema validation) всплывают только при первом инциденте. Их дешевле спроектировать заранее, чем чинить после «дубль тикетов в проде».
 
 ---
 

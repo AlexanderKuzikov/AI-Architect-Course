@@ -30,7 +30,7 @@ VLM-модели, vision encoder, projector, context length и reasoning реж�
 
 - LMArena / Vision Arena / независимые evals — качество на похожих задачах;
 - Hugging Face / Ollama / LM Studio — доступность модели, projector, tokenizer и license;
-- backend support — GGUF/VLM, chat template, dynamic resolution, grounding;
+- backend support — локальные VLM (формат GGUF), chat template, dynamic resolution, grounding;
 - hardware envelope — VRAM/RAM, n_ctx, visual tokens, batch size;
 - cost/latency — cloud vs local vs hybrid.
 
@@ -797,7 +797,7 @@ messages = [
  GTX 1660 6 Гб           RTX 3090/4090 24 Гб        Multi-GPU / Cloud
       │                         │                          │
  CURRENT_VLM_MODEL Q4             CLOUD_VLM_MODEL mid           CLOUD_VLM_MODEL large
- LM Studio 0.4.8           LM Studio / vLLM          vLLM / NVIDIA NIM
+ LM Studio 0.4.8           LM Studio / vLLM          vLLM / NVIDIA NIM (NVIDIA-сервер для моделей)
  ~4-6 img/min              ~15-20 img/min            ~50+ img/min
  n_ctx до 16K              n_ctx до 32K              n_ctx до 262K
 
@@ -870,7 +870,7 @@ async def batch_extract(
 **Практический вывод для архитектора:** CURRENT_EDGE_SLM/2B/4B — не «слабые версии».
 Это отдельные инструменты: 0.8B для routing и classification, 2B для простых
 extraction, 4B для medium сложности. Все с Reasoning и Vision. Routing по
-сложности снижает median latency в 2–3× при том же качестве на сложных кейсах.
+сложности снижает медианную задержку в 2–3× при том же качестве на сложных кейсах.
 
 ### Граничные случаи — где ломается
 
@@ -937,7 +937,7 @@ CURRENT_VLM_MODEL + pre-processing pipeline:
 **Итоговая архитектура — hybrid routing:**
 
 - Pre-processing: auto\_rotate → contrast enhancement → letterbox resize
-- Routing: SSIM quality score
+- Routing: оценка качества по SSIM (сходство изображений по структуре, 0..1)
     - высокое качество → pytesseract + text LLM (~8 docs/min)
     - низкое качество → CURRENT_VLM_MODEL detail=high (~4 docs/min)
 - CURRENT_SMALL_VLM для pre-screening и классификации типа документа
@@ -946,7 +946,13 @@ CURRENT_VLM_MODEL + pre-processing pipeline:
 
 ### Дополнение из практики: PDF файлом и чистка думания (август 2026)
 
-Роутер принимает PDF напрямую файлом с base64 без растрирования: текстовые разбирает бесплатный парсер, сканы — платный OCR с ценой за сотни рублей на тысячу страниц, нативные модели — сами. Три грабли, которые стоит вшить в пайплайн: сломанный PDF возвращает двести с маркером ошибки внутри контента модели — детектить регуляркой и показывать как ошибку, а не как ответ; VLM иногда возвращает в контенте хвост думания даже при выключенном effort — вырезать до парсинга, иначе ломается structured output; поле ошибки в ответе бывает строкой, а не объектом — парсить оба варианта.
+Роутер принимает PDF напрямую файлом, в base64, без растрирования. Текстовые документы разбирает бесплатный парсер, сканы — платный OCR (цены отсчитываются от сотен рублей за тысячу страниц), нативные модели обрабатывают сами.
+
+**Три грабли, которые стоит вшить в пайплайн:**
+
+1. Сломанный PDF возвращает HTTP 200 с маркером ошибки внутри контента. Детектить регулярным выражением до парсинга и показывать как ошибку, а не как ответ модели.
+2. VLM иногда возвращает в контент хвост рассуждений даже при выключенном режиме thinking. Вырезать до парсинга, иначе ломается structured output.
+3. Поле ошибки в ответе бывает строкой, а не объектом. Парсить оба варианта.
 
 ---
 
@@ -984,7 +990,7 @@ messages[-1]["content"][-1]["text"] = "/no_think\nИзвлеки ИНН из д�
 # VLM в 5-10× медленнее pytesseract без прироста качества
 
 # ✅ VLM оправдан когда:
-# — Низкое качество скана (SSIM < 0.7)
+# — Низкое качество скана (SSIM < 0.7 — изображения структурно не похожи)
 # — Сложный layout: таблицы, формы, смешанные блоки
 # — Семантическая интерпретация (не только OCR)
 # — Рукописный текст
@@ -1095,7 +1101,7 @@ def preprocess(path: str) -> Image.Image:
 
 - [ ] Auto-rotate (OSD) перед подачей в VLM
 - [ ] Contrast enhancement для низкокачественных сканов
-- [ ] Letterbox resize без дистortion aspect ratio
+- [ ] Letterbox resize без искажения пропорций (aspect ratio)
 - [ ] Конвертация в RGB (убрать CMYK, RGBA)
 
 

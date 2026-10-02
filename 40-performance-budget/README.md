@@ -55,9 +55,9 @@ Metric бюджеты:
   TBT:   ≤ 200ms   (lab proxy для INP)
   FCP:   ≤ 1800ms
 
-  Lighthouse scores (минимальные для merge):
-  Performance: ≥ 80 (warn) / ≥ 70 (fail)
-  Accessibility: ≥ 90
+  Lighthouse scores (пороги для merge):
+  Performance: ≥ 80 — проходит, < 80 — предупреждение, < 70 — блокирует merge
+  Accessibility: ≥ 90 — блокирует merge
 ```
 
 ### Принципы определения бюджетов

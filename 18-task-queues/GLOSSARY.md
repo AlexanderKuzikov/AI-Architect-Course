@@ -35,7 +35,7 @@
 Блокирующая Redis команда: ждёт появления элемента в LIST. BullMQ использует для получения задач из `waiting` списка без polling. Требует `maxRetriesPerRequest: null` в ioredis — иначе команда прерывается по таймауту retry.
 
 **BullMQ**  
-Node.js библиотека очередей задач на основе Redis. Версия 5.71.0 (март 2026). Поддерживает: приоритеты, delay, cron, FlowProducer (DAG), rate limiting, OpenTelemetry. Работает в режиме at-least-once.
+Node.js библиотека очередей задач на основе Redis. Версия 6.2.2 (сентябрь 2026). Поддерживает: приоритеты, delay, cron, FlowProducer (DAG), rate limiting, OpenTelemetry. Работает в режиме at-least-once.
 
 **Bull Board**  
 Web UI для мониторинга BullMQ очередей. npm: `@bull-board/express` (6.x). Отображает состояния задач, прогресс, ошибки, возможность retry/удаления. Обязательно защищать от публичного доступа.

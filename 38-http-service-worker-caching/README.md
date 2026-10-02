@@ -290,7 +290,7 @@ async function purgeAllCache(): Promise<void> {
 
 ### Граничные случаи — где ломается
 
-**`Vary` header и CDN**: `Vary: Accept-Encoding` — CDN кеширует отдельно gzip и non-gzip. `Vary: Cookie` — CDN не кеширует (каждый пользователь разный cookie). `Vary: Accept-Language` — CDN кеширует по языку. Cloudflare игнорирует `Vary: Cookie` для cache key по умолчанию. 
+**`Vary` header и CDN**: `Vary: Accept-Encoding` — CDN кеширует отдельно gzip и non-gzip. `Vary: Accept-Language` — CDN кеширует по языку. `Vary: Cookie` — кеш должен разделять записи по cookie, но Cloudflare по умолчанию **игнорирует** этот заголовок при построении cache key. Если отдача зависит от cookie, полагаться на `Vary: Cookie` нельзя: либо cookie не участвует в ответе, либо ключ кеша задаётся явно.
 
 **stale-if-error и критичные данные**: `stale-if-error=86400` на API с финансовыми данными → при падении origin пользователи 24 часа видят устаревшие цены. Для критичных данных: `stale-if-error` с коротким TTL или не использовать.
 
