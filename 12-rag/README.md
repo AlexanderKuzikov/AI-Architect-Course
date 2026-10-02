@@ -24,11 +24,11 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| pgvector | 0.8.2 | март 2026 |
-| Qdrant | 1.17.0 | март 2026 |
-| LM Studio | 0.4.8 | март 2026 |
-| PostgreSQL | 18.x | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| pgvector | 0.8.7 | октябрь 2026 |
+| Qdrant | 1.19.x | октябрь 2026 |
+| LM Studio | 0.4.25 | октябрь 2026 |
+| PostgreSQL | 18.x | октябрь 2026 |
 
 ---
 
@@ -277,7 +277,7 @@ IVFFlat (Inverted File Index):
 
 ### pgvector vs Qdrant
 
-| Критерий | pgvector 0.8.2 | Qdrant 1.17.0 |
+| Критерий | pgvector 0.8.7 | Qdrant 1.19.x |
 |:--|:--|:--|
 | Интеграция с PostgreSQL | ✅ Нативная | ❌ Отдельный сервис |
 | Фильтрация по метаданным | ✅ SQL WHERE | ✅ Qdrant filters |
@@ -820,7 +820,7 @@ RAG — только для семантического класса. Точн�
 > «Собери контекст из retrieved чанков»
 
 Хорошая формулировка:
-> «Реализуй `assembleContext` на TypeScript. Принимает: `chunks: {content: string, score: number, sourceId: string}[]`, `query: string`, `maxTokens: number` (дефолт 3500), `reserveForAnswer: number` (дефолт 512). Оценка токенов: `Math.ceil(text.length / 3)` (русский текст). Алгоритм: обрежь чанки по token budget (наиболее релевантные первыми), примени "lost in the middle" переупорядочивание (top-1 первый, top-2 последний). Формат output: каждый чанк с меткой `[Источник N (sourceId)]`. Верни объект `{ context: string, chunksUsed: number, tokensUsed: number }`.»
+> «Реализуй `assembleContext` на TypeScript. Принимает: `chunks: {content: string, score: number, sourceId: string}[]`, `query: string`, `maxTokens: number` (дефолт 4096), `reserveForAnswer: number` (дефолт 512). Оценка токенов: `Math.ceil(text.length / 3)` (русский текст). Алгоритм: обрежь чанки по token budget (наиболее релевантные первыми), примени "lost in the middle" переупорядочивание (top-1 первый, top-2 последний). Формат output: каждый чанк с меткой `[Источник N (sourceId)]`. Верни объект `{ context: string, chunksUsed: number, tokensUsed: number }`.»
 
 Формула: конкретный алгоритм оценки токенов для RU + lost-in-middle + метаданные в output.
 
@@ -836,7 +836,7 @@ RAG — только для семантического класса. Точн�
 - [ ] Максимальный размер чанка не превышает max_tokens embedding модели
 
 ### Vector Store
-- [ ] pgvector 0.8.2+ (CVE-2026-3172 с параллельным HNSW build исправлен)
+- [ ] pgvector 0.8.2+ (CVE-2026-3172 с параллельным HNSW build исправлен; актуальная ветка — 0.8.7)
 - [ ] HNSW индекс создан с явными `m` и `ef_construction`
 - [ ] `hnsw.ef_search` настроен для production нагрузки
 - [ ] ANN Recall@10 измерен на тестовом наборе запросов

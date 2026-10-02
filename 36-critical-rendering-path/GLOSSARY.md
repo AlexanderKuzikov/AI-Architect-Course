@@ -13,7 +13,7 @@
 Отдельный поток браузера: применяет GPU-ускоренные трансформации (transform, opacity) без main thread. Анимации на compositor thread не вызывают layout или paint → 60fps без jank.
 
 **content-visibility: auto**  
-CSS свойство: браузер пропускает layout и paint для off-screen элементов. Значительное ускорение initial render длинных страниц. `contain-intrinsic-size` — подсказка для scroll estimation. Baseline широкая поддержка, Safari 18+.
+CSS свойство: браузер пропускает layout и paint для off-screen элементов. Значительное ускорение initial render длинных страниц. `contain-intrinsic-size` — подсказка для scroll estimation. Поддержка: Chrome 85+, Firefox 125+, Safari 18+ (2024).
 
 **critters**  
 Node.js инструмент: автоматическая extraction critical CSS + inline в HTML + async load остального. Используется как Vite/Webpack plugin.

@@ -77,7 +77,7 @@ CSS и синхронный JS в `<head>` блокируют парсинг HTM
 ## S
 
 **scheduler.yield()**  
-Web API (Chrome 115+): уступает управление main thread браузеру между задачами. Позволяет разбивать Long Tasks на части не блокируя обработку пользовательских взаимодействий. Fallback: `setTimeout(fn, 0)`.
+Web API (Chrome/Edge 129+, Firefox 142+, Safari не поддерживает): уступает управление main thread браузеру между задачами. Позволяет разбивать Long Tasks на части не блокируя обработку пользовательских взаимодействий. Fallback: `setTimeout(fn, 0)` или официальный `scheduler-polyfill`.
 
 **sendBeacon**  
 Web API: отправляет данные асинхронно без блокировки страницы, даже при закрытии вкладки. Предпочтительный способ отправки analytics данных (web-vitals metrics) — не блокирует unload.

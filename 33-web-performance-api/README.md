@@ -21,15 +21,15 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | API / инструмент | Статус | Поддержка |
 | :-- | :-- | :-- |
 | Navigation Timing L2 | **Текущий** | Все major browsers |
 | Resource Timing L2 | **Текущий** | Все major browsers |
-| Long Animation Frames (LoAF) | **Baseline 2024** | Chrome 123+, FF 127+ |
-| Long Tasks API | **Deprecated** | Chrome 58+ (заменён LoAF) |
-| web-vitals | **5.x** | npm, 2026 |
+| Long Animation Frames (LoAF) | **Chromium-only** | Chrome/Edge 123+, FF и Safari не поддерживают |
+| Long Tasks API | **Заменён LoAF** | Chrome 58+ (все ещё работает, но без атрибуции) |
+| web-vitals | **6.x** | npm, 2026 |
 | `performance.measureUserAgentSpecificMemory()` | **Stable** | Chrome 89+, requires cross-origin isolation |
 
 > **Navigation Timing L1** (`performance.navigation`, `performance.timing`) — deprecated. Использовать `PerformanceNavigationTiming` из L2.
@@ -306,7 +306,7 @@ Long Tasks API (deprecated):
   Сообщает: задача > 50ms на main thread
   НЕ сообщает: какой скрипт вызвал, какой URL, детали frame
 
-LoAF — Long Animation Frames API (Baseline 2024):
+LoAF — Long Animation Frames API (Chromium-only, не Baseline):
   Сообщает: frame > 50ms включая rendering
   Сообщает: какие скрипты выполнялись, их URL, duration каждого
   Атрибуция источника проблемы INP
@@ -374,7 +374,7 @@ function findCulpritScripts(interactionStart: number, interactionEnd: number) {
 
 **LoAF vs Long Tasks в CI**: в Playwright/Puppeteer `long-animation-frame` entries могут быть недоступны в headless режиме. Для lab testing — использовать DevTools Performance API напрямую.
 
-**Third-party scripts и LoAF**: по данным 2026, third-party скрипты в LoAF — 60–70% сайтов. Tag manager (GTM) появляется в LoAF ~45% случаев. Если `sourceURL` — внешний домен → delay load до первого user interaction. 
+**Third-party scripts и LoAF**: third-party скрипты — самая частая причина тяжёлых LoAF на реальных сайтах: один сторонний тег (GTM, чат-виджет, consent manager) способен заблокировать main thread на сотни миллисекунд. Если в `sourceURL` — внешний домен → отложить загрузку до первого user interaction. 
 
 **`blockingDuration` vs `duration`**: `duration` > 50ms не всегда означает проблему INP. `blockingDuration` — время непосредственной блокировки input обработки. Только `blockingDuration > 0` — прямая причина плохого INP.
 
@@ -387,7 +387,7 @@ function findCulpritScripts(interactionStart: number, interactionEnd: number) {
 ### web-vitals library (рекомендован)
 
 ```typescript
-// npm install web-vitals@5
+// npm install web-vitals@6
 import {
   onLCP, onINP, onCLS, onFCP, onTTFB,
   type Metric
@@ -532,7 +532,7 @@ Long Animation Frames (LoAF) через PerformanceObserver дают то, че�
 ```typescript
 // RUM: LoAF collector (см. §5 этого модуля)
 const observer = new PerformanceObserver((list) => {
-  for (const entry of list.getEntries() as PerformanceLongAnimationFrameTiming[]) {
+  for (const entry of list.getEntries() as PerformanceLongAnimationFrameEntry[]) {
     if (entry.duration < 200) continue   // интересуют только тяжёлые блоки
 
     const scripts = entry.scripts.map(s => ({
@@ -628,14 +628,14 @@ BFCache restores дают аномально низкий LCP (~0ms). Prefetch n
 
 **Хорошая формулировка:**
 > «Добавить RUM pipeline:
-> 1. `npm install web-vitals@5`.
+> 1. `npm install web-vitals@6`.
 > 2. Файл `src/analytics/vitals.ts`: подписаться на `onLCP`, `onINP`, `onCLS`, `onFCP`, `onTTFB`.
 > 3. Отправка через `navigator.sendBeacon('/api/vitals', JSON.stringify({name, value, rating, id, navigationType}))`.
 > 4. Sampling 10%: `if (Math.random() > 0.1) return` до отправки.
 > 5. Flush при `visibilitychange → hidden`.
 > 6. Импортировать и вызывать `initVitals()` в entry point после first paint (не в head).»
 
-Формула: web-vitals 5 + sendBeacon + sampling 10% + flush при hidden + точка инициализации после first paint.
+Формула: web-vitals 6 + sendBeacon + sampling 10% + flush при hidden + точка инициализации после first paint.
 
 ---
 
@@ -663,7 +663,7 @@ BFCache restores дают аномально низкий LCP (~0ms). Prefetch n
 - [ ] Custom marks для бизнес-критичных операций (checkout, search)
 
 **Core Web Vitals**
-- [ ] web-vitals 5.x: `onLCP`, `onINP`, `onCLS`, `onFCP`, `onTTFB`
+- [ ] web-vitals 6.x: `onLCP`, `onINP`, `onCLS`, `onFCP`, `onTTFB`
 - [ ] Финализация при `visibilitychange → hidden`
 - [ ] Deduplicate по `metric.id` на бэкенде
 

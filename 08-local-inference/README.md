@@ -415,7 +415,7 @@ for model in models["data"]:
 ollama run CURRENT_LOCAL_MODEL   # ошибка загрузки модели
 
 # ✅ Для CURRENT_LOCAL_MODEL — только llama.cpp-совместимые backends
-# LM Studio 0.4.x (llama.cpp b8xxx), llama-cpp-python, llama.cpp CLI
+# LM Studio 0.4.x (llama.cpp b11xxx), llama-cpp-python, llama.cpp CLI
 ```
 
 **Практический вывод для архитектора:** если pipeline требует CURRENT_LOCAL_MODEL — Ollama не вариант.

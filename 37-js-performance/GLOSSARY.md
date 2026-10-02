@@ -63,7 +63,7 @@ V8 mid-tier JIT компилятор (добавлен 2023): быстрая к�
 ## P
 
 **postTask()**  
-`scheduler.postTask()` API: планирование задач с приоритетом (`user-blocking`, `user-visible`, `background`) и возможностью отмены через AbortController. Baseline 2024. Правильная замена `setTimeout(fn, 0)`.
+`scheduler.postTask()` API: планирование задач с приоритетом (`user-blocking`, `user-visible`, `background`) и возможностью отмены через AbortController. Baseline 2024 (Chrome 94+, Firefox 101+, Safari 15.4+). Правильная замена `setTimeout(fn, 0)`.
 
 ---
 
@@ -73,7 +73,7 @@ V8 mid-tier JIT компилятор (добавлен 2023): быстрая к�
 API: фиксированный массив памяти доступный из нескольких Workers одновременно. Zero-copy sharing. Требует Cross-Origin Isolation (`COOP: same-origin` + `COEP: require-corp`). Использовать с Atomics для thread-safety.
 
 **scheduler.yield()**  
-API: явная отдача управления браузеру в середине long задачи. Позволяет браузеру обработать user input и paint между chunks. Baseline 2024. Правильный инструмент для chunking — без задержки `setTimeout`.
+API: явная отдача управления браузеру в середине long задачи. Позволяет обработать user input и paint между chunks. Chrome/Edge 129+, Firefox 142+, Safari не поддерживает (не Baseline). Инструмент для chunking без задержки `setTimeout`; для остальных браузеров — fallback или `scheduler-polyfill`.
 
 ---
 

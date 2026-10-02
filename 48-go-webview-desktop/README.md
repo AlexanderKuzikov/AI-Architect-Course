@@ -20,12 +20,12 @@
 
 ## Актуальные версии
 
-> Проверено: август 2026
+> Проверено: сентябрь 2026
 
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
 | `webview/webview_go` | v0.0.0-2024+ | Go bindings для webview (C library) |
-| Go | 1.26 | toolchain, сборка |
+| Go | 1.27 | toolchain, сборка |
 | WebView2 (Windows) | встроен в Win10/11 | движок рендеринга |
 | WebKitGTK (Linux) | `libwebkit2gtk-4.0` | движок рендеринга |
 | WKWebView (macOS) | встроен | движок рендеринга |
@@ -193,7 +193,7 @@ cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: 0x08000000}
 // константы CREATE_NO_WINDOW в syscall нет — только литерал
 ```
 
-**`exec.CommandContext` может НЕ убить процесс** (Go 1.26, блокировка сети): не полагаться на context-отмену, использовать `taskkill /PID <pid> /T /F` по таймеру.
+**`exec.CommandContext` может НЕ убить процесс** (блокировка сети): не полагаться на context-отмену, использовать `taskkill /PID <pid> /T /F` по таймеру.
 
 ### 3.4. Чёрный экран при старте
 

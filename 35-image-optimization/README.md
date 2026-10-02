@@ -21,13 +21,13 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| sharp | **0.34.x** | Node.js image processing |
+| sharp | **0.35.x** | Node.js image processing |
 | @squoosh/lib | заморожен | CLI инструмент, не для production pipeline |
-| vite-imagetools | **7.x** | Vite plugin: трансформации при import |
+| vite-imagetools | **12.x** | Vite plugin: трансформации при import |
 | Cloudflare Images | актуален | Image CDN + трансформации |
 | Imgix | актуален | Image CDN + URL-based трансформации |
 
@@ -39,7 +39,7 @@
 
 | Формат | vs JPEG | Поддержка | Декодирование | Лучший для |
 | :-- | :-- | :-- | :-- | :-- |
-| **AVIF** | −45–60% | ~95% (Chrome 85+, FF 93+, Safari 16+) | Медленнее | Hero photos, продуктовые фото |
+| **AVIF** | −45–60% | ~95% (Chrome 85+, FF 93+, Safari 16.1+) | Медленнее | Hero photos, продуктовые фото |
 | **WebP** | −25–35% | ~99% | Быстрое | UI, иконки, иллюстрации |
 | **JPEG** | baseline | 100% | Очень быстрое | Fallback для legacy |
 | **PNG** | +0% (lossless) | 100% | Быстрое | Прозрачность, скриншоты |
@@ -48,7 +48,7 @@
 
 > AVIF в 2026 — primary формат для фотографий. WebP — fallback. JPEG — fallback для legacy. 
 >
-> JPEG XL: Safari поддерживает, Chrome — нет (2026). Слишком рано для production web. 
+> JPEG XL: Safari поддерживает (17+, 2023), Firefox объявил intent to ship (2026), Chrome — нет (2026). Слишком рано для production web. 
 
 ### Когда что использовать
 
@@ -168,7 +168,7 @@ async function generateLQIP(inputPath: string): Promise<string> {
     .toBuffer()
 
   return `data:image/webp;base64,${buffer.toString('base64')}`
-  // Размер: ~200-400 bytes — можно inline в HTML/JS
+  // Размер: ~200-500 bytes — можно inline в HTML/JS
 }
 
 // Использование в генераторе статики:
@@ -178,11 +178,11 @@ async function generateLQIP(inputPath: string): Promise<string> {
 
 ### Граничные случаи — где ломается
 
-**AVIF `effort` vs build time**: `effort: 9` на 1000 изображений — может занимать 30+ минут. В CI/CD — использовать `effort: 4-6`, `effort: 9` только для offline batch обработки. Sharp 0.34.x обрабатывает AVIF в 25x быстрее чем squoosh-cli. 
+**AVIF `effort` vs build time**: `effort: 9` на 1000 изображений — может занимать 30+ минут. В CI/CD — использовать `effort: 4-6`, `effort: 9` только для offline batch обработки. Sharp 0.35.x обрабатывает AVIF в 25x быстрее чем squoosh-cli. 
 
 **`withoutEnlargement: true` и srcset**: если оригинал 600px, запрос на 1200px вариант → Sharp вернёт 600px файл с именем `image-1200w.avif`. Нужно либо проверять output metadata, либо не генерировать variants больше оригинала.
 
-**sharp и serverless**: sharp использует native binaries (libvips). В AWS Lambda, Vercel Functions — требует platform-specific binary. Sharp 0.34.x поддерживает `sharp-linux-x64`, `sharp-linux-arm64` как отдельные пакеты. Docker: явно указывать platform. 
+**sharp и serverless**: sharp использует native binaries (libvips). В AWS Lambda, Vercel Functions — требует platform-specific binary. Sharp 0.35.x поддерживает `sharp-linux-x64`, `sharp-linux-arm64` как отдельные пакеты. Docker: явно указывать platform. 
 
 **Почему это важно архитектору:** sharp нельзя просто импортировать в serverless функцию без конфигурации платформы. Архитектурное решение — обрабатывать изображения при upload в отдельном сервисе/worker, не inline в request handler.
 
@@ -451,7 +451,8 @@ async function processAndStoreImage(
   fetchpriority="high"
 >
 
-<!-- В body: LCP <img> -->
+<!-- В body: LCP <img>
+     decoding="sync" — декодировать до следующего frame, приоритетно для LCP -->
 <img
   src="/images/hero-1200w.jpg"
   srcset="..."
@@ -461,7 +462,7 @@ async function processAndStoreImage(
   height="630"
   loading="eager"
   fetchpriority="high"
-  decoding="sync"   <!-- sync: decode до следующего frame для LCP -->
+  decoding="sync"
 >
 ```
 
@@ -495,7 +496,7 @@ async function processAndStoreImage(
 
 **`imagesrcset` на `<link rel="preload">`**: атрибут именно `imagesrcset` (не `srcset`) и `imagesizes` (не `sizes`). Без них браузер preload-ит только `href` — фиксированный размер без учёта viewport.
 
-**AVIF для LCP и старые iOS**: iOS 16 поддерживает AVIF, iOS 15 — нет. На iPad mini 4 (iOS 15) hero image упадёт на WebP. Проверять через BrowserStack / CrUX breakdown по браузерам аудитории.
+**AVIF для LCP и старые iOS**: iOS 16.1 поддерживает AVIF, iOS 16.0 и ниже — нет. На iPad mini 4 (iOS 15) hero image упадёт на WebP. Проверять через BrowserStack / CrUX breakdown по браузерам аудитории.
 
 **Почему это важно архитектору:** LCP image неправильно настроенный даёт penalty 0.5–1.5s в CrUX. `fetchpriority="high"` без `<link rel="preload">` работает, но preload даёт дополнительные 100–300ms на fast connections потому что браузер начинает fetch до полного парсинга HTML.
 
@@ -626,7 +627,7 @@ Sharp с `withoutEnlargement: false` (default!) увеличит изображ�
 **Хорошая формулировка:**
 > «Написать Node.js скрипт `scripts/optimize-images.ts`:
 > 1. Сканировать `src/assets/images/**/*.{jpg,png}` рекурсивно.
-> 2. Для каждого изображения генерировать через sharp@0.34.x: AVIF (quality: 60, effort: 6), WebP (quality: 80), JPEG (quality: 85, mozjpeg: true) — для каждого из размеров: 400, 800, 1200px ширины с `withoutEnlargement: true`.
+> 2. Для каждого изображения генерировать через sharp@0.35.x: AVIF (quality: 60, effort: 6), WebP (quality: 80), JPEG (quality: 85, mozjpeg: true) — для каждого из размеров: 400, 800, 1200px ширины с `withoutEnlargement: true`.
 > 3. Пропускать если output уже существует И оригинал не изменился (сравнить mtime).
 > 4. Сохранять в `public/images/{name}-{width}w.{ext}`.
 > 5. Генерировать `src/assets/images/manifest.json` с путями для каждого оригинала.»

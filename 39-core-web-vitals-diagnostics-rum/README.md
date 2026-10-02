@@ -21,17 +21,17 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Метрика / инструмент | Версия / статус |
 | :-- | :-- |
 | LCP порог «хорошо» | **≤ 2.5s** |
 | INP порог «хорошо» | **≤ 200ms** (заменил FID в марте 2024) |
 | CLS порог «хорошо» | **≤ 0.1** |
-| web-vitals (npm) | **5.3.0** |
+| web-vitals (npm) | **6.2** |
 | Chrome User Experience Report (CrUX) | Обновляется ежедневно |
-| LoAF API | **Baseline 2024** (Chrome 123+) |
-| `fetchpriority` | **Baseline 2023** — все браузеры |
+| LoAF API | **Chromium-only** (Chrome/Edge 123+, FF/Safari нет) |
+| `fetchpriority` | **Baseline** — все браузеры |
 
 ---
 
@@ -242,8 +242,9 @@ INP = 98-я перцентиль всех взаимодействий за се
 ### Диагностика через LoAF
 
 ```typescript
-// LoAF — Long Animation Frame API (Baseline 2024)
+// LoAF — Long Animation Frame API (Chromium-only: Chrome/Edge 123+)
 // Более точный чем Long Tasks API для INP диагностики
+// В Firefox и Safari тип 'long-animation-frame' недоступен — нужен feature-detect
 
 const observer = new PerformanceObserver(list => {
   for (const entry of list.getEntries()) {
@@ -477,7 +478,7 @@ element.animate([
 ### web-vitals npm — полный setup
 
 ```typescript
-// npm install web-vitals@5
+// npm install web-vitals@6
 import { onLCP, onINP, onCLS, onFCP, onTTFB } from 'web-vitals/attribution'
 
 type Metric = {
@@ -656,7 +657,7 @@ function checkVitals(lcpValues: number[], inpValues: number[], clsValues: number
 
 **Хорошая формулировка:**
 > «Добавить RUM мониторинг Core Web Vitals:
-> 1. `npm install web-vitals@5`.
+> 1. `npm install web-vitals@6`.
 > 2. В `src/analytics/vitals.ts`: импортировать `onLCP, onINP, onCLS, onFCP, onTTFB` из `web-vitals/attribution`.
 > 3. Каждый callback: отправлять через `navigator.sendBeacon('/api/vitals', JSON.stringify({ metric, value, rating, attribution, url }))`.
 > 4. В `src/main.ts`: вызвать все пять функций после DOMContentLoaded.
@@ -688,7 +689,7 @@ function checkVitals(lcpValues: number[], inpValues: number[], clsValues: number
 
 **Измерение**
 - [ ] Google Search Console → CWV report подключён
-- [ ] web-vitals@5 с attribution установлен, отправляет в RUM
+- [ ] web-vitals@6 с attribution установлен, отправляет в RUM
 - [ ] Алерт при деградации 75-й перцентили
 
 **LCP**

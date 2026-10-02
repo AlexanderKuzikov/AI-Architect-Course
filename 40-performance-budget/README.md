@@ -21,17 +21,17 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Проверено: сентябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Lighthouse CI (`@lhci/cli`) | **0.15.1** | Lighthouse в CI |
 | `treosh/lighthouse-ci-action` | **v12** | GitHub Actions обёртка |
 | BundleMon | **2.x** | Bundle size мониторинг + PR comments |
-| `size-limit` | **12.1.0** | Bundle size limits (npm) |
-| `rollup-plugin-visualizer` | **5.x** | Bundle composition анализ |
+| `size-limit` | **14.1.0** | Bundle size limits (npm) |
+| `rollup-plugin-visualizer` | **7.x** | Bundle composition анализ |
 | `vite-bundle-visualizer` | **1.2.1** | Vite-специфичный анализ |
-| `@next/bundle-analyzer` | **16.2.9** | Next.js bundle анализ |
+| `@next/bundle-analyzer` | **16.3.8** | Next.js bundle анализ |
 
 ---
 
@@ -264,11 +264,11 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - run: npm ci
@@ -347,7 +347,7 @@ ERROR (блокирует merge):
   ✓ Отсутствует gzip/brotli compression
   ✓ Render-blocking resources появились
   ✓ Images без width/height (CLS риск)
-  ✓ JS bundle > hard limit (например 500 KB)
+  ✓ JS bundle > hard limit (для этого проекта — 300 KB)
 
 WARN (уведомляет, не блокирует):
   ✓ Lighthouse Performance score < 80
@@ -587,7 +587,7 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'))
 **Хорошая формулировка:**
 > «Добавить BundleMon в GitHub Actions:
 > 1. Создать `bundlemon.config.json` в корне: baseDir `./dist`, files: `assets/index-*.js` maxSize 300kb, `assets/vendor-*.js` maxSize 200kb, `assets/*.css` maxSize 50kb. reportOutput: github с checkRun + prComment.
-> 2. Создать `.github/workflows/bundle-size.yml`: trigger on pull_request, steps: checkout, setup-node@v4 с node 22, npm ci, npm run build, LironEr/bundlemon-action@v2.
+> 2. Создать `.github/workflows/bundle-size.yml`: trigger on pull_request, steps: checkout, setup-node@v6 с node 24, npm ci, npm run build, LironEr/bundlemon-action@v2.
 > 3. Добавить в workflow env: BUNDLEMON_PROJECT_ID и BUNDLEMON_PROJECT_APIKEY из secrets.
 > 4. В `bundlemon.config.json`: добавить maxPercentIncrease: 5 для JS файлов.
 > Не запускать при push в main — только PR.»
@@ -606,7 +606,7 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'))
 > 3. Найти топ-5 модулей по gzip size. Для каждого: (a) проверить используется ли полный пакет или только часть, (b) есть ли более лёгкая альтернатива на bundlephobia.com, (c) можно ли перенести на dynamic import.
 > 4. Составить список предлагаемых замен с размерами до/после.»
 
-Формула: bundle analysis (source-map-explorer) + топ-чанки + план замен с размерами.
+Формула: bundle analysis (rollup-plugin-visualizer) + топ-чанки + план замен с размерами.
 
 ---
 

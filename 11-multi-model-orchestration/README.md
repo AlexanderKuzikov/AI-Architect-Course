@@ -23,13 +23,13 @@
 
 | Инструмент / Сервис | Версия / Лимит | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| LM Studio | 0.4.8 | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| LM Studio | 0.4.25 | октябрь 2026 |
 | Groq free tier — CURRENT_REASONING_MODEL large | 30 RPM / 1 000 RPD / 100K TPD | март 2026 |
 | Groq free tier — CURRENT_LOCAL_TEXT_MODEL compact | 30 RPM / 14 400 RPD / 500K TPD | март 2026 |
 | Groq free tier — CURRENT_TEXT_MODEL mid | 60 RPM / 1 000 RPD / 500K TPD | март 2026 |
 | DaData API free tier | 10 000 запросов/сутки на ключ | март 2026 |
-| Sharp | 0.34.x | март 2026 |
+| Sharp | 0.35.x | октябрь 2026 |
 
 ---
 

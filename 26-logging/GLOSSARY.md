@@ -57,7 +57,7 @@ Vendor-neutral стандарт для instrumentation: API + SDK + проток
 ## P
 
 **PeriodicExportingMetricReader**  
-OTel компонент: собирает метрики с заданным интервалом (`exportIntervalMillis`) и отправляет в exporter. Заменяет устаревший `metricReader` (singular) — использовать `metricReaders: []` (массив).
+OTel компонент: собирает метрики с заданным интервалом (`exportIntervalMillis`) и отправляет в exporter. Заменяет устаревший `metricReader` (singular, помечен `@deprecated ... metricReaders instead`) — использовать `metricReaders: []` (массив).
 
 **pino**  
 JSON logger для Node.js. Асинхронная запись через worker thread, `fast-json-stringify` для сериализации. ~5× быстрее Winston. Транспорт: stdout (production), pino-pretty (development).

@@ -10,7 +10,7 @@
 пространства имён структуре директорий. Управляется через
 Composer и его `vendor/autoload.php`.
 
-**array_find / array_first (PHP 8.4)**
+**array_find (PHP 8.4) / array_first (PHP 8.5)**
 Встроенные функции поиска первого элемента, удовлетворяющего предикату: `array_find($arr, fn($v) => $v > 10)`. Заменяют ручные циклы/`array_filter` + `reset` для типового сценария «найди первый».
 
 **Asymmetric Visibility (PHP 8.4)**
@@ -116,7 +116,7 @@ Nginx + PHP-FPM — стандартная связка для PHP-сайтов.
 конфликтов имён. `namespace App\Core\Parser` соответствует
 директории `src/Core/Parser/` при PSR-4 autoloading.
 
-**#[NoDiscard] (PHP 8.4)**
+**#[NoDiscard] (PHP 8.5)**
 Атрибут: результат функции не может быть проигнорирован. Вызов `f();` без использования результата вызывает warning. Защищает от потери важных значений (ошибки, id, результаты транзакций).
 
 **Null Coalescing (?? и ??=)**

@@ -2,7 +2,7 @@
 
 > **Для AI-архитектора:** Security для AI-агентов — это не только prompt injection. Это tool abuse, secrets leakage, memory poisoning, supply chain, model gateway risk и auditability.
 >
-> Один день изучения — threat model, OWASP LLM Top 10, слои обороны, secrets management, audit trail. Финальный модуль курса.
+> Один день изучения — threat model, OWASP LLM Top 10, слои обороны, secrets management, audit trail. Финальный модуль трека Agent Systems.
 
 ## Содержание
 
@@ -20,11 +20,12 @@
 
 ## Актуальные версии
 
-> Проверено: август 2026
+> Проверено: сентябрь 2026
 
 | Стандарт / Инструмент | Статус | Назначение |
 |:--|:--|:--|
-| OWASP LLM Top 10 | active | baseline для LLM risks |
+| OWASP Top 10 for LLM Applications | 2026 (август 2026) | baseline для LLM risks |
+| OWASP Top 10 for Agentic Applications | ASI01–ASI10, декабрь 2025 | риски агентов: goal hijacking, tool misuse, каскадные сбои |
 | MCP security guidance | emerging | remote MCP auth, approvals |
 | Trivy | mature | vulnerabilities, secrets, SBOM |
 | OPA / Rego policy-as-code | mature | policy checks |
@@ -44,18 +45,20 @@ Agent system имеет больше поверхностей атаки, чем
 
 **Правило:** модель — это чужой код под твоим контролем. Всё, что она видит (промпты, retrieved content, документы), потенциально hostile. Отсюда — все слои обороны.
 
-### 1.2. OWASP LLM Top 10 (сводка)
+### 1.2. OWASP Top 10 for LLM Applications 2026 (сводка)
 
-1. **Prompt Injection** — зловредная инструкция в input/retrieved content;
-2. **Sensitive Information Disclosure** — утечка секретов/PII через output;
-3. **Supply Chain** — вредоносные пакеты, отравленные модели, плагины;
-4. **Data and Model Poisoning** — зловредные данные в обучении/памяти;
-5. **Improper Output Handling** — output без валидации;
-6. **Excessive Agency** — агент имеет больше прав, чем нужно;
-7. **System Prompt Leakage** — утечка системного промпта;
-8. **Vector and Embedding Weaknesses** — атаки на RAG/embeddings;
-9. **Misinformation** — уверенные ложные ответы;
-10. **Unbounded Consumption** — cost explosion через abuse.
+1. **LLM01 Prompt Injection** — зловредная инструкция в input/retrieved content;
+2. **LLM02 Sensitive Information Disclosure** — утечка секретов/PII через output;
+3. **LLM03 Excessive Agency** — агент имеет больше прав, чем нужно;
+4. **LLM04 Supply Chain** — вредоносные пакеты, отравленные модели, плагины;
+5. **LLM05 Data and Model Poisoning** — зловредные данные в обучении/памяти;
+6. **LLM06 Unbounded Consumption** — cost explosion через abuse;
+7. **LLM07 Misinformation** — уверенные ложные ответы;
+8. **LLM08 Hidden Context Exposure** — утечка скрытого контекста, ранее System Prompt Leakage;
+9. **LLM09 Vector and Embedding Weaknesses** — атаки на RAG/embeddings;
+10. **LLM10 Improper Output Handling** — output без валидации.
+
+Ключевое изменение редакции 2026: Excessive Agency поднялся с 6-го места на 3-е (агентные деплои), System Prompt Leakage переименован в Hidden Context Exposure — утекает не только системный промпт, но и память, результаты tools и состояние приложения. Для агентных систем добавлен отдельный список — OWASP Top 10 for Agentic Applications (ASI01–ASI10): goal hijacking, tool misuse, identity/privilege abuse, каскадные multi-agent сбои.
 
 ### Граничные случаи — где ломается
 
@@ -187,7 +190,7 @@ type AuditRecord = {
 
 ### Граничные случаи — где ломается
 
-**System prompt leakage**: агент отвечает «вот мои инструкции». Промпты — тоже sensitive data. Guardrail на фразы типа «system prompt», «instructions» в output.
+**System prompt leakage**: агент отвечает «вот мои инструкции». Промпты и весь скрытый контекст (память, результаты tools, состояние) — тоже sensitive data. Guardrail на фразы типа «system prompt», «instructions» в output.
 
 **Excessive agency**: агент с `documents:write` при задаче «прочитать и ответить». Blast radius вырос без причины. Принцип least privilege — по задаче, а не по роли.
 
@@ -263,8 +266,8 @@ Blast radius: зависит от layer 2 (tool permissions) и layer 3 (approva
 ### Что получилось
 
 - найдены fetch-вызовы, где URL формировался из внешних данных (справочник судов имел поле с URL, который чистился не всегда);
-- **фикс: URL-allowlist на всех fetch** — allowlist доменов судов + запрет на private IP ranges (127.0.0.0/8, 10.0.0.0/8, 192.168.0.0/16, 169.254.0.0/16);
-- валидация URL до резолва DNS (DNS-rebinding защита);
+- **фикс: URL-allowlist на всех fetch** — allowlist доменов судов + запрет на private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16);
+- валидация URL до резолва DNS + проверка и пининг резолвнутого IP (защита от DNS-rebinding);
 - все fetch логируются в audit trail с agentId и userId;
 - капча-сервис (RuCaptcha) — ключ short-lived, не передаётся в агента.
 
@@ -360,7 +363,7 @@ Prompt injection — громкая, но не самая частая угро�
 
 **Задача 4 — URL allowlist validator**
 
-> Реализуй `validateOutboundUrl(url, {allowlist, blockPrivateRanges})` на TypeScript. Отклоняет URL вне allowlist и private IP ranges (127.0.0.0/8, 10.0.0.0/8, 192.168.0.0/16, 169.254.0.0/16). Верни `{allowed, reason}`. Тест: `http://192.168.1.1/admin` с blockPrivateRanges=true → rejected.
+> Реализуй `validateOutboundUrl(url, {allowlist, blockPrivateRanges})` на TypeScript. Отклоняет URL вне allowlist и private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16). Верни `{allowed, reason}`. Тест: `http://192.168.1.1/admin` с blockPrivateRanges=true → rejected.
 
 ---
 

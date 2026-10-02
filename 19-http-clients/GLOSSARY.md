@@ -27,7 +27,7 @@ Web API для отмены асинхронных операций. `AbortContr
 ## C
 
 **circuit breaker**  
-Паттерн устойчивости: автоматически отклоняет запросы к нестабильному сервису без ожидания таймаута. Три состояния: CLOSED (нормальная работа), OPEN (fail fast), HALF-OPEN (пробный запрос). npm: `opossum` 8.x. Обязателен в сочетании с fallback.
+Паттерн устойчивости: автоматически отклоняет запросы к нестабильному сервису без ожидания таймаута. Три состояния: CLOSED (нормальная работа), OPEN (fail fast), HALF-OPEN (пробный запрос). npm: `opossum` 10.x. Обязателен в сочетании с fallback.
 
 **CLOSED state**  
 Нормальное состояние circuit breaker: запросы проходят через него к downstream сервису. Переходит в OPEN при превышении `errorThresholdPercentage` в скользящем окне.
@@ -46,7 +46,7 @@ Web API для отмены асинхронных операций. `AbortContr
 Параметр opossum circuit breaker: процент ошибок в скользящем окне после которого circuit переходит в OPEN. Дефолт: 50%. При `volumeThreshold: 5` — срабатывает только если было минимум 5 запросов в окне.
 
 **ESM-only**  
-Модуль распространяемый только как ES Module (import/export). got 14.x и ky 1.x — ESM-only. Несовместимы с `require()` без динамического `import()`. В TypeScript: `"module": "ESNext"`, `"moduleResolution": "bundler"` или `"node16"`.
+Модуль распространяемый только как ES Module (import/export). got 16.x и ky 2.x — ESM-only. Несовместимы с `require()` без динамического `import()`. В TypeScript: `"module": "ESNext"`, `"moduleResolution": "bundler"` или `"node16"`.
 
 ---
 
@@ -63,7 +63,7 @@ Web API для отмены асинхронных операций. `AbortContr
 ## G
 
 **got**  
-Node.js HTTP клиент. Версия 14.6.6 (март 2026). ESM-only. Особенности: встроенный retry с `calculateDelay`, hooks (beforeRequest, afterResponse, beforeRetry, beforeError), TypeScript нативно. Не работает в браузере. Singleton через `got.extend()`.
+Node.js HTTP клиент. Версия 16.0.0 актуальна на октябрь 2026. ESM-only, требует Node.js 22+; в 16.x `retry.enforceRetryRules` по умолчанию `true`, поэтому `calculateDelay` вызывается только когда retry разрешён правилами. Особенности: встроенный retry с `calculateDelay`, hooks (beforeRequest, afterResponse, beforeRetry, beforeError), TypeScript нативно. Не работает в браузере. Singleton через `got.extend()`.
 
 ---
 
@@ -90,7 +90,7 @@ Node.js HTTP клиент. Версия 14.6.6 (март 2026). ESM-only. Осо
 HTTP механизм: соединение остаётся открытым после запроса для последующих запросов к тому же origin. undici Pool: `keepAliveTimeout` — время ожидания следующего запроса. Основа connection pooling эффективности.
 
 **ky**  
-HTTP клиент на основе fetch. Версия 1.x (март 2026). ESM-only. Работает в браузере и Node.js. Меньше возможностей чем got (нет retry callbacks уровня got), но универсален. Использовать для isomorphic кода.
+HTTP клиент на основе fetch. Версия 2.x актуальна на октябрь 2026. ESM-only. Работает в браузере и Node.js. Меньше возможностей чем got (нет retry callbacks уровня got), но универсален. Использовать для isomorphic кода.
 
 ---
 
@@ -107,14 +107,14 @@ undici класс для mock HTTP в тестах. `mockAgent.disableNetConnect
 Состояние circuit breaker: все запросы немедленно отклоняются без обращения к downstream. Вызывается fallback. Длится `resetTimeout` мс, затем переход в HALF-OPEN.
 
 **opossum**  
-Node.js библиотека circuit breaker. Версия 8.x (март 2026). API: `new CircuitBreaker(fn, options)`, `.fire(...args)`, `.fallback(fn)`, события: `open`, `halfOpen`, `close`, `success`, `failure`. Prometheus/OTel интеграция из коробки.
+Node.js библиотека circuit breaker. Версия 10.x актуальна на октябрь 2026. API: `new CircuitBreaker(fn, options)`, `.fire(...args)`, `.fallback(fn)`, события: `open`, `halfOpen`, `close`, `success`, `failure`. Prometheus/OTel интеграция из коробки.
 
 ---
 
 ## P
 
 **p-retry**  
-npm утилита для retry с backoff. Версия 6.x (март 2026). ESM-only. Параметры: `retries`, `minTimeout`, `maxTimeout`, `factor`, `randomize`, `signal`. `AbortError` прекращает retry немедленно. `onFailedAttempt` — callback для логирования.
+npm утилита для retry с backoff. Версия 8.x актуальна на октябрь 2026. ESM-only. Параметры: `retries`, `minTimeout`, `maxTimeout`, `factor`, `randomize`, `signal`. `AbortError` прекращает retry немедленно. `onFailedAttempt` — callback для логирования.
 
 **pipelining**  
 HTTP/1.1 feature: отправлять несколько запросов без ожидания ответа. undici Pool: `pipelining: 1` = keep-alive без pipelining (максимальная совместимость). `pipelining: 0` = новое соединение на каждый запрос. Большинство AI API не поддерживают pipelining.
@@ -169,7 +169,7 @@ HTTP механизм для однонаправленного стриминг
 ## U
 
 **undici**  
-Node.js HTTP/1.1 клиент. Версия 7.24.6 (март 2026). Bundled в Node.js 18+. Реализует глобальный `fetch()` в Node.js. Классы: `request` (single request), `Pool` (connection pooling), `Agent` (global dispatcher), `MockAgent` (тесты). Нулевые внешние зависимости.
+Node.js HTTP/1.1 клиент. Версия 8.11.2 актуальна на октябрь 2026. Bundled в Node.js 18+. Реализует глобальный `fetch()` в Node.js. Классы: `request` (single request), `Pool` (connection pooling), `Agent` (global dispatcher), `MockAgent` (тесты). Нулевые внешние зависимости.
 
 ---
 
@@ -210,7 +210,7 @@ Node.js HTTP/1.1 клиент. Версия 7.24.6 (март 2026). Bundled в N
 ## П
 
 **Пин версии**  
-Точная фиксация версии зависимости в package.json без `^` или `~`. `"axios": "1.14.0"` вместо `"axios": "^1.14.0"`. Защита от автоматической установки скомпрометированных версий при `npm install` или `npm update`.
+Точная фиксация версии зависимости в package.json без `^` или `~`. `"axios": "1.20.0"` вместо `"axios": "^1.20.0"`. Защита от автоматической установки скомпрометированных версий при `npm install` или `npm update`.
 
 **Пул соединений** → см. *connection pooling*
 

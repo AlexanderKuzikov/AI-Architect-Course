@@ -20,17 +20,19 @@
 
 ## Актуальные версии
 
-> Проверено: август 2026
+> Проверено: сентябрь 2026
 
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
-| A2A Protocol | v0.3.x ecosystem | agent-to-agent communication |
-| `a2a-js` | 0.2.x | JavaScript SDK |
-| Python / Go A2A SDK | active | Google A2A ecosystem |
+| A2A Protocol | v1.0 (spec 1.0.0) | agent-to-agent communication |
+| `@a2a-js/sdk` | 1.3.x | JavaScript SDK |
+| Python / Go / Java / .NET / Rust A2A SDK | 1.x | официальные SDK экосистемы |
 | A2A + MCP integration | active | tool use через MCP, знания через A2A |
-| Agent Card v1 | draft | discovery агентов |
+| AgentCard v1.0 | в составе протокола v1.0 | discovery агентов |
 
-Источник: [a2a-protocol.org](https://a2a-protocol.org), [Google A2A](https://github.com/a2aproject).
+Протокол развивается под Linux Foundation; v1.0 вышел в марте 2026 и пришёл на смену линейке 0.x. Агент может одновременно объявлять поддержку v0.3 и v1.0.
+
+Источник: [a2a-protocol.org](https://a2a-protocol.org), [что нового в v1.0](https://a2a-protocol.org/latest/whats-new-v1/), репозиторий [a2aproject/A2A](https://github.com/a2aproject).
 
 ---
 
@@ -58,7 +60,7 @@ Orchestrator Agent
 | Model Gateway | агент ↔ LLM providers |
 | AgentOps | измерение и контроль agent system |
 
-**Практический вывод для архитектора:** A2A и MCP — ортогональные слои. Агент берёт инструменты через MCP, знания через RAG/память, а другие агенты вызывает по A2A. Интеграционный паттерн: агент получает «руки» через MCP, «коллег» через A2A.
+**Практический вывод для архитектора:** A2A и MCP — ортогональные слои. Агент берёт инструменты через MCP, знания через RAG/память, а других агентов вызывает по A2A. Интеграционный паттерн: агент получает «руки» через MCP, «коллег» через A2A.
 
 ### 1.2. Когда multi-agent оправдан
 
@@ -75,7 +77,7 @@ Orchestrator Agent
 
 **Один агент вместо оркестратора**: если «оркестратор» просто proxy-ит вызовы в одну LLM — это не multi-agent, это один агент с лишним слоем. A2A имеет смысл, когда агенты реально отличаются: модель, знания, инструменты, права.
 
-**A2A без MCP**: агент, вызывающий другого агента, часто нуждается в его инструментах. Если второй агент не умеет звать MCP-инструменты — каждый раз «напрашивается» третий уровень. Контракт agent-a должен включать описание того, какие инструменты он задействует.
+**A2A без MCP**: агент, вызывающий другого агента, часто нуждается в его инструментах. Если второй агент не умеет звать MCP-инструменты — каждый раз «напрашивается» третий уровень. Контракт агента A должен включать описание того, какие инструменты он задействует.
 
 **Почему это важно архитектору:** A2A — про границы компетенций и ответственности, а не про количество LLM-вызовов. Стоимость решения растёт с каждым агентом: state, tracing, delegation, retry. Каждый агент должен приносить измеримую ценность.
 
@@ -85,14 +87,18 @@ Orchestrator Agent
 
 ### 2.1. Agent Card — описание возможностей агента
 
-Agent Card — JSON-документ, который агент публикует для discovery. Содержит name, description, URL, authentication и список capabilities.
+Agent Card — JSON-документ, который агент публикует для discovery. Содержит name, description, version, список интерфейсов и capabilities.
 
 ```typescript
 interface AgentCard {
   name: string;
   description: string;
-  url: string;
   version: string;
+  supportedInterfaces: {        // v1.0: первый элемент — предпочтительный
+    url: string;                // "https://agent.example.com/a2a"
+    protocolBinding: string;    // "JSONRPC" | "GRPC" | "HTTP+JSON"
+    protocolVersion: string;    // "0.3" | "1.0" — агент может объявить обе
+  }[];
   capabilities: {
     tasks: string[];           // типы задач: "extraction", "research"
     maxInputSize: number;      // макс. размер входных данных (chars)
@@ -100,7 +106,7 @@ interface AgentCard {
     supportedFormats: string[]; // "json", "markdown", "text"
     maxConcurrent: number;     // параллельных task
   };
-  authentication: {
+  securitySchemes: {
     type: 'none' | 'bearer' | 'oauth2';
     scopes: string[];
   };
@@ -108,6 +114,8 @@ interface AgentCard {
 ```
 
 Agent Card — это не просто discovery, это **контракт SLA**. По нему оркестратор решает: можно ли этому агенту отдать задачу внутри лимитов, и какие credentials понадобятся.
+
+В протоколе v1.0 карточка стала мультиинтерфейсной: вместо одного `url` поле `supportedInterfaces` перечисляет связки `url` + `protocolBinding` + `protocolVersion` (JSON-RPC, gRPC, HTTP+JSON/REST), а объявление схем безопасности живёт в `securitySchemes`. Перед префиксом `/v1` в URL из v0.3 в v1.0 отказались — версия переносится на уровень интерфейса.
 
 ### 2.2. Task — единица работы
 
@@ -120,8 +128,12 @@ flowchart LR
     C --> D["completed<br/>(result available)"]
     C --> E["failed<br/>(error + reason)"]
     C --> F["canceled<br/>(orchestrator abort)"]
+    C --> G["rejected<br/>(agent declines)"]
+    C --> H["input-required<br/>(needs user input)"]
     B --> F
 ```
+
+В спецификации состояний больше пяти: к терминальным `completed`, `failed`, `canceled` добавлен `rejected` (агент отказался брать задачу), а для многоходовых диалогов есть прерываемые состояния `input-required` и `auth-required`. Оркестратор обязан обрабатывать их явно, иначе задача зависает.
 
 ```typescript
 interface Task {
@@ -132,7 +144,7 @@ interface Task {
   idempotencyKey?: string; // для safe retry
 
   input: TaskInput;
-  status: TaskStatus;      // submitted | working | completed | failed | canceled
+  status: TaskStatus;      // submitted | working | input-required | auth-required | completed | failed | canceled | rejected
   output?: TaskOutput;
   error?: { code: string; message: string };
 
@@ -148,15 +160,18 @@ interface Task {
 
 ### 2.3. Протокольный lifecycle
 
-Агент-отправитель (orchestrator) вызывает агента-исполнителя:
+Агент-отправитель (orchestrator) вызывает агента-исполнителя. В v1.0 при binding `HTTP+JSON` это один POST на URL интерфейса из `supportedInterfaces[0]`, а операция задаётся полем `method`:
 
 ```text
-1. Orchestrator: POST /a2a/task → { taskId, status: "submitted" }
-2. Orchestrator: GET /a2a/task/{taskId} (poll) → { status: "working" }
-   или: SSE /a2a/task/{taskId}/stream (stream) → { status, delta }
-3. Agent:       PATCH /a2a/task/{taskId} → { status: "completed", output }
-4. Orchestrator: GET /a2a/task/{taskId} → { status: "completed", output }
+1. Orchestrator: message/send          → { task: { id, status: "submitted" } }
+2. Orchestrator: tasks/get (poll)      → { task: { status: "working" } }
+   или: message/stream (SSE)           → события task/status и task/artifact_update
+3. Agent:       завершает задачу, результат приходит в task.artifact
+4. Orchestrator: tasks/resubscribe     → переподключение SSE после обрыва
+   или: tasks/cancel                   → отмена по требованию оркестратора
 ```
+
+Префиксов `/v1` в URL больше нет — версия живёт в `supportedInterfaces[].protocolVersion`, поэтому один агент может обслуживать и 0.3, и 1.0 одновременно.
 
 Выбор между poll и stream — trade-off:
 

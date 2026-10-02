@@ -21,12 +21,12 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Beasties | **0.2.x** | Автоматическая экстракция critical CSS (наследник Critters) |
-| Critical | **5.x** | Penthouse-based экстракция с Puppeteer |
+| Beasties | **0.5.x** | Автоматическая экстракция critical CSS (наследник Critters) |
+| Critical | **9.x** | Puppeteer-based экстракция |
 | csso | **5.x** | CSS минификация |
 | PostCSS | **8.x** | CSS processing pipeline |
 
@@ -95,7 +95,7 @@ Critical CSS = стили необходимые для отрисовки
                без прокрутки
 
 Above-the-fold = viewport пользователя
-               = обычно 1200×800px (desktop), 390×844px (mobile)
+               = обычно 1440×900px (desktop), 390×844px (mobile)
 ```
 
 ### Что входит в critical
@@ -566,13 +566,13 @@ Beasties по умолчанию использует один viewport. Hero н
 > «Добавь critical CSS»
 
 **Хорошая формулировка:**
-> «Добавь Beasties 0.2.x в postbuild script для SSG output в `./dist`.
+> «Добавь Beasties 0.5.x в postbuild script для SSG output в `./dist`.
 > Конфиг: `preload: 'media'`, `compress: true`, `noscriptFallback: true`, `pruneSource: false`.
 > Обработать все `.html` файлы в dist через `glob('dist/**/*.html')` параллельно через `Promise.all`.
 > Добавить как npm postbuild script: `"postbuild": "tsx scripts/inline-critical.ts"`.
 > Логировать количество обработанных файлов и время выполнения.»
 
-Формула: Beasties 0.2.x в postbuild + конфиг (preload/compress/noscript/pruneSource) + glob по dist + postbuild script.
+Формула: Beasties 0.5.x в postbuild + конфиг (preload/compress/noscript/pruneSource) + glob по dist + postbuild script.
 
 ---
 

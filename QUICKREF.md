@@ -72,14 +72,14 @@
 | 37 JS Perf | will-change только на анимируемых элементах |
 | 38 HTTP Caching | `stale-while-revalidate` для CDN |
 | 39 CWV Diagnostics | Lighthouse + RUM; lab data ≠ field data |
-| 40 Perf Budget | 14KB CSS, 100KB JS, 1MB images |
+| 40 Perf Budget | JS < 300KB gzip, LCP ≤ 2500ms; bundle size — hard fail, score — warn |
 
 ## Agent Systems (41–47)
 
 | Модуль | Ключевая концепция |
 |--------|-------------------|
-| 41 MCP | Tool server ≠ API proxy; STDIO vs HTTP/SSE vs WebSocket |
-| 42 A2A | Agent Card → Task → Artifact; orchestrator vs peer vs pipeline |
+| 41 MCP | Tool server ≠ API proxy; STDIO vs Streamable HTTP; stateless-сервер за LB |
+| 42 A2A | Agent Card → Task → Artifact; orchestrator vs peer vs pipeline; протокол v1.0 |
 | 43 Agent Memory | Episodic vs procedural vs semantic; provenance обязателен |
 | 44 Browser Use | Адаптер/скрипт надёжнее агента; URL allowlist, капча, WAF-backoff |
 | 45 Agentic RAG | Multi-step retrieval: plan → search → verify → answer |

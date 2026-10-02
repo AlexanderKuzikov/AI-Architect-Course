@@ -85,7 +85,7 @@ Redis структура данных: ключ → множество field-val
 Инвалидация ключей по паттерну через `SCAN` + `DEL`. Не использовать `KEYS` — блокирует Redis. Паттерн: `prefix:*`. Итеративный обход с `COUNT 100` за итерацию — не блокирует event loop Redis.
 
 **ioredis**  
-Node.js Redis клиент. Версия 5.11.1 (июнь 2026). Поддерживает pipeline, cluster, sentinel, pub/sub, TLS. Параметры для кэша: `maxRetriesPerRequest: 3` (для обычных команд), `commandTimeout`, `retryStrategy`.
+Node.js Redis клиент. Версия 6.0.0 актуальна на октябрь 2026 (требует Node.js 20+, RESP3 по умолчанию). Поддерживает pipeline, cluster, sentinel, pub/sub, TLS. Параметры для кэша: `maxRetriesPerRequest: 3` (для обычных команд), `commandTimeout`, `retryStrategy`.
 
 ---
 
@@ -108,7 +108,7 @@ Distributed кэш: Redis. Разделяется между всеми инст
 HTTP заголовок: дата последнего изменения ресурса. Используется в `If-Modified-Since` для conditional GET. Менее точен чем ETag (точность до секунды). Использовать для файлов где `mtime` доступен.
 
 **lru-cache**  
-npm пакет. Версия 11.5.1 (июнь 2026). LRU + TTL + size-based eviction. Ключевые опции: `max`, `maxSize`, `sizeCalculation`, `ttl`, `allowStale`, `fetchMethod`, `dispose`. ESM-only начиная с версии 10.x.
+npm пакет. Версия 11.5.3 актуальна на октябрь 2026. LRU + TTL + size-based eviction. Ключевые опции: `max`, `maxSize`, `sizeCalculation`, `ttl`, `allowStale`, `fetchMethod`, `dispose`. ESM-only начиная с версии 10.x.
 
 **LRU (Least Recently Used)**  
 Алгоритм вытеснения: при превышении лимита удаляется запись к которой дольше всего не обращались. Эффективен для рабочих множеств (working set): часто используемые данные остаются, редкие вытесняются.
@@ -137,7 +137,7 @@ npm пакет. Версия 11.5.1 (июнь 2026). LRU + TTL + size-based evic
 Политика Redis по умолчанию: при заполнении памяти команды записи возвращают `OOM command not allowed`. Категорически не подходит для кэша — приводит к ошибкам вместо вытеснения старых данных.
 
 **node-cache**  
-npm пакет для in-memory кэширования. Версия 5.x (март 2026). Проще чем lru-cache, без LRU eviction по умолчанию. Подходит для малых кэшей с TTL без ограничения по размеру.
+npm пакет для in-memory кэширования. Версия 5.1.2 актуальна на октябрь 2026. Проще чем lru-cache, без LRU eviction по умолчанию. Подходит для малых кэшей с TTL без ограничения по размеру.
 
 ---
 

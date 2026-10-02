@@ -20,7 +20,7 @@ Google база данных реальных UX метрик собранных
 Время до первого рендера любого контента (текст, изображение, SVG). Не Core Web Vital, но сигнал загрузки. Влияет на восприятие скорости.
 
 **fetchpriority**  
-HTML атрибут (`high`/`low`/`auto`): подсказка браузеру о приоритете загрузки ресурса. Baseline 2023. Один `fetchpriority="high"` на LCP image улучшает LCP на 20-30%. Нельзя ставить на несколько элементов — конкурируют.
+HTML атрибут (`high`/`low`/`auto`): подсказка браузеру о приоритете загрузки ресурса. Baseline — поддержан всеми браузерами. Один `fetchpriority="high"` на LCP image улучшает LCP на 20-30%. Нельзя ставить на несколько элементов — конкурируют.
 
 **field data**  
 Метрики собранные от реальных пользователей (CrUX, RUM). Google использует для ранжирования. Противопоставляется lab data (Lighthouse, синтетическое тестирование).
@@ -49,7 +49,7 @@ Core Web Vital с марта 2024 (заменил FID): время от user int
 Core Web Vital: время до рендера наибольшего visible элемента в viewport. Порог «хорошо»: ≤ 2.5s. Subparts: TTFB + resource load delay + resource load duration + element render delay.
 
 **LoAF (Long Animation Frame)**  
-Performance API entry type (Baseline 2024): событие когда rendering frame занял > 50ms. Содержит `scripts[]` с `sourceURL`, `invokerType`, `sourceFunctionName`. Заменил Long Tasks API для INP диагностики.
+Performance API entry type (Chromium-only, не Baseline; Chrome/Edge 123+): событие когда rendering frame занял > 50ms. Содержит `scripts[]` с `sourceURL`, `invokerType`, `sourceFunctionName`. Заменил Long Tasks API для INP диагностики. Firefox и Safari не поддерживают — подключать только после feature-detect.
 
 ---
 
@@ -90,7 +90,7 @@ Lab метрика: сумма blocking time всех long tasks между FCP 
 ## W
 
 **web-vitals**  
-npm библиотека (версия 5.x): измерение CWV в браузере. Импорт из `web-vitals/attribution` даёт диагностические данные (LCP element URL, INP interaction target + LoAF entries, CLS shift target).
+npm библиотека (версия 6.x): измерение CWV в браузере. Импорт из `web-vitals/attribution` даёт диагностические данные (LCP element URL, INP interaction target + LoAF entries, CLS shift target).
 
 ---
 

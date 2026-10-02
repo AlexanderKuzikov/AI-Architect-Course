@@ -21,7 +21,7 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | API / инструмент | Статус | Поддержка |
 | :-- | :-- | :-- |
@@ -72,7 +72,7 @@ First Contentful Paint (FCP) ✓
 ```
 Блокирует рендер:
   ✗ <link rel="stylesheet"> в <head>
-  ✗ <script> без defer/async перед </head>
+  ✗ <script> без defer/async в <head>
   ✗ @import внутри CSS файла (создаёт chain: CSS→@import→CSS→@import)
 
 НЕ блокирует рендер:
@@ -198,15 +198,14 @@ First Contentful Paint (FCP) ✓
 ```typescript
 // vite.config.ts — Beasties (наследник Critters, см. модуль 29)
 import { defineConfig } from 'vite'
-import BeastiesPlugin from 'beasties/webpack'  // или vite-интеграция Beasties
+import beasties from 'beasties/vite'
 
 export default defineConfig({
   plugins: [
-    BeastiesPlugin({
+    beasties({
       // Inline critical CSS + async load остального автоматически
-      strategy: 'critical',  // только above-fold
-      preload: 'media',      // async pattern через media="print" trick
-      pruneSource: true,     // удалять inlined стили из внешнего файла
+      preload: 'media',      // async pattern через media-атрибут + onload
+      pruneSource: false,    // дублирование: внешний файл остаётся общим для всех страниц
     }),
   ],
 })
@@ -287,7 +286,7 @@ async function extractCritical(url: string, cssPath: string): Promise<void> {
 
 **penthouse и SPA**: penthouse открывает страницу headlessly. Если React SPA рендерит при JS — penthouse увидит пустую страницу без SSR. Использовать только с SSR или SSG.
 
-**Почему это важно архитектору:** critical CSS extraction — это компромисс: дублирование стилей (inline + external file) vs более быстрый FCP. При `pruneSource: true` — нет дублирования, но external CSS файл меньше → лучше cache hit.
+**Почему это важно архитектору:** critical CSS extraction — это компромисс: дублирование стилей (inline + external file) vs более быстрый FCP. При `pruneSource: true` Beasties создаёт уникальный CSS файл на каждую страницу — это разрушает cross-page кеш (см. модуль 29). Для SSG по умолчанию `pruneSource: false`.
 
 ---
 
@@ -716,7 +715,7 @@ PHP-сайт на собственном фреймворке (WebForge, мод�
 > 5. Если есть utility классы (mt-*, text-*) → `@layer utilities { }`.
 > 6. Все `!important` убрать — заменить на стили в `@layer overrides { }`.»
 
-Формула: @layer-структура (reset/base/utilities/components/overrides) + перенос правил + ликвидация !important.
+Формула: @layer-структура (reset/base/components/utilities/overrides) + перенос правил + ликвидация !important.
 
 ---
 

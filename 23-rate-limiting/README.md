@@ -20,14 +20,14 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| rate-limiter-flexible | **10.0.1** | Production rate limiting, Redis/Memory/Postgres |
-| express-rate-limit | **7.x** | Простой HTTP middleware для Express |
-| @upstash/ratelimit | **latest** | Serverless / edge, HTTP-based Redis |
-| ioredis | **5.9.x** | Redis клиент для distributed limiting |
+| rate-limiter-flexible | **11.2.1** | Production rate limiting, Redis/Memory/Postgres |
+| express-rate-limit | **8.x** | Простой HTTP middleware для Express |
+| @upstash/ratelimit | **2.x** | Serverless / edge, HTTP-based Redis |
+| ioredis | **6.x** | Redis клиент для distributed limiting |
 
 ---
 
@@ -569,7 +569,7 @@ DDoS с 10 000 req/sec достигнет Node.js процесса и перег
 > «Добавь rate limiting на API»
 
 **Хорошая формулировка:**
-> «Используя rate-limiter-flexible 10.0.1 с RateLimiterRedis (ioredis клиент), создай три лимитера:
+> «Используя rate-limiter-flexible 11.2.1 с RateLimiterRedis (ioredis клиент), создай три лимитера:
 > 1. `api-general`: 100 points / 60s per userId (sliding window)
 > 2. `ai-generate`: 10 points / 3600s per userId (дорогие операции)
 > 3. `login-brute`: 5 points / 900s per username, blockDuration: 3600

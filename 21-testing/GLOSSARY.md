@@ -113,8 +113,8 @@ Cleanup daemon testcontainers: автоматически останавлива
 **Test Trophy**  
 Стратегия Kent C. Dodds: акцент на integration tests как наиболее эффективных по confidence/cost. Unit tests — только для чистой бизнес-логики. E2E — только critical paths. Де-факто стандарт для Node.js API сервисов.
 
-**testcontainers-node**  
-Библиотека запуска Docker-контейнеров из тестов: `@testcontainers/postgresql`, `@testcontainers/redis` и др. Версия 11.13.0 (апрель 2026). Поддерживает `AsyncDisposable`. Старт Postgres 16-alpine: ~2–3 секунды. Альтернатива моку БД с полным воспроизведением реального поведения.
+**testcontainers**  
+Библиотека запуска Docker-контейнеров из тестов: `@testcontainers/postgresql`, `@testcontainers/redis` и др. Версия 12.2.0 актуальна на октябрь 2026. Ставится по частям: `@testcontainers/postgresql`, `@testcontainers/redis` и др. Поддерживает `AsyncDisposable`. Старт Postgres 16-alpine: ~2–3 секунды. Альтернатива моку БД с полным воспроизведением реального поведения.
 
 ---
 
@@ -134,7 +134,7 @@ API Vitest для замены модуля тестовым двойником.
 Утилита Vitest для получения типизированного mock-объекта: `vi.mocked(fn).mockReturnValue(...)`. Используется после `vi.mock()` для конфигурации поведения в `beforeEach` без потери типов TypeScript.
 
 **Vitest**  
-Test runner от команды Vite. Версия 4.1 (апрель 2026). Нативный ESM, Worker Threads изоляция, совместимый с Jest API. Требует Node.js ≥ 20. Параллельный запуск файлов выявляет temporal coupling, скрытый в однопоточном Jest.
+Test runner от команды Vite. Версия 5.0 актуальна на октябрь 2026: требует Node.js ≥ 22.12 и Vite ≥ 6.4. Нативный ESM, Worker Threads изоляция, совместимый с Jest API. Требует Node.js ≥ 20. Параллельный запуск файлов выявляет temporal coupling, скрытый в однопоточном Jest.
 
 ---
 

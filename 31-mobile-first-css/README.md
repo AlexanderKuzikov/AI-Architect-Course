@@ -21,7 +21,7 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Фича | Baseline | Поддержка |
 | :-- | :-- | :-- |
@@ -198,7 +198,7 @@ Mobile-first преимущества:
 
 **Breakpoint gap**: контент ломается между определёнными breakpoints. Решение: не задавать breakpoints заранее, а добавлять когда контент требует. Открыть страницу, медленно тянуть за край браузера — точка поломки = breakpoint.
 
-**Landscape mobile**: `(orientation: landscape)` + маленькая высота. iPhone в landscape: ширина 844px — попадёт в `min-width: 768px` tablet стили, но высота 390px. Добавлять `(min-height: 600px)` для layout-heavy компонентов:
+**Landscape mobile**: `(orientation: landscape)` + маленькая высота. iPhone в landscape: ширина 844px — попадёт в `min-width: 768px` стили tablet, но высота 390px. Добавлять `(min-height: 600px)` для layout-heavy компонентов:
 ```css
 @media (min-width: 768px) and (min-height: 600px) {
   .hero { min-height: 80vh; }
@@ -320,7 +320,7 @@ Container query решает:
 
 **`container-type` на флексовом дочернем**: если контейнер сам является flex item без явной ширины — он не имеет собственного inline size для query. Нужно `flex: 1 1 0` или явный `width`.
 
-**Почему это важно архитектору:** container queries фундаментально меняют где живёт responsiveness — в компоненте, не на уровне страницы. Это architectural decision: design system компоненты, которые «знают» свою адаптацию, vs layout-level coordination.
+**Почему это важно архитектору:** container queries фундаментально меняют где живёт адаптивность — в компоненте, не на уровне страницы. Это архитектурное решение: компоненты design system, которые «знают» свою адаптацию, вместо координации на уровне layout.
 
 ---
 
@@ -370,10 +370,12 @@ inset-inline: auto 1rem;  /* = left: auto; right: 1rem (LTR) */
   border-inline-start: 3px solid var(--color-primary);
 }
 
-/* Граничный случай: border-radius ещё НЕ имеет полного
-   логического эквивалента в 2026 */
-/* border-start-start-radius, border-start-end-radius — есть,
-   но поддержка проверять */
+/* Логические border-radius поддерживаются с Chrome 89, Safari 15,
+   Firefox 66 — в 2026 это Baseline widely available */
+.my-card {
+  border-start-start-radius: 8px;
+  border-start-end-radius: 8px;
+}
 
 /* ⚠️ Осторожно: смешивание physical и logical может
    создать конфликты в RTL */
@@ -584,7 +586,7 @@ inset-inline: auto 1rem;  /* = left: auto; right: 1rem (LTR) */
 /* В RTL: margin-left будет с "неправильной" стороны */
 ```
 
-**6. `@media` без `min-width` fallback для container queries**
+**6. `@container` без базового layout для браузеров без поддержки CQ**
 ```css
 /* Браузеры без container query support не получают layout */
 .card { display: block; }  /* ✅ базовый layout всегда */
@@ -653,7 +655,7 @@ Mobile-first cascade (базовый layout под мобильный, `min-widt
 - смена темы — это переопределение переменных, а не набор условных стилей;
 - тема, шрифт и масштаб хранятся как атрибуты на `<html>`; выбор сохраняется в локальном хранилище, а init-скрипт в `<head>` применяет их до первой отрисовки — поэтому нет мигания.
 
-Эталон из витрины — 10 палитр без экстрема (контраст выдержан под требования доступности) и 11 шрифтов с файлами на своём хостинге, включая кириллицу.
+Эталон из витрины — 10 палитр без экстремов (контраст выдержан под требования доступности) и 11 шрифтов с файлами на своём хостинге, включая кириллицу.
 
 Грабли из витрины: табличный грид задаёт свой шрифт с флагом `!important` прямо на ячейках. Переопределять такой шрифт нужно в корне и в переменной грида — с пересчётом по ключу. Точечные `!important` на ячейках не лечатся.
 

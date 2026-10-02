@@ -38,7 +38,7 @@ Observability, tracing, evaluation, guardrails и cost control для LLM/agent 
 ## G
 
 **gen_ai.*** (OTel LLM Conventions)  
-Стандартные атрибуты OpenTelemetry для LLM: `gen_ai.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`. Инструменты понимают их из коробки.
+Стандартные атрибуты OpenTelemetry для LLM: `gen_ai.request.model` / `gen_ai.response.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`. Инструменты понимают их из коробки.
 
 **Golden Dataset**  
 Версионированный набор эталонных примеров с точными expected outputs. Ловит регрессии, которые LLM judge пропускает.

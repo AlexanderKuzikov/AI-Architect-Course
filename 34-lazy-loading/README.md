@@ -21,15 +21,15 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Vite | **8.x** | Bundler + dev server |
 | Rollup | **4.x** | Bundler (Vite использует под капотом) |
-| @vitejs/plugin-react | **4.x** | React + HMR |
-| rollup-plugin-visualizer | **5.x** | Bundle analysis |
-| vite-bundle-analyzer | актуальный | Bundle analysis (альтернатива) |
+| @vitejs/plugin-react | **6.x** | React + HMR |
+| rollup-plugin-visualizer | **7.x** | Bundle analysis |
+| vite-bundle-analyzer | **1.3.x** | Bundle analysis (альтернатива) |
 
 ---
 

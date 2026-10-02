@@ -21,16 +21,16 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Компонент | Версия | Назначение |
 | :-- | :-- | :-- |
-| `actions/checkout` | **v5** | Клонирование репозитория |
-| `actions/setup-node` | **v6** | Node.js окружение + встроенный npm cache |
-| `actions/cache` | **v4** | Кэширование произвольных путей |
-| `docker/build-push-action` | **v6** | BuildKit сборка и push |
-| `docker/login-action` | **v3** | Аутентификация в registry |
-| GitHub Actions Runner | **v2.321+** | ubuntu-latest = Ubuntu 24.04 |
+| `actions/checkout` | **v7** | Клонирование репозитория |
+| `actions/setup-node` | **v7** | Node.js окружение + встроенный npm cache |
+| `actions/cache` | **v6** | Кэширование произвольных путей |
+| `docker/build-push-action` | **v7** | BuildKit сборка и push |
+| `docker/login-action` | **v4** | Аутентификация в registry |
+| GitHub Actions Runner | **v2.337+** | ubuntu-latest = Ubuntu 24.04 |
 
 ---
 
@@ -134,13 +134,13 @@ concurrency:
 
 ### setup-node со встроенным кэшем
 
-`actions/setup-node@v6` умеет кэшировать npm/yarn/pnpm без отдельного `cache` action:
+`actions/setup-node@v7` умеет кэшировать npm/yarn/pnpm без отдельного `cache` action:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v5
+  - uses: actions/checkout@v7
 
-  - uses: actions/setup-node@v6
+  - uses: actions/setup-node@v7
     with:
       node-version: 24
       cache: 'npm'          # кэшировать ~/.npm
@@ -158,7 +158,7 @@ Cache key формируется автоматически из `package-lock.j
 
 ```yaml
 - name: Cache node_modules
-  uses: actions/cache@v4
+  uses: actions/cache@v6
   id: npm-cache
   with:
     path: ~/.npm
@@ -179,8 +179,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'npm'
@@ -188,7 +188,7 @@ jobs:
       - run: npm run test:coverage
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage/
@@ -199,7 +199,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download coverage
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: coverage-report
           path: coverage/
@@ -229,8 +229,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: 'npm' }
       - run: npm ci
       - run: npm run lint
@@ -238,8 +238,8 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: 'npm' }
       - run: npm ci
       - run: npm run typecheck
@@ -247,8 +247,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: 'npm' }
       - run: npm ci
       - run: npm run test:ci
@@ -257,8 +257,8 @@ jobs:
     needs: [lint, typecheck, test]   # все три параллельно → build после всех
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: 'npm' }
       - run: npm ci
       - run: npm run build
@@ -293,7 +293,7 @@ jobs:
       fail-fast: false    # не отменять другие при failure одного
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -375,7 +375,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # AWS: получить временные credentials через OIDC
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::123456789:role/github-actions-role
           aws-region: eu-central-1
@@ -410,20 +410,20 @@ jobs:
       contents: read
       packages: write   # GHCR push
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: ${{ github.ref == 'refs/heads/main' }}
@@ -442,10 +442,10 @@ jobs:
 
 ```yaml
 - name: Set up QEMU
-  uses: docker/setup-qemu-action@v3    # эмуляция arm64 на amd64
+  uses: docker/setup-qemu-action@v4    # эмуляция arm64 на amd64
 
 - name: Build multi-platform
-  uses: docker/build-push-action@v6
+  uses: docker/build-push-action@v7
   with:
     platforms: linux/amd64,linux/arm64
     push: true
@@ -497,8 +497,8 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-node@v6
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v7
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'npm'
@@ -580,8 +580,8 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: 'npm' }
       - run: npm ci
       - run: node glossary-links.mjs   # битые ссылки на модули → fail
@@ -610,7 +610,7 @@ CI для **контента** (не кода) окупился быстрее, 
 
 Проверки после каждого деплоя: здоровье API с проверками базы и кэша, счётчик записей через API, одна запись патчем с аудитом, главная страница с заголовком, статусы сервисов, хвост журнала. Локалка и витрина сверяются числом записей и версией миграций — расхождение ловится до демо, а не на нём.
 
-Правило: разработка локально, витрина — по требованию, не каждый коммит. Ручной скрипт с проверками дешевле полноценного конвейера, пока деплоишь по требованию, а не десять раз в день.
+Правило: разработка локально, витрина — по требованию, не каждый коммит. Ручной скрипт с проверками дешевле полноценного конвейера, пока деплоишь по требованию, а не 10 раз в день.
 
 ### Дополнение из практики: кодировки в пайплайне и защита данных при импорте (сентябрь 2026)
 
@@ -713,7 +713,7 @@ deploy:
 > Jobs параллельно: `lint` (eslint), `typecheck` (tsc --noEmit), `test` (vitest --run).
 > `build` после всех трёх через `needs: [lint, typecheck, test]`.
 > `deploy` только на main, после build, `environment: production`.
-> Каждый job: `actions/checkout@v5` + `actions/setup-node@v6` с `cache: 'npm'` + `npm ci`.
+> Каждый job: `actions/checkout@v7` + `actions/setup-node@v7` с `cache: 'npm'` + `npm ci`.
 > `concurrency: group: ${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true`.
 > Глобальные `permissions: contents: read`. Пинить `runs-on: ubuntu-24.04`.»
 
@@ -726,8 +726,8 @@ deploy:
 
 **Хорошая формулировка:**
 > «Добавь job `docker` в ci.yml после успешного `build` (`needs: build`).
-> Steps: `docker/setup-buildx-action@v3`, `docker/login-action@v3` для GHCR (password: secrets.GITHUB_TOKEN).
-> `docker/build-push-action@v6`: push только на main, теги `latest` и `github.sha`.
+> Steps: `docker/setup-buildx-action@v4`, `docker/login-action@v4` для GHCR (password: secrets.GITHUB_TOKEN).
+> `docker/build-push-action@v7`: push только на main, теги `latest` и `github.sha`.
 > Registry cache: `cache-from/cache-to type=registry,ref=ghcr.io/${{ github.repository }}:buildcache,mode=max`.
 > Permissions job: `packages: write`.»
 
@@ -743,7 +743,7 @@ deploy:
 - [ ] `concurrency` настроен: cancel-in-progress для feature branches, false для main
 
 **Производительность**
-- [ ] `actions/setup-node@v6` с `cache: 'npm'` или `cache: 'pnpm'`
+- [ ] `actions/setup-node@v7` с `cache: 'npm'` или `cache: 'pnpm'`
 - [ ] Cache keys включают `hashFiles('**/package-lock.json')`
 - [ ] Docker: registry cache с `mode=max`
 

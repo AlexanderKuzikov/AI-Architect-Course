@@ -8,7 +8,7 @@
 
 ---
 
-Курс для AI-архитекторов: 52 модуля covering RAG, MCP, A2A, agent memory, desktop, cost engineering, API design, resilience. Мультиязычные примеры (JS/TS/PHP/Python/Go), Node build scripts.
+Курс для AI-архитекторов: 52 модуля — RAG, MCP, A2A, agent memory, desktop, cost engineering, API design, resilience. Мультиязычные примеры (JS/TS/PHP/Python/Go), Node build scripts.
 
 - **52 модуля** — RAG, MCP, A2A, agent memory, desktop, API design и другие темы.
 - **Мультиязычность** — примеры на JS, TS, PHP, Python, Go.

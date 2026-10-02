@@ -70,7 +70,7 @@
 |:--|:--|:--|:--|
 | Short-term | текущий диалог | session | последние сообщения |
 | Episodic | события и факты сессии | days/months | «пользователь утвердил договор DOC-123» |
-| Semantic | устойчивые факты | months/years | «клиент использует MSK timezone» |
+| Semantic | устойчивые факты | months/years | «клиент работает в часовом поясе МСК» |
 | Procedural | правила/навыки | months/years | «перед отправкой договора проверять реквизиты» |
 | Working memory | временный plan/context | task | список шагов текущего workflow |
 
@@ -188,7 +188,7 @@ Provenance chain: `fact → source → sourceType → confidence → createdAt`.
 
 **Конкурентные записи**: два агента одновременно пишут факт про одного клиента. Последний write побеждает — но это может быть более низкий confidence. Нужно правило разрешения конфликта: сравнить confidence и свежесть записи, либо смержить их.
 
-**Дубликаты facts**: «клиент использует МСК» записан трижды с разными id. Retrieve возвращает тройную копию. Deduplication по (tenantId, subject, normalized predicate) обязателен.
+**Дубликаты facts**: «клиент использует МСК» записан трижды с разными id. Retrieve возвращает тройную копию. Deduplication по (tenantId, subject, нормализованный predicate, нормализованный object) обязателен.
 
 **Юридическое удаление (GDPR)**: пользователь просит удалить персональные данные. Forget должен каскадно пройти по всем типам памяти, включая references в графе. Legal hold — исключение: retentionReason='legal_hold' блокирует удаление.
 
@@ -239,7 +239,7 @@ Provenance chain: `fact → source → sourceType → confidence → createdAt`.
 
 - graph: `(Company)-[:HAS_CONTRACT]->(Contract)-[:SIGNED_BY]->(Person)` — multi-hop ответы работают;
 - vector: «проблемы с оплатой» → семантический поиск по жалобам клиента;
-- deduplication по (tenantId, subject, predicate) — убрал тройные копии;
+- deduplication по (tenantId, subject, нормализованный predicate, нормализованный object) — убрал тройные копии;
 - provenance обязательна: каждый факт знает источник, пересоздание графа из истории возможно;
 - GDPR delete: каскадный forget по всем типам + legal hold для открытых дел.
 
@@ -316,7 +316,7 @@ Provenance chain: `fact → source → sourceType → confidence → createdAt`.
 
 **Задача 2 — Duplicate detector**
 
-> Реализуй `findDuplicateMemory(record, existing)`. Дубликатом считать одинаковые `tenantId`, `subject`, `predicate`, нормализованный `object` и пересекающийся `accessPolicy`. Верни `{duplicate: boolean, existingIds: string[]}`.
+> Реализуй `findDuplicateMemory(record, existing)`. Дубликатом считать одинаковые `tenantId`, `subject`, нормализованный `predicate`, нормализованный `object` и пересекающийся `accessPolicy`. Верни `{duplicate: boolean, existingIds: string[]}`.
 
 ---
 

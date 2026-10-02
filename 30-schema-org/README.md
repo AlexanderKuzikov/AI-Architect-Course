@@ -21,16 +21,16 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Schema.org vocab | **28.x** | Полная онтология типов |
+| Schema.org vocab | **30.1** | Полная онтология типов |
 | Google Search Gallery | — | Subset типов поддерживаемых Google |
 | Rich Results Test | — | Валидация Google-specific |
 | Schema Markup Validator | — | Полная Schema.org валидация |
 
-> **Важно январь 2026:** Google удалил поддержку ряда rich result типов. Dataset работает только в Dataset Search. FAQPage/HowTo — строгие ограничения. Всегда проверять актуальный [Google Search Gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery).
+> **Важно 2026:** Google сузил набор rich results. FAQPage отключён в поиске с 7 мая 2026, HowTo — deprecated с сентября 2023, `Dataset` работает только в Dataset Search. Всегда проверять актуальный [Google Search Gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery).
 
 ---
 
@@ -88,7 +88,7 @@ JSON-LD используется во всём модуле. Причины:
   ✓ Не смешан с HTML — легко менять независимо
   ✓ Легко генерировать программно из CMS данных
   ✓ Нет риска сломать верстку при изменении
-  ✓ Единственный где Google разрешает размещение в <body>
+  ✓ Единственный формат, который Google разрешает размещать в `<body>`
 ```
 
 ### Базовая структура
@@ -213,7 +213,7 @@ JSON-LD используется во всём модуле. Причины:
 }
 ```
 
-**Ловушка**: `priceValidUntil` обязателен для стабильного rich result. Без него Google может не показывать цену. Дата должна быть в будущем.
+**Ловушка**: `priceValidUntil` рекомендован Google для стабильного rich result. Без него дата «сгорания» цены неизвестна и Google может не показывать цену. Дата должна быть в будущем.
 
 ### Article / BlogPosting
 
@@ -288,7 +288,7 @@ Breadcrumbs отображаются в SERP вместо URL — повышаю
 }
 ```
 
-**Ограничения 2026**: Google резко сократил показ FAQPage rich results. Показываются только для авторитетных доменов по узким запросам. Не рассчитывать на них как на стабильный канал трафика.
+**Ограничения 2026**: с 7 мая 2026 Google Search больше не показывает FAQPage rich results вообще — ни десктоп, ни мобильные. Разметку можно оставить (лишняя разметка не вредит), но строить на ней стратегию нельзя: ни SERP-выдачи, ни отчёта в Search Console.
 
 ### LocalBusiness
 
@@ -397,23 +397,28 @@ Breadcrumbs отображаются в SERP вместо URL — повышаю
 
 ## 5. Изменения 2026
 
-### Удалённые типы (январь 2026)
+### Удалённые типы (2025–2026)
 
 Google прекратил поддержку rich results для:
-- `Dataset` — перемещён в Dataset Search
-- `SpecialAnnouncement` — добавлен в COVID период, убран
-- `CovidTestingFacility` — убран
+- `Dataset` — с ноября 2025 работает только в Dataset Search, не в Google Search
+- `SpecialAnnouncement` — deprecated с июля 2025 (добавлен в COVID период)
+- `CovidTestingFacility` — убран вместе с остальными COVID-схемами
+- `Book Actions`, `Course Info`, `Claim Review`, `Estimated Salary`, `Learning Video`, `Vehicle Listing` — отключены в 2025
+- `Practice Problem` — поддержка снята в январе 2026
 
-### FAQPage и HowTo — ограничения
+### FAQPage и HowTo — таймлайн
 
 ```
-До 2024: FAQPage показывался для большинства сайтов
-2024:    Ограничен авторитетными доменами
-2025-2026: Ещё строже — только для узких запросов,
-           правительственные и медицинские сайты
+2023-08:    FAQPage ограничен авторитетными gov/health доменами,
+            HowTo ограничен десктопом
+2023-09-13: HowTo deprecated полностью (мобильный + десктоп)
+2026-05-07: FAQPage rich results отключены в Google Search
+2026-06:    убрана документация FAQPage и поддержка в Search Console
+2026-08:    поддержка FAQPage удалена из Search Console API
 
-Вывод: FAQPage — добавлять, но не строить стратегию на нём.
-       Потенциал не исчез полностью — просто непредсказуем.
+Вывод: FAQPage и HowTo больше не дают SERP-выдачи.
+       Разметка остаётся полезной для понимания контента
+       AI-системами, но не как канал трафика из поиска.
 ```
 
 ### AI Overview и structured data
@@ -426,8 +431,9 @@ Google AI Overview (SGE):
 Важные типы для AI Overview:
   Article с dateModified → «свежий» контент
   Person/Organization с sameAs → верифицированные источники
-  HowTo → пошаговые инструкции
-  FAQPage → ответы на вопросы
+  Product + Offer → цена и наличие для товарных запросов
+  BreadcrumbList → иерархия страницы
+  (FAQPage/HowTo не дают SERP-выдачи с 2026 — см. §5)
 ```
 
 ---
@@ -592,11 +598,11 @@ SEO-проект (SEO-Zavodsvay): статический сайт на PHP-ша�
 **3. Несколько плагинов генерирующих Organization**
 Centralize: один источник structured data. Выключить все плагины кроме одного или генерировать программно в шаблоне.
 
-**4. FAQPage для коммерческих запросов**
+**4. FAQPage как источник трафика из поиска**
 ```json
-// ❌ FAQPage на странице /buy/product — коммерческий интент
-// Google не показывает FAQ для явно коммерческих страниц
-// ✅ FAQPage только для информационных страниц
+// ❌ FAQPage в расчёте на SERP-выдачу
+// Google Search не показывает FAQPage с мая 2026 — ни на одном устройстве
+// Разметку можно оставить для AI-систем, но обещать rich result нельзя
 ```
 
 **5. Пропускать @id для сущностей**
@@ -660,7 +666,7 @@ Google проверяет соответствие: разметка с ratingVa
 - [ ] BreadcrumbList — на всех внутренних страницах
 - [ ] Article/BlogPosting — все публикации
 - [ ] Product + Offer — все товарные страницы (priceValidUntil!)
-- [ ] FAQPage — только информационные страницы, не коммерческие
+- [ ] FAQPage — только как разметка контента для AI-систем, не расчёт на rich result
 - [ ] LocalBusiness — если физическая точка
 
 **Качество данных**

@@ -21,7 +21,7 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | API / инструмент | Статус | Поддержка |
 | :-- | :-- | :-- |
@@ -29,9 +29,9 @@
 | Web Workers | **Stable** | Все browsers |
 | SharedArrayBuffer | **Требует COOP+COEP** | Chrome 68+, FF 79+, Safari 15.2+ |
 | Atomics | **ES2017** | Все major browsers |
-| `scheduler.postTask()` | **Baseline 2024** | Chrome 94+, FF 101+, Safari 17+ |
-| `scheduler.yield()` | **Baseline 2024** | Chrome 115+, FF 131+, Safari 17.4+ |
-| Comlink | **4.x** | Web Worker abstraction |
+| `scheduler.postTask()` | **Baseline 2024** | Chrome 94+, FF 101+, Safari 15.4+ |
+| `scheduler.yield()` | **Chromium + FF, не Baseline** | Chrome/Edge 129+, FF 142+, Safari нет |
+| Comlink | **4.4.x** | Web Worker abstraction |
 
 ---
 
@@ -112,9 +112,7 @@ observer.observe({ type: 'long-animation-frame', buffered: true })
     Дорого — дороже, чем если бы не оптимизировать вовсе.
 ```
 
-Почему средний уровень вообще нужен.
-
-Без Maglev функция прошла бы от интерпретатора сразу к TurboFan. А TurboFan перед оптимизацией делает анализ: строит граф, проверяет типы, пробует специализации (объекты одной формы можно развернуть прямо в регистры).
+Почему средний уровень вообще нужен? Без Maglev функция прошла бы от интерпретатора сразу к TurboFan. А TurboFan перед оптимимизацией делает анализ: строит граф, проверяет типы, пробует специализации (объекты одной формы можно развернуть прямо в регистры).
 
 Для большинства функций этот анализ дороже самой работы — они вызываются сотни раз, а не миллионы. Maglev компилирует быстро и «грубо», а TurboFan добавляется только тем, кому это окупается.
 
@@ -396,7 +394,7 @@ class DatabaseConnection implements Disposable {
 
 **WeakRef и microtask queue**: даже если объект eligible for GC, он может оставаться живым пока выполняется текущая microtask queue. `deref()` в том же synchronous block скорее всего вернёт объект — но это не гарантия.
 
-**FinalizationRegistry в Node.js**: в Node.js GC callbacks из FinalizationRegistry выполняются в отдельном потоке (libuv). Нельзя трогать JS объекты из callback напрямую — только через `process.nextTick` / `setImmediate`. 
+**FinalizationRegistry в Node.js**: callback выполняется как microtask на главном isolate — в том же потоке, что и остальной JS. Поэтому внутри callback нельзя делать долгие синхронные операции (иначе блокируется event loop); тяжёлую работу выносить в `setImmediate`. Сам момент вызова определяется GC и не прогнозируется. 
 
 **Почему это важно архитектору:** WeakRef не замена явным lifecycle паттернам. Это safety net для кешей. Если SPA держит в памяти 50 закрытых модальных компонентов — проблема не в отсутствии WeakRef, а в том что компоненты не unmount.
 
@@ -566,7 +564,7 @@ async function processLargeArray(items: Item[]): Promise<Result[]> {
 
 **`scheduler.yield()` и priority inheritance**: yield возобновляет задачу с тем же приоритетом. Но если между chunks появится более приоритетная задача — она выполнится первой. Для UI-критичного кода использовать `user-blocking` priority чтобы не быть вытесненным.
 
-**`scheduler.postTask()` и Safari < 17**: Baseline 2024 означает Safari 17.4+. Для более старых — полифил через `MessageChannel` или `setTimeout`. 
+**`scheduler.postTask()` и Safari < 15.4**: Baseline 2024 означает Safari 15.4+. Для более старых — полифил через `MessageChannel` или `setTimeout`. 
 
 **Почему это важно архитектору:** `scheduler.yield()` — правильная замена `setTimeout(fn, 0)` для chunking. setTimeout добавляет минимум 4ms задержку. yield — немедленное продолжение после обработки приоритетных задач.
 
@@ -729,7 +727,7 @@ setInterval(async () => {
 > 6. При поисковом запросе: `const results = await workerApi.search(query)`.
 > 7. Проверить: поиск по 50K записей не должен создавать LoAF entry.»
 
-Формула: useMemo/useDeferredValue + worker (transferList) + VirtualizedList + порог 50K без LoAF.
+Формула: Web Worker (Comlink) + buildIndex/search на границе 50K записей + проверка «нет LoAF при поиске».
 
 ---
 

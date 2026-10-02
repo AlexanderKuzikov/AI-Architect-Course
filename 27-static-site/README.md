@@ -1,7 +1,7 @@
 # Модуль 27 — Static Site Generation
 
 > **Для AI-архитектора:** SSG — это не «сделать сайт без сервера». Это архитектурное решение: где проходит граница между build time и runtime, как управлять свежестью данных без полного rebuild, и сколько страниц пережёвывает CI перед деплоем. AI-кодер выберет Next.js по умолчанию. Задача архитектора — понять, когда Astro Islands экономит 95% JS, а когда ISR превращается в источник stale контента.
-> Один день изучения — build vs runtime спектр, Astro 6 Island architecture, ISR механика, граничные случаи при тысячах страниц.
+> Один день изучения — build vs runtime спектр, Astro 7 Island architecture, ISR механика, граничные случаи при тысячах страниц.
 
 ---
 
@@ -20,17 +20,17 @@
 
 ## Актуальные версии
 
-> Август 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Astro | **6.1** (stable) | Island architecture SSG/SSR |
-| Eleventy | **3.1.5** (stable) / 4.0.0-alpha | Zero-JS SSG, максимальная гибкость |
-| Next.js | **16.x** | SSG + ISR + hybrid rendering |
-| Vite | **8.x** | Build tooling под Astro |
-| sharp | **0.34+** | Image optimization в build pipeline |
+| Astro | **7.3** (stable) | Island architecture SSG/SSR |
+| Eleventy | **3.1.6** (stable) | Zero-JS SSG, максимальная гибкость |
+| Next.js | **16.3** | SSG + ISR + hybrid rendering |
+| Vite | **8.3** | Build tooling под Astro |
+| sharp | **0.35+** | Image optimization в build pipeline |
 
-> Astro 6.x: workerd dev server, Live Content Collections, auto CSP.
+> Astro 6.x добавил Fonts API, auto CSP и Live Content Collections. Astro 7.x: Vite 8, новый Rust-компилятор, Advanced Routing.
 
 ---
 
@@ -197,7 +197,7 @@ const { Content } = await post.render()
 
 **Import ordering в `.astro`**: frontmatter (между `---`) выполняется на сервере в build time. Любой код с `window`, `document`, `localStorage` в frontmatter — crash сборки. Изолировать в `client:*` islands.
 
-**Live Content Collections (Astro 6)**: новый режим — данные загружаются в runtime, не только в build. Ломает предположение «SSG = всё статично»: нужно явно объявлять что live, что static, иначе смешанный кэш.
+**Live Content Collections (Astro 6+)**: новый режим — данные загружаются в runtime, не только в build. Ломает предположение «SSG = всё статично»: нужно явно объявлять что live, что static, иначе смешанный кэш.
 
 **Почему это важно архитектору:** `client:load` везде — это не island architecture, это просто медленный React app с лишним шагом. Профилировать bundle по `astro build --verbose` перед деплоем.
 
@@ -312,7 +312,7 @@ export const dynamicParams = true  // (default) — SSR для unknown params
 // export const dynamicParams = false — 404 для unknown params
 ```
 
-### Параллельная генерация (Next.js 15)
+### Параллельная генерация (Next.js 16)
 
 ```typescript
 // next.config.ts
@@ -337,7 +337,7 @@ export default defineConfig({
 
 ### Граничные случаи — где ломается
 
-**Memory в build process**: при генерации 50k+ страниц Node.js build process может hit heap limit. `NODE_OPTIONS=--max-old-space-size=8192` для больших сайтов в CI. Astro 6 с workerd dev server снижает footprint.
+**Memory в build process**: при генерации 50k+ страниц Node.js build process может hit heap limit. `NODE_OPTIONS=--max-old-space-size=8192` для больших сайтов в CI. Astro 6+ с workerd dev server снижает footprint.
 
 **Частичный rebuild**: большинство SSG фреймворков не поддерживают настоящий incremental rebuild из коробки — при изменении layout все страницы перестраиваются. Eleventy 3.x с `--incremental` флагом — исключение.
 
@@ -548,14 +548,14 @@ export default async function Page() {
 > «Сделай блог на Astro»
 
 **Хорошая формулировка:**
-> «Создай Astro 6.1 блог. Content Collection `blog` с schema: title (string), publishDate (date), tags (string[]), draft (boolean, default: false).
+> «Создай Astro 7.3 блог. Content Collection `blog` с schema: title (string), publishDate (date), tags (string[]), draft (boolean, default: false).
 > Страница `/blog/[slug].astro` через `getStaticPaths` + `getCollection('blog', p => !p.data.draft)`.
 > Island `SearchWidget` с `client:idle`, компонент Preact.
 > Комментарии `client:visible`.
 > Sitemap через `@astrojs/sitemap`, `trailingSlash: 'never'`, canonical URL в head.
 > JSON-LD Article schema для каждого поста.»
 
-Формула: Astro 6.1 + Content Collections (schema) + getStaticPaths + директивы гидрации (idle/visible) + sitemap/canonical + JSON-LD.
+Формула: Astro 7.3 + Content Collections (schema) + getStaticPaths + директивы гидрации (idle/visible) + sitemap/canonical + JSON-LD.
 
 ---
 
@@ -563,7 +563,7 @@ export default async function Page() {
 > «Добавь ISR для каталога товаров»
 
 **Хорошая формулировка:**
-> «В Next.js 15 App Router: страница `/products/[id]` с `revalidate: 3600` и тегом `product-${id}`.
+> «В Next.js 16 App Router: страница `/products/[id]` с `revalidate: 3600` и тегом `product-${id}`.
 > `generateStaticParams` только для топ-500 по views.
 > `dynamicParams = true` для остальных.
 > Route `/api/revalidate` POST: проверить `x-revalidate-secret` header, вызвать `revalidateTag(\`product-\${id}\`)`.

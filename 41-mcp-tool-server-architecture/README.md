@@ -19,17 +19,19 @@
 
 ## Актуальные версии
 
-> Проверено: август 2026
+> Проверено: сентябрь 2026
 
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
-| `@modelcontextprotocol/sdk` | 1.x | основной SDK для MCP clients/servers |
-| MCP Registry | community | discovery MCP servers |
+| Спецификация MCP | `2026-07-28` | текущая ревизия протокола |
+| `@modelcontextprotocol/sdk` | 1.31.x | основной SDK для MCP clients/servers |
+| MCP Python SDK | v2 | серверная реализация, `MCPServer` вместо FastMCP |
+| MCP Registry | v0.1 (API freeze) | discovery MCP servers |
 | Playwright MCP | active | browser automation как MCP server |
 | Claude Code / opencode | active | MCP clients в production-агентах |
 | OAuth 2.1 / PKCE | recommended | remote MCP authorization pattern |
 
-Источник: [modelcontextprotocol.io](https://modelcontextprotocol.io), SDK на [npm](https://www.npmjs.com/package/@modelcontextprotocol/sdk).
+Источник: [modelcontextprotocol.io](https://modelcontextprotocol.io), changelog ревизии — [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/changelog), SDK на [npm](https://www.npmjs.com/package/@modelcontextprotocol/sdk).
 
 ---
 
@@ -44,7 +46,7 @@ Agent / LLM
    │
    ▼
 MCP Client
-   │  list_tools / call_tool / read_resource
+   │  tools/list / tools/call / resources/read
    ▼
 MCP Server
    ├── Tool: search_documents(query)
@@ -56,7 +58,7 @@ MCP Server
 Логика:
 
 - **MCP host** — приложение, в котором живёт агент (desktop app, IDE, сервер).
-- **MCP client** — компонент host, который говорит по протоколу: `list_tools`, `call_tool`, `read_resource`, `subscribe`.
+- **MCP client** — компонент host, который говорит по протоколу: `tools/list`, `tools/call`, `resources/read`, `subscriptions/listen`.
 - **MCP server** — удалённый процесс, который предоставляет tools/resources/prompts. Один server может обслуживать много clients.
 - **Tool** — действие с schema и side effects.
 - **Resource** — источник данных по виртуальному URI (`dms://documents/12345`).
@@ -151,22 +153,25 @@ server.registerResource(
 
 **Практический вывод для архитектора:** MCP server — это не тонкий proxy к API, а архитектурный boundary с policy layer. Каждый tool = контракт: входная schema, допустимые side effects, лимиты, аудит.
 
-### 2.2. Transport: STDIO vs HTTP/SSE vs WebSocket
+### 2.2. Transport: STDIO vs Streamable HTTP
 
-| Transport | Плюсы | Минусы | Когда использовать |
-|:--|:--|:--|:--|
-| STDIO | простой, локальный, нет сетевого surface | только один host, нет multi-user | desktop agents, локальная разработка |
-| HTTP/SSE | remote server, multi-user, observability | нужен auth/rate limiting | production tool servers |
-| WebSocket | streaming, bidirectional | сложнее эксплуатация | realtime agents, subscriptions |
+| Transport | Статус в спецификации | Плюсы | Минусы | Когда использовать |
+|:--|:--|:--|:--|:--|
+| STDIO | стандартный | простой, локальный, нет сетевого surface | только один host, нет multi-user | desktop agents, локальная разработка |
+| Streamable HTTP | стандартный | remote server, multi-user, stateless | нужен auth/rate limiting | production tool servers |
+| HTTP+SSE | deprecated с ревизии `2025-03-26` | обратная совместимость со старыми клиентами | дублирует Streamable HTTP | только миграция старых клиентов |
+| WebSocket | не входит в спецификацию | streaming, bidirectional | свой framing и cancellation | кастомные transport'ы |
 
 STDIO подходит для локальной разработки и desktop-агентов: MCP server запускается как child process, общается через stdin/stdout JSON-RPC. Никакой сети, никакого auth — граница это сам процесс.
 
-HTTP/SSE — production вариант. Server живёт отдельно, доступен нескольким клиентам, поднимается в Kubernetes. Здесь вступают в силу: auth, rate limiting, TLS, observability.
+Streamable HTTP — production вариант. Server живёт отдельно, доступен нескольким клиентам, поднимается в Kubernetes. Здесь вступают в силу: auth, rate limiting, TLS, observability.
 
 ```text
 STDIO:  Agent ──stdin/stdout── MCP Server (child process)
-HTTP:   Agent ──HTTPS/SSE────── MCP Server (deploy) ── authn/authz/ratelimit
+HTTP:   Agent ──HTTPS/POST───── MCP Server (deploy) ── authn/authz/ratelimit
 ```
+
+**Что изменила ревизия `2026-07-28`.** Протокол стал stateless: handshake `initialize` и заголовок `Mcp-Session-Id` удалены, GET-эндпоинт потока закрыт, версия протокола едет в `_meta` каждого запроса. Практический эффект: server больше не нужно держать за sticky-сессией — хватает обычного round-robin балансщика. Deprecated: HTTP+SSE transport, features Roots, Sampling и Logging; tasks вынесены в расширение `io.modelcontextprotocol/tasks`.
 
 Для production нужен discovery: registry, config map, service discovery или versioned manifest.
 

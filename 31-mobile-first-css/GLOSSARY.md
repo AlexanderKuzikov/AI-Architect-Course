@@ -47,7 +47,7 @@ CSS логическое свойство: размер по inline axis (шир
 ## L
 
 **logical properties**  
-CSS свойства использующие writing-mode-relative направления вместо physical (left/right/top/bottom). `margin-inline-start` вместо `margin-left`. Автоматически адаптируются к RTL и вертикальным writing modes.
+CSS свойства использующие writing-mode-relative направления вместо physical (left/right/top/bottom). `margin-inline-start` вместо `margin-left`. Автоматически адаптируются к RTL и вертикальным writing modes. Логические `border-*-radius` поддерживаются с Chrome 89, Safari 15, Firefox 66.
 
 **lvh (Large Viewport Height)**  
 CSS единица: максимальная высота viewport когда UI браузера скрыт (при прокрутке). Соответствует классическому `100vh` поведению. Использовать для full-screen immersive layouts.

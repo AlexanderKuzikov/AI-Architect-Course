@@ -21,7 +21,7 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент / API | Версия | Статус |
 | :-- | :-- | :-- |
@@ -185,7 +185,7 @@ function conditionalGet(req: Request, res: Response, content: string) {
 
 **ETag за load balancer**: два инстанса генерируют разные ETag для одного контента (разный timestamp, process ID, random). Решение: детерминированный ETag на основе content hash, не timestamp.
 
-**ETag с CDN**: CDN может стрипать ETag при compression (Content-Encoding: gzip). Cloudflare — сохраняет weak ETag. Nginx по умолчанию удаляет ETag при gzip. Явно включать: `gzip_vary on; etag on`.
+**ETag с CDN**: CDN может стрипать ETag при compression (Content-Encoding: gzip). Nginx ETag не удаляет при gzip — `etag on` по умолчанию. Но `gzip_vary` по умолчанию **off**, поэтому `Vary: Accept-Encoding` не добавляется и CDN может отдать gzip-вариант клиенту без сжатия. Явно включать: `gzip_vary on; etag on;`.
 
 ---
 
@@ -306,7 +306,7 @@ async function purgeAllCache(): Promise<void> {
 1. Cache First (Offline First):
    SW → Cache → Network (если не в кеше)
    Когда: статические ассеты (JS, CSS, fonts, images)
-   Риск: стale данные
+   Риск: устаревшие данные
 
 2. Network First:
    SW → Network → Cache fallback (если offline)
@@ -476,7 +476,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,avif,webp,woff2}'],
         globIgnores: ['**/node_modules/**', '**/stats.html'],
 
-        // SW файл не кешировать!
+        // Navigation fallback: при offline отдаём оболочку приложения
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
 
@@ -712,7 +712,7 @@ if (request.method !== 'GET') return  // Не перехватывать mutatio
 > 4. Создать `public/offline.html` — минимальная страница "нет соединения".
 > 5. Проверить: Chrome DevTools → Application → Service Workers → активен без ошибок.»
 
-Формула: SW-прекеш (CACHE_VERSION) + стратегии (network-first/stale-while-revalidate) + контрол клиентов + проверка в DevTools.
+Формула: SW-precache (CACHE_VERSION) + стратегии (network-first/stale-while-revalidate) + контроль клиентов + проверка в DevTools.
 
 ---
 
@@ -742,7 +742,7 @@ if (request.method !== 'GET') return  // Не перехватывать mutatio
 
 **ETag**
 - [ ] ETag детерминированный (content hash, не timestamp/PID)
-- [ ] Nginx: `gzip_vary on; etag on` при использовании gzip
+- [ ] Nginx: `gzip_vary on` (по умолчанию off — нужен `Vary: Accept-Encoding`), `etag on` (уже default)
 
 **CDN**
 - [ ] Разные TTL для браузера и CDN через `CDN-Cache-Control`

@@ -164,6 +164,7 @@ function buildGlossary(md) {
   let content = readFileSync(path, 'utf-8');
   for (const [num, m] of Object.entries(MODULES)) {
     const n = pad(num);
+    content = content.replaceAll(`](./${m.dir}/README.md)`, `](#module-${n})`);
     content = content.replaceAll(`](../${m.dir}/README.md)`, `](#module-${n})`);
     content = content.replaceAll(`](../${m.dir}/GLOSSARY.md)`, `](#glossary)`);
   }

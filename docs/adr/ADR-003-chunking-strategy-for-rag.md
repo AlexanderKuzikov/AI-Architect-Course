@@ -13,20 +13,20 @@
 ### Вариант A: Fixed-size 512 токенов, overlap 64
 - Embedding: точный (узкая семантика)
 - Риск: разрыв таблиц и списков между чанками
-- Ссылка: [Модуль 12 §2](../12-rag/README.md#2-chunking)
+- Ссылка: [Модуль 12 §2](../../12-rag/README.md#2-chunking-стратегии-нарезки)
 
 ### Вариант B: Hierarchical (Parent-Child)
 - Child: 128 токенов для embedding (точность)
 - Parent: 512 токенов для контекста LLM (полнота)
 - Плюс: решает конфликт точность vs полнота
 - Риск: сложнее реализация, 2× хранилища
-- Ссылка: [Модуль 12 §2](../12-rag/README.md#2-chunking)
+- Ссылка: [Модуль 12 §2](../../12-rag/README.md#2-chunking-стратегии-нарезки)
 
 ### Вариант C: Semantic chunking через embedding
 - Нарезка по резким падениям cosine similarity
 - Плюс: семантически цельные чанки
 - Минус: дорого при индексации (N вызовов embedding)
-- Ссылка: [Модуль 12 §2](../12-rag/README.md#2-chunking)
+- Ссылка: [Модуль 12 §2](../../12-rag/README.md#2-chunking-стратегии-нарезки)
 
 ## Решение
 Выбран **Вариант B (Hierarchical Parent-Child)**.
@@ -42,5 +42,5 @@
 - Размер child скорректирован под русский язык
 
 ## Связанные решения
-- [Модуль 12 §2 — Chunking](../12-rag/README.md#2-chunking)
-- [Модуль 12 §8 — Agentic RAG](../12-rag/README.md#8-agentic-rag-и-graph-rag)
+- [Модуль 12 §2 — Chunking](../../12-rag/README.md#2-chunking-стратегии-нарезки)
+- [Модуль 12 §8 — Agentic RAG](../../12-rag/README.md#8-agentic-rag-и-graph-rag-следующий-уровень-retrieval)

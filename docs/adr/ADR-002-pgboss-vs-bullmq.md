@@ -16,14 +16,14 @@
 - Гарантии: at-least-once
 - DAG: нативный через FlowProducer
 - Мониторинг: Bull Board UI
-- Ссылки: [Модуль 18 §3](../18-task-queues/README.md#3-queue-и-worker-базовый-паттерн)
+- Ссылки: [Модуль 18 §3](../../18-task-queues/README.md#3-queue-и-worker-базовый-паттерн)
 
 ### Вариант B: pg-boss 12.x (на существующем Postgres)
 - Доступно: zero дополнительной инфраструктуры
 - Гарантии: exactly-once через SKIP LOCKED
 - DAG: нет нативного — реализовать через parent_job_id
 - Мониторинг: SQL запросы
-- Ссылки: [Модуль 18 §7](../18-task-queues/README.md#7-pg-boss)
+- Ссылки: [Модуль 18 §7](../../18-task-queues/README.md#7-pg-boss-очередь-без-redis)
 
 ## Решение
 Выбран **Вариант B (pg-boss)**.
@@ -39,5 +39,5 @@
 - Graceful shutdown через boss.stop() + pool.end()
 
 ## Связанные решения
-- [Модуль 18 §7 — pg-boss](../18-task-queues/README.md#7-pg-boss)
-- [Модуль 24 §3 — Docker Compose](../24-docker/README.md#3-buildkit)
+- [Модуль 18 §7 — pg-boss](../../18-task-queues/README.md#7-pg-boss-очередь-без-redis)
+- [Модуль 24 §3 — Docker Compose](../../24-docker/README.md#3-buildkit)

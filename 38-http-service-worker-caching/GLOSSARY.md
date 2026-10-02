@@ -33,7 +33,7 @@ Service Worker API: новый активированный SW берёт кон
 ## E
 
 **ETag**  
-HTTP заголовок: уникальный идентификатор версии ресурса. `W/"hash"` — weak ETag (семантически эквивалентный). `"hash"` — strong ETag (byte-perfect). Используется для conditional requests (304 Not Modified).
+HTTP заголовок: уникальный идентификатор версии ресурса. `W/"hash"` — weak ETag (семантически эквивалентный). `"hash"` — strong ETag (byte-perfect). Используется для conditional requests (304 Not Modified). Nginx генерирует ETag по умолчанию (`etag on`) и не удаляет его при gzip.
 
 ---
 

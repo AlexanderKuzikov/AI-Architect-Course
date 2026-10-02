@@ -26,12 +26,12 @@
 
 | Инструмент | Версия | Примечание |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
 | ExcelJS | 4.4.0 | стабильная; 4.4.1-prerelease.0 в тесте |
 | SheetJS (xlsx) | 0.20.3 (CDN/git) | npm пакет `xlsx` заморожен на 0.18.5 — использовать CDN или git |
-| node-xlsx | 0.23.x | обёртка над SheetJS, XLSX only |
-| PizZip | 3.1.x | raw ZIP манипуляция |
-| TypeScript | 5.x | март 2026 |
+| node-xlsx | 0.24.x | обёртка над SheetJS, XLSX only |
+| PizZip | 3.3.x | raw ZIP манипуляция |
+| TypeScript | 5.x | октябрь 2026 |
 
 > ⚠️ **SheetJS npm:** пакет `xlsx` на npm.js не обновлялся с 2022. Актуальная версия распространяется через `https://cdn.sheetjs.com` или `git+https://git.sheetjs.com/sheetjs/sheetjs.git`. Для production — пинить конкретный тег.
 

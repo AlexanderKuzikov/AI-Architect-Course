@@ -25,11 +25,11 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| docx (npm) | 9.5.1 | март 2026 |
-| docxtemplater | 3.66.3 | март 2026 |
-| PizZip | 3.1.x | март 2026 |
-| python-docx | 1.1.x | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| docx (npm) | 9.8.1 | октябрь 2026 |
+| docxtemplater | 3.71.0 | октябрь 2026 |
+| PizZip | 3.3.0 | октябрь 2026 |
+| python-docx | 1.2.0 | октябрь 2026 |
 | ECMA-376 (OOXML стандарт) | 5th Edition | актуален |
 
 ---
@@ -575,7 +575,7 @@ function generateContract(
 
 ### Когда docx вместо raw XML
 
-`docx` (npm 9.5.1) — декларативный TypeScript API для создания документов с нуля. Не требует шаблона. Подходит когда структура документа полностью определяется кодом.
+`docx` (npm 9.8.1) — декларативный TypeScript API для создания документов с нуля. Не требует шаблона. Подходит когда структура документа полностью определяется кодом.
 
 ```typescript
 import {
@@ -851,7 +851,7 @@ const safeFeatures = [
 шапкой, подписями и QR-кодом. Дизайн контролируется юристами — меняется
 раз в квартал.
 
-**Стек:** Node.js 24, docxtemplater 3.66, PizZip 3.x, Sharp 0.34, актуальная локальная LLM
+**Стек:** Node.js 24, docxtemplater 3.71, PizZip 3.x, Sharp 0.35, актуальная локальная LLM
 через Ollama (для AI-генерации описания работ).
 
 **Гипотеза:** docxtemplater — правильный выбор: шаблон в Word, данные из
@@ -948,7 +948,7 @@ function insertQrIntoHeader(zip: PizZip, qrBuffer: Buffer): void {
 | Создание шаблона в Word | 4 часа | 20% |
 | Предобработка шаблона (merge runs) | 2 часа | 10% |
 | Raw XML для QR в колонтитуле | 8 часов | 40% |
-| Docxtemplater рендеринг | 4 часа | 20% |
+| docxtemplater рендеринг | 4 часа | 20% |
 | Тестирование совместимости (Word + LO) | 2 часа | 10% |
 
 **Вывод:** 40% времени ушло на raw XML манипуляцию (QR в колонтитул),
@@ -966,7 +966,7 @@ validation в LibreOffice.
 
 ### Дополнение из практики: скрипты деловых документов (сентябрь 2026)
 
-Генерация отчётов и планов скриптами в отдельную папку, не россыпью: фактические статусы из контекста проекта, таблицы с фактами, шрифт делового текста одиннадцатым кеглем, заголовки обычным регистром без капса. Палитра выгрузки собирается тем же скриптом из фактических данных с поиском и копированием. Правило: документ для заказчика — артефакт скрипта из живых данных, а не ручная верстка.
+Генерация отчётов и планов скриптами в отдельную папку, не россыпью: фактические статусы из контекста проекта, таблицы с фактами, шрифт делового текста 11 кеглем, заголовки обычным регистром без капса. Палитра выгрузки собирается тем же скриптом из фактических данных с поиском и копированием. Правило: документ для заказчика — артефакт скрипта из живых данных, а не ручная верстка.
 
 ---
 
@@ -1046,7 +1046,7 @@ validation в LibreOffice.
 > «Сделай генерацию договора из шаблона»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `generateContract(templatePath: string, data: ContractData): Buffer` используя docxtemplater 3.66.x и PizZip 3.x. Тип ContractData: `{ contractNumber: string, date: string, clientName: string, inn: string, items: {name: string, qty: number, price: number}[], total: number }`. Параметры Docxtemplater: paragraphLoop: true, linebreaks: true. Обработать ошибку рендеринга (незакрытые теги, отсутствующие плейсхолдеры) — выбросить Error с именем проблемного тега из e.properties.errors. Вернуть Buffer для записи в файл или отправки как HTTP response.»
+> «Реализуй TypeScript функцию `generateContract(templatePath: string, data: ContractData): Buffer` используя docxtemplater 3.71.x и PizZip 3.x. Тип ContractData: `{ contractNumber: string, date: string, clientName: string, inn: string, items: {name: string, qty: number, price: number}[], total: number }`. Параметры Docxtemplater: paragraphLoop: true, linebreaks: true. Обработать ошибку рендеринга (незакрытые теги, отсутствующие плейсхолдеры) — выбросить Error с именем проблемного тега из e.properties.errors. Вернуть Buffer для записи в файл или отправки как HTTP response.»
 
 Формула: версии + тип входных данных + обработка ошибок docxtemplater + формат вывода.
 

@@ -20,7 +20,7 @@
 
 ## Актуальные версии
 
-> Проверено: август 2026
+> Проверено: сентябрь 2026
 
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
@@ -29,7 +29,7 @@
 | Langfuse | active | traces, evals, playground |
 | LangTrace | active | OTel-native LLM tracing |
 | Promptfoo | 0.12x | evals и CI gates |
-| DeepEval | 3.9.x | pytest-compatible evals |
+| DeepEval | 4.x | pytest-compatible evals |
 
 ---
 
@@ -88,7 +88,7 @@ LLM-системы деградируют незаметно: провайдер
 **OpenTelemetry LLM conventions**: вместо самодельных `llm.*` используй стандарт `gen_ai.*`:
 
 ```typescript
-function createLLMSpan(metadata: {
+function createLLMSpanMetadata(metadata: {
   agentId: string;
   model: string;
   tokensIn: number;
@@ -97,8 +97,8 @@ function createLLMSpan(metadata: {
   cost: number;
 }): SpanAttributes {
   return {
-    'gen_ai.agent_id': metadata.agentId,
-    'gen_ai.model': metadata.model,
+    'gen_ai.agent.id': metadata.agentId,
+    'gen_ai.request.model': metadata.model,
     'gen_ai.usage.input_tokens': metadata.tokensIn,
     'gen_ai.usage.output_tokens': metadata.tokensOut,
     'gen_ai.latency_ms': metadata.latencyMs,
@@ -108,6 +108,8 @@ function createLLMSpan(metadata: {
 ```
 
 Стандарт `gen_ai.*` — это не про «красивый аккуратный код», а про совместимость: инструменты (Langfuse, Datadog, Grafana) понимают эти атрибуты из коробки, без кастомных парсеров.
+
+Граница стандарта: в реестре semconv есть `gen_ai.request.model`, `gen_ai.response.model`, `gen_ai.agent.id`, `gen_ai.usage.input_tokens`/`output_tokens`, а вот `gen_ai.latency_ms` и `gen_ai.cost_usd` — нет. Их задаёт сам проект: держите префикс `gen_ai.` ради группировки, но не ждите, что чужой парсер их поймёт.
 
 ### 2.2. Evaluation layers
 
@@ -168,11 +170,11 @@ Incident questions: когда началась деградация, какой
 
 **Потеря traces при crash**: процесс упал до flush буфера — трассы потеряны. Async-экспортёры с durable buffer (или синхронный flush критичных spans).
 
-**Неверная cost attribution**: fallback на другую модель без пометки в span — cost-метрики врут, fallback незаметен. `gen_ai.model` должен фиксировать фактическую модель, а не запрошенную.
+**Неверная cost attribution**: fallback на другую модель без пометки в span — cost-метрики врут, fallback незаметен. `gen_ai.response.model` должен фиксировать фактическую модель, а не запрошенную.
 
 **Flaky evals**: LLM judge недетерминирован — gate то проходит, то падает. Несколько прогонов + допуск + детерминированные проверки первыми.
 
-**Почему это важно архитектору:** три из четырёх граничных случаев — про молчаливые искажения данных (sampling, loss, misattribution). Инструмент, который «врет», хуже отсутствия инструмента: он даёт ложную уверенность.
+**Почему это важно архитектору:** 3 из 4 граничных случаев — про молчаливые искажения данных (sampling, loss, misattribution). Инструмент, который «врет», хуже отсутствия инструмента: он даёт ложную уверенность.
 
 ---
 
@@ -212,7 +214,7 @@ Support-agent: ticket → retrieve customer memory → classify issue → RAG �
 
 ### Гипотеза
 
-OTel-трассировка + golden dataset в CI + стратифицированный sampling дадут контроль над деградацией без explosion cost на телеметрию.
+OTel-трассировка + golden dataset в CI + стратифицированный sampling дадут контроль над деградацией без взрывного роста расходов на телеметрию.
 
 ### Что получилось
 
@@ -234,11 +236,11 @@ User ticket
 
 **Что неожиданно:** падение качества ловил не LLM judge, а **Golden dataset + deterministic checks**. LLM judge пропустил регрессию (смена модели провайдером), потому что «похоже звучало». Golden dataset с точными expected outputs — поймал. LLM judge оказался самым дорогим и самым ненадёжным слоем.
 
-**Второй инцидент:** fallback rate вырос до 18% (провайдер деградировал), но cost-дашборд молчал — атрибуты fallback-модели не помечались. Фикс: `gen_ai.model` = фактическая модель + `gen_ai.fallback: true`.
+**Второй инцидент:** fallback rate вырос до 18% (провайдер деградировал), но cost-дашборд молчал — атрибуты fallback-модели не помечались. Фикс: `gen_ai.response.model` = фактическая модель + `gen_ai.fallback: true`.
 
 ### Дополнение из практики: cost и порядок запусков стенда ревью (сентябрь 2026)
 
-Стенд гонял 7 моделей по одному заданию и писал дельту дня в журнал: одна модель — шесть центов, две — по три цента, одна — четыре цента, одна — ноль по акции с оговоркой про смешанное потребление. Вывод не в цифрах, а в процессе: цена фиксируется до запуска, а не после счёта.
+Стенд гонял 7 моделей по одному заданию и писал дельту дня в журнал: одна модель — 6 центов, две — по 3, одна — 4, одна — 0 по акции с оговоркой про смешанное потребление. Вывод не в цифрах, а в процессе: цена фиксируется до запуска, а не после счёта.
 
 Три правила, которые стоит забрать в AgentOps:
 
@@ -248,7 +250,7 @@ User ticket
 
 ### Вывод, противоречащий интуиции
 
-Самый ценный eval-слой — **детерминированный golden dataset**, а не LLM judge. Регрессии ловятся точными expected outputs, а LLM judge добавляет шум и cost. For high-risk domains — human review ничем не заменяется. Инвестиции в AgentOps окупаются не метриками «для галочки», а способностью ответить «кто и когда сломал pipeline».
+Самый ценный eval-слой — **детерминированный golden dataset**, а не LLM judge. Регрессии ловятся точными expected outputs, а LLM judge добавляет шум и cost. Для high-risk доменов human review ничем не заменяется. Инвестиции в AgentOps окупаются не метриками «для галочки», а способностью ответить «кто и когда сломал pipeline».
 
 ---
 
@@ -303,7 +305,7 @@ User ticket
 
 Плохая формулировка: > «Добавь observability агенту»
 
-Хорошая формулировка: > «Реализуй `createLLMSpanMetadata({agentId, model, tokensIn, tokensOut, latencyMs, cost})`. Верни объект для OpenTelemetry span с атрибутами `gen_ai.agent_id`, `gen_ai.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.latency_ms`, `gen_ai.cost_usd`. Добавь тест: все ключи соответствуют OTel LLM conventions.»
+Хорошая формулировка: > «Реализуй `createLLMSpanMetadata({agentId, model, tokensIn, tokensOut, latencyMs, cost})`. Верни объект для OpenTelemetry span с атрибутами `gen_ai.agent.id`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.latency_ms`, `gen_ai.cost_usd`. Добавь тест: все ключи соответствуют OTel LLM conventions.»
 
 Формула: точная функция + стандартные атрибуты + тест на соответствие стандарту.
 
@@ -311,7 +313,7 @@ User ticket
 
 **Задача 1 — Trace metadata**
 
-> Реализуй `createLLMSpanMetadata({agentId, model, tokensIn, tokensOut, latencyMs, cost})`. Верни объект для OpenTelemetry span c атрибутами `gen_ai.agent_id`, `gen_ai.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.latency_ms`, `gen_ai.cost_usd`.
+> Реализуй `createLLMSpanMetadata({agentId, model, tokensIn, tokensOut, latencyMs, cost})`. Верни объект для OpenTelemetry span c атрибутами `gen_ai.agent.id`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.latency_ms`, `gen_ai.cost_usd`.
 
 ---
 

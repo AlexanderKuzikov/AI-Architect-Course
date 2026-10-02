@@ -1,6 +1,7 @@
-// Converts module references in GLOSSARY.md to clickable links
-// (Модуль 42) → [Модуль 42](../42-a2a-protocol/README.md)
-// (Модули 12, 45) → [Модули 12](../12-rag/README.md), [45](../45-agentic-rag-graph-rag/README.md)
+// Converts module references in the root GLOSSARY.md to clickable links
+// (Модуль 42) → [Модуль 42](./42-a2a-protocol/README.md)
+// (Модули 12, 45) → [Модули 12](./12-rag/README.md), [45](./45-agentic-rag-graph-rag/README.md)
+// Prefix is ./ (not ../): GLOSSARY.md lives at the repo root, so ../ would point outside it.
 
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -20,7 +21,7 @@ content = content.replace(
     const parts = nums.split(',').map(s => s.trim()).filter(Boolean);
     const links = parts.map(n => {
       const m = MODULES[parseInt(n)];
-      return m ? `[Модуль ${n}](../${m.dir}/README.md)` : `Модуль ${n}`;
+      return m ? `[Модуль ${n}](./${m.dir}/README.md)` : `Модуль ${n}`;
     });
     return '(' + links.join(', ') + ')';
   }
@@ -31,7 +32,7 @@ content = content.replace(
   /\(Модуль\s+(\d+)\)/g,
   (match, n) => {
     const m = MODULES[parseInt(n)];
-    return m ? `([Модуль ${n}](../${m.dir}/README.md))` : match;
+    return m ? `([Модуль ${n}](./${m.dir}/README.md))` : match;
   }
 );
 

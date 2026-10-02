@@ -21,7 +21,7 @@
 
 ---
 
-## Актуальные версии (март 2026)
+## Актуальные версии (октябрь 2026)
 
 ### JSON Schema спецификация
 
@@ -39,11 +39,11 @@
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Pydantic | 2.x | Схемы и валидация, Python |
-| zod | 4.x (stable; практика на 4.4.3) | Схемы и валидация, TypeScript/Node.js; v3 — legacy, миграция по гайду |
+| zod | 4.x (stable; актуальная 4.6.5) | Схемы и валидация, TypeScript/Node.js; v3 — legacy, миграция по гайду |
 | jsonschema | 4.x | Валидация JSON Schema, Python |
-| Outlines | 0.1.x | Constrained generation поверх HuggingFace / llama.cpp |
-| llama.cpp | b4xxx | Grammar sampling (GBNF) |
-| LM Studio | 0.3.x | OpenAI-совместимый API с `response_format` |
+| Outlines | 1.x | Constrained generation поверх HuggingFace / llama.cpp |
+| llama.cpp | b11xxx (rolling) | Grammar sampling (GBNF) |
+| LM Studio | 0.4.x | OpenAI-совместимый API с `response_format` |
 
 ---
 

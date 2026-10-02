@@ -122,7 +122,7 @@ BuildKit `--mount=type=secret,id=NAME,target=PATH`: файл с секретом
 ## W
 
 **watch mode (Compose)**  
-Docker Compose 2.22+: файловый watcher с действиями `sync` (копировать файл в контейнер), `rebuild` (пересобрать образ), `sync+restart` (sync + перезапустить). Альтернатива bind mount node_modules с проблемами UID и платформо-зависимых бинарников.
+Docker Compose 2.22+ (функция доступна и в v5.x): файловый watcher с действиями `sync` (копировать файл в контейнер), `rebuild` (пересобрать образ), `sync+restart` (sync + перезапустить). Альтернатива bind mount node_modules с проблемами UID и платформо-зависимых бинарников.
 
 ---
 

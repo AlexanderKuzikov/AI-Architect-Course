@@ -16,14 +16,14 @@
 - Стоимость: $0 (только электричество, ~$5/мес)
 - Приватность: данные не покидают машину
 - Качество: 94% accuracy (тест 500 документов)
-- Ссылка: [Модуль 10](../10-prompt-engineering-vlm/README.md), [Модуль 08](../08-local-inference/README.md)
+- Ссылка: [Модуль 10](../../10-prompt-engineering-vlm/README.md), [Модуль 08](../../08-local-inference/README.md)
 
 ### Вариант B: Облачная VLM (OpenAI/Claude API)
 - Латенси: ~15–20 img/min, TTFT ~300ms
 - Стоимость: ~$0.03/image × 3500 изображений = $105/мес
 - Приватность: данные уходят к провайдеру
 - Качество: 96% accuracy (те же 500 документов)
-- Ссылка: [Модуль 10 §7](../10-prompt-engineering-vlm/README.md#7-production-pipeline)
+- Ссылка: [Модуль 10 §7](../../10-prompt-engineering-vlm/README.md#7-production-pipeline-выбор-backend)
 
 ## Решение
 Выбран **Вариант A (локальная VLM)**.
@@ -39,5 +39,5 @@
 - Hybrid routing: pytesseract + text LLM для чистых сканов, VLM только для сложных (модуль 11 §4)
 
 ## Связанные решения
-- [Модуль 08 §1 — VRAM Budget](../08-local-inference/README.md#1-vram-budget)
-- [Модуль 11 §4 — Cascade Filter](../11-multi-model-orchestration/README.md#4-cascade-filter)
+- [Модуль 08 §1 — VRAM Budget](../../08-local-inference/README.md#1-vram-budget-расчёт-и-выбор-квантизации)
+- [Модуль 11 §4 — Cascade Filter](../../11-multi-model-orchestration/README.md#4-cascade-filter-дешёвая-модель-как-gate)

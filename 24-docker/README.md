@@ -20,12 +20,12 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Docker Engine | **29.x** | Container runtime |
-| Docker Compose | **v2.40+** | Multi-container orchestration |
+| Docker Compose | **v5.x** | Multi-container orchestration (v5 вышел в декабре 2025) |
 | BuildKit | **встроен в Docker 29** | Параллельная сборка, cache mounts |
 | tini | **0.19.0** | PID 1 init process |
 | Node.js base image | **node:24-alpine** | Базовый образ |
@@ -394,7 +394,7 @@ docker run \
 
 ### Watch mode — синхронизация без rebuild
 
-Docker Compose 2.22+ поддерживает `watch` — файловый watcher с действиями на изменения:
+Docker Compose v5 поддерживает `watch` — файловый watcher с действиями на изменения:
 
 ```yaml
 # docker-compose.yml

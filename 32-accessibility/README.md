@@ -21,15 +21,15 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Стандарт / инструмент | Версия | Статус |
 | :-- | :-- | :-- |
 | WCAG | **2.2** (октябрь 2023) | Текущий стандарт, EAA/ADA/Section 508 ссылаются на него |
-| axe-core | **4.10.x** | Базовый движок для автоматической проверки |
-| @axe-core/playwright | **4.10.x** | Интеграция с Playwright |
-| ARIA | **1.2** | Текущая спецификация |
-| NVDA | **2024.x** | Screen reader Windows (бесплатный) |
+| axe-core | **4.13.x** | Базовый движок для автоматической проверки |
+| @axe-core/playwright | **4.13.x** | Интеграция с Playwright |
+| ARIA | **1.2** (июнь 2023) | Текущая спецификация; 1.3 — Working Draft, не для production |
+| NVDA | **актуальный релиз** | Screen reader Windows (бесплатный) |
 | VoiceOver | встроен macOS/iOS | Screen reader Apple |
 
 > WCAG 3.0 в draft — не использовать как compliance target. WCAG 2.2 Level AA — актуальный baseline.
@@ -98,7 +98,7 @@ Robust        — работает с assistive technologies
 ### Правовой контекст 2026
 
 ```
-European Accessibility Act (EAA): вступил в силу июнь 2025
+European Accessibility Act (EAA): применяется с 28 июня 2025
   Обязателен для всех цифровых продуктов в EU market
   Стандарт: EN 301 549 → ссылается на WCAG 2.2 AA
 
@@ -197,7 +197,7 @@ European Accessibility Act (EAA): вступил в силу июнь 2025
 
 **`<button>` внутри `<a>`**: невалидный HTML — интерактивный элемент внутри интерактивного. Screen readers ведут себя непредсказуемо. Выбрать одно: ссылка для навигации, кнопка для действия.
 
-**`aria-label` vs видимый текст**: когда `aria-label` отличается от видимого текста кнопки — пользователь voice control говорит видимый текст, но software ищет `aria-label`. Всегда включать видимый текст в `aria-label` как часть строки.
+**`aria-label` vs видимый текст**: когда `aria-label` отличается от видимого текста кнопки — голосовое управление произносит видимый текст, но программа ищет `aria-label`. Всегда включать видимый текст в `aria-label` как часть строки.
 
 **Почему это важно архитектору:** semantic HTML — единственный надёжный accessibility фундамент. ARIA flickering (role меняется) и неверные иерархии заголовков — главные причины провала screen reader аудита.
 
@@ -559,14 +559,14 @@ jobs:
   a11y:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '22' }
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: '24' }
       - run: npm ci
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e -- --grep="Accessibility"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: accessibility-report
@@ -705,7 +705,7 @@ jobs:
 
 **Хорошая формулировка:**
 > «Добавить Playwright accessibility тест в `e2e/a11y.spec.ts`:
-> 1. Установить `@axe-core/playwright@4.10.x`.
+> 1. Установить `@axe-core/playwright@4.13.x`.
 > 2. Тест для каждого URL: `/`, `/blog`, `/contact`.
 > 3. Использовать теги `['wcag2a', 'wcag2aa', 'wcag22aa']`.
 > 4. При нарушениях: `test.info().attach('violations', JSON)` и `expect(violations).toHaveLength(0)`.

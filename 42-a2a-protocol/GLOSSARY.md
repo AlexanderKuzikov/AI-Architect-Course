@@ -3,10 +3,10 @@
 ## A
 
 **A2A (Agent-to-Agent)**  
-Протокол коммуникации между агентами. Решает задачи координации, делегирования, состояния и accountability между агентами.
+Протокол коммуникации между агентами (актуальная версия спецификации — v1.0). Решает задачи координации, делегирования, состояния и accountability между агентами.
 
 **Agent Card**  
-JSON-документ, публикуемый агентом для discovery: name, description, url, version, capabilities, authentication. Является контрактом SLA, по нему оркестратор принимает решение о делегировании.
+JSON-документ, публикуемый агентом для discovery: name, description, version, capabilities, `supportedInterfaces` (url + protocolBinding + protocolVersion) и схемы безопасности. Является контрактом SLA, по нему оркестратор принимает решение о делегировании.
 
 **Agent Discovery**  
 Механизм нахождения агентов и их Agent Cards: registry, каталог, DNS SRV. Без него оркестратор не знает, кому делегировать.

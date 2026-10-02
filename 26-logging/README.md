@@ -1,7 +1,7 @@
 # Модуль 26 — Logging / Observability
 
 > **Для AI-архитектора:** observability — это не «добавить логи». Это проектирование системы, при которой вопрос «что произошло с запросом X в 14:32?» можно ответить за 30 секунд, не за 30 минут. AI-кодер добавит `console.log` везде. Задача архитектора — определить что собирать, как коррелировать и где хранить.
-> Один день изучения — три столпа observability, Pino mechanics, OpenTelemetry SDK 2.0, корреляция logs+traces.
+> Один день изучения — три столпа observability, Pino mechanics, OpenTelemetry SDK, корреляция logs+traces.
 
 ---
 
@@ -20,15 +20,16 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| pino | **9.x** | Structured JSON logger |
-| pino-http | **10.x** | HTTP request logging middleware |
+| pino | **10.x** | Structured JSON logger |
+| pino-http | **11.x** | HTTP request logging middleware |
 | pino-pretty | **13.x** | Human-readable dev output |
-| @opentelemetry/sdk-node | **2.x** | OTel SDK для Node.js |
-| @opentelemetry/auto-instrumentations-node | **0.58+** | Auto-instrument HTTP, Express, pg, Redis |
+| `@opentelemetry/sdk-node` | **0.222.x** | OTel SDK для Node.js (experimental-ветка OTel JS) |
+| `@opentelemetry/sdk-metrics` | **2.x** | Стабильная ветка OTel JS |
+| `@opentelemetry/auto-instrumentations-node` | **0.80+** | Auto-instrument HTTP, Express, pg, Redis |
 | Grafana Loki | **3.7.0** | Log aggregation |
 
 ---
@@ -334,12 +335,14 @@ const sdk = new NodeSDK({
     url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces',
   }),
 
-  metricReader: new PeriodicExportingMetricReader({
-    exporter: new OTLPMetricExporter({
-      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/metrics',
+  metricReaders: [
+    new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/metrics',
+      }),
+      exportIntervalMillis: 15_000,
     }),
-    exportIntervalMillis: 15_000,
-  }),
+  ],
 
   instrumentations: [
     getNodeAutoInstrumentations({
@@ -439,9 +442,11 @@ app.use((req, res, next) => {
 
 **`span.end()` в `finally`**: без `finally` span не закроется при исключении — memory leak и потеря данных о запросе.
 
-**`metricReader` (singular) deprecated**: в OTel JS SDK 2.x `metricReader` (single) deprecated — использовать `metricReaders: []` (массив) для нескольких экспортеров.
+**`metricReader` (singular) deprecated**: опция `metricReader` помечена `@deprecated ... metricReaders instead` — использовать `metricReaders: []` (массив) для нескольких экспортеров.
 
-**OTel SDK и TypeScript**: OTel JS SDK 2.0 требует TypeScript ≥ 5.0.4 и Node.js ≥ 18.19.0. Целевой ES2022.
+**Две ветки версий OTel JS**: стабильные пакеты (`@opentelemetry/sdk-metrics`, `@opentelemetry/resources`, `@opentelemetry/sdk-trace-node`) выходят как `2.x`, а experimental-пакеты (`@opentelemetry/sdk-node`, `@opentelemetry/auto-instrumentations-node`, exporters) — как `0.2xx`. Обе ветки живут параллельно, ставить нужно согласованный набор.
+
+**OTel JS и TypeScript**: начиная с 2.0.0 OTel JS требует TypeScript ≥ 5.0.4 и Node.js ≥ 18.19.0. Целевой ES2022.
 
 **Почему это важно архитектору:** `--import` флаг (ESM) vs `--require` (CJS) — ошибка в выборе = auto-instrumentation не работает молча. Проверять через тестовый endpoint с заведомо известным span.
 
@@ -607,7 +612,7 @@ CourtDesk — сбор судебных дел + API для 1С-клиента (
 > «Добавь логирование в сервис»
 
 **Хорошая формулировка:**
-> «Настрой pino 9.x логирование для Express приложения.
+> «Настрой pino 10.x логирование для Express приложения.
 > `logger.ts`: singleton pino с `redact: ['req.headers.authorization', 'body.password']`, `base: { service, version }`, pino-pretty только при NODE_ENV=development.
 > `requestContext.ts`: AsyncLocalStorage для `{ requestId, userId, traceId }`. Middleware генерирует requestId (crypto.randomUUID()), устанавливает x-request-id заголовок ответа.
 > `getLogger()`: child logger с bindings из AsyncLocalStorage.
@@ -622,7 +627,7 @@ CourtDesk — сбор судебных дел + API для 1С-клиента (
 > «Добавь OpenTelemetry»
 
 **Хорошая формулировка:**
-> «Создай `instrumentation.ts` для @opentelemetry/sdk-node 2.x.
+> «Создай `instrumentation.ts` для @opentelemetry/sdk-node 0.222.x.
 > Resource: service.name, service.version, deployment.environment из env vars.
 > Trace exporter: OTLPTraceExporter на OTEL_EXPORTER_OTLP_ENDPOINT (default localhost:4318).
 > Metric reader: PeriodicExportingMetricReader, 15s interval, массив `metricReaders` (не устаревший metricReader).
@@ -631,7 +636,7 @@ CourtDesk — сбор судебных дел + API для 1С-клиента (
 > В SIGTERM handler: `await sdk.shutdown()`.
 > В getLogger(): читать traceId/spanId из `trace.getActiveSpan()?.spanContext()` и добавлять в child bindings.»
 
-Формула: OTel SDK 2.x + resource + exporter/metric readers + auto-instrumentations + --import + shutdown + traceId в лог.
+Формула: OTel SDK (sdk-node 0.222.x + sdk-metrics 2.x) + resource + exporter/metric readers + auto-instrumentations + --import + shutdown + traceId в лог.
 
 ---
 

@@ -24,12 +24,12 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| pdfjs-dist (Mozilla PDF.js) | 5.6.205 | март 2026 |
-| MuPDF JS | 1.26.9 | март 2026 |
-| @hyzyla/pdfium | актуальный на npm | март 2026 |
-| @embedpdf/pdfium | актуальный на npm | март 2026 |
-| pdf-parse | 1.1.x | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| pdfjs-dist (Mozilla PDF.js) | 6.3.289 | октябрь 2026 |
+| MuPDF JS | 1.28.1 | октябрь 2026 |
+| @hyzyla/pdfium | 2.1.13 | октябрь 2026 |
+| @embedpdf/pdfium | 2.15.1 | октябрь 2026 |
+| pdf-parse | 2.4.5 | октябрь 2026 |
 
 ---
 
@@ -279,7 +279,7 @@ async function diagnoseEncoding(buffer: ArrayBuffer): Promise<void> {
 ### pdf-parse: простейший случай
 
 ```typescript
-import pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 import * as fs from 'fs';
 
 interface ExtractResult {
@@ -290,17 +290,23 @@ interface ExtractResult {
 
 async function extractTextSimple(pdfPath: string): Promise<ExtractResult> {
   const buffer = fs.readFileSync(pdfPath);
-  const data = await pdfParse(buffer);
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
 
-  return {
-    text: data.text,
-    numPages: data.numpages,
-    info: data.info,
-  };
+  try {
+    const data = await parser.getText();
+
+    return {
+      text: data.text,
+      numPages: data.total,
+      info: data.info as Record<string, unknown>,
+    };
+  } finally {
+    await parser.destroy();
+  }
 }
 ```
 
-`pdf-parse` использует PDF.js под капотом. Удобен для быстрого прототипа. Проблемы: нет контроля над постраничной обработкой, нет позиций текста, тихо даёт мусор при битом ToUnicode.
+`pdf-parse` использует PDF.js под капотом. Удобен для быстрого прототипа. Проблемы: нет координат текста, тихо даёт мусор при битом ToUnicode. Учти: в v2 прежний вызов `pdfParse(buffer)` удалён — работает только класс `PDFParse` с обязательным `destroy()` в `finally`.
 
 ### pdfjs-dist: полный контроль
 
@@ -328,7 +334,6 @@ async function extractTextStructured(
     data: new Uint8Array(buffer),
     // ✅ Отключить worker в Node.js
     useWorkerFetch: false,
-    isEvalSupported: false,
   }).promise;
 
   const pages: PageText[] = [];
@@ -451,7 +456,6 @@ async function renderPageToBuffer(
   const pdf = await pdfjs.getDocument({
     data: new Uint8Array(pdfBuffer),
     useWorkerFetch: false,
-    isEvalSupported: false,
   }).promise;
 
   const page = await pdf.getPage(pageNum);
@@ -482,7 +486,6 @@ async function renderAllPages(
   const pdf = await pdfjs.getDocument({
     data: new Uint8Array(pdfBuffer),
     useWorkerFetch: false,
-    isEvalSupported: false,
   }).promise;
 
   const buffers: Buffer[] = [];
@@ -691,7 +694,6 @@ async function openEncrypted(
       data: new Uint8Array(buffer),
       password,
       useWorkerFetch: false,
-      isEvalSupported: false,
     }).promise;
   } catch (err: any) {
     if (err.name === 'PasswordException') {
@@ -740,7 +742,6 @@ async function processLargePdf(
   const pdf = await pdfjs.getDocument({
     data: new Uint8Array(buffer),
     useWorkerFetch: false,
-    isEvalSupported: false,
   }).promise;
 
   // ✅ Обрабатывать батчами — не держать все страницы в памяти
@@ -803,7 +804,7 @@ async function extractFormFields(
 решений в формате PDF. Источники: ГАС «Правосудие», kad.arbitr.ru,
 1С-документы. Каждый источник — свой класс PDF.
 
-**Стек:** Node.js 24, pdfjs-dist 5.6, Sharp 0.34, LM Studio + CURRENT_LOCAL_MODEL.
+**Стек:** Node.js 24, pdfjs-dist 6.3, Sharp 0.35, LM Studio + CURRENT_LOCAL_MODEL.
 
 **Гипотеза:** text extraction + LLM будет достаточно для >90%
 документов. Только image-only PDF потребуют render → OCR.
@@ -894,7 +895,7 @@ const PDF_ROUTES: Record<string, PdfRoute> = {
 
 **Выглядит правильно:** одна зависимость, простой API, работает.
 
-**Почему ошибка:** `pdf-parse` не поддерживает постраничную обработку с управлением памятью. 500-страничный PDF загружается целиком. Нет доступа к координатам текста. Для production — pdfjs-dist напрямую.
+**Почему ошибка:** `pdf-parse` не даёт доступа к координатам текста и не управляет памятью постранично так, как это делает pdfjs-dist. Для production с требованиями к геометрии текста — pdfjs-dist напрямую.
 
 ---
 
@@ -922,7 +923,7 @@ const PDF_ROUTES: Record<string, PdfRoute> = {
 > «Извлеки текст из PDF»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `processPdf(buffer: ArrayBuffer): Promise<PdfResult>`. Тип `PdfResult`: `{ class: 'native-text'|'image-only'|'hybrid', pages: PageResult[], creatorApp: string }`, где `PageResult`: `{ pageNum: number, text: string, hasText: boolean }`. Использовать pdfjs-dist 5.6.x с `useWorkerFetch: false, isEvalSupported: false`. Классификацию определять по среднему числу символов на страницу (< 10 символов = image-only). Для `image-only` и `hybrid` — возвращать `hasText: false` и пустой text. Обработать PasswordException: выбросить Error с message "PDF_ENCRYPTED".»
+> «Реализуй TypeScript функцию `processPdf(buffer: ArrayBuffer): Promise<PdfResult>`. Тип `PdfResult`: `{ class: 'native-text'|'image-only'|'hybrid', pages: PageResult[], creatorApp: string }`, где `PageResult`: `{ pageNum: number, text: string, hasText: boolean }`. Использовать pdfjs-dist 6.3.x с `useWorkerFetch: false`. Классификацию определять по среднему числу символов на страницу (< 10 символов = image-only). Для `image-only` и `hybrid` — возвращать `hasText: false` и пустой text. Обработать PasswordException: выбросить Error с message "PDF_ENCRYPTED".»
 
 Формула: тип возврата + логика классификации + граничные случаи (пароль) + версия библиотеки.
 

@@ -20,13 +20,13 @@
 
 ## Актуальные версии
 
-> Проверено: август 2026
+> Проверено: сентябрь 2026
 
 | Инструмент | Версия | Назначение |
 |:--|:--|:--|
-| Playwright | 1.5x | browser automation, cross-browser |
+| Playwright | 1.6x | browser automation, cross-browser |
 | Puppeteer | 25.x | Chrome automation (одна из практик курса) |
-| `browser-use/browser-use` | 98K+ stars | browser automation для AI agents |
+| `browser-use/browser-use` | 115K+ stars | browser automation для AI agents |
 | Playwright MCP | active | browser как MCP tool server |
 | Computer Use / CUA | active ecosystem | screen/keyboard/mouse actions |
 
@@ -38,7 +38,7 @@
 
 Browser-use agent управляет браузером: открывает страницы, кликает, вводит текст, читает DOM, делает скриншоты, ждёт состояния и извлекает данные. Computer-use agent шире: экран, мышь, клавиатура, мобильное устройство или desktop-приложение.
 
-Использовать browser-use стоит, когда нет API, а веб-интерфейс есть. Если API можно сделать — architect должен выбрать API, потому что UI automation fragile.
+Использовать browser-use стоит, когда нет API, а веб-интерфейс есть. Если API можно сделать — архитектор должен выбрать API, потому что UI automation fragile.
 
 ### 1.2. Browser-use vs API vs Playwright script
 
@@ -144,7 +144,7 @@ function validateBrowserAction(
 ): { allowed: boolean; reason?: string } {
   if (action.type === 'goto') {
     const url = new URL(action.url);
-    if (!policy.allowedOrigins.some(o => url.origin.startsWith(o))) {
+    if (!policy.allowedOrigins.includes(url.origin)) {
       return { allowed: false, reason: `Origin ${url.origin} not allowed` };
     }
   }
@@ -164,7 +164,7 @@ const selector = '.order-card .btn-primary';
 // ✅ data-testid — стабильный контракт
 const selector = '[data-testid="order-payment-status"]';
 
-// ✅ Accessibility tree — ролльный контракт
+// ✅ Accessibility tree — ролевой контракт
 const status = await page.getByRole('cell', { name: /Оплачен/i }).textContent();
 ```
 
@@ -185,7 +185,9 @@ const status = await page.getByRole('cell', { name: /Оплачен/i }).textCon
 // Pre-authenticated session: storage state вместо credentials
 await context.storageState({ path: `runs/${runId}/storage.json` });
 // ... в следующем run:
-const context = await browser.newContext({ storageState: `runs/${runId}/storage.json` });
+const context = await chromium.launchPersistentContext(`runs/${runId}/profile`, {
+  storageState: `runs/${runId}/storage.json`,
+});
 ```
 
 ### 2.6. Human-in-the-loop и approvals

@@ -7,7 +7,7 @@
 ## A
 
 **ARIA (Accessible Rich Internet Applications)**  
-W3C спецификация: набор атрибутов (`role`, `aria-*`, `aria-live`) для добавления semantic информации в HTML элементы которые не несут встроенной семантики. Используется только когда нативный HTML недостаточен.
+W3C спецификация: набор атрибутов (`role`, `aria-*`, `aria-live`) для добавления семантической информации в HTML-элементы, которые не несут встроенной семантики. Используется только когда нативный HTML недостаточен.
 
 **aria-describedby**  
 ARIA атрибут: связывает элемент с его описанием через `id`. Screen reader объявляет описание после label. Использовать для подсказок, требований формата, контекстной информации.
@@ -57,7 +57,7 @@ HTML атрибут: делает элемент и всех потомков н
 ## P
 
 **POUR**  
-Четыре принципа WCAG: Perceivable (воспринимаемый), Operable (управляемый), Understandable (понятный), Robust (надёжный). Организационный framework для 87 success criteria.
+Четыре принципа WCAG: Perceivable (воспринимаемый), Operable (управляемый), Understandable (понятный), Robust (надёжный). Организационная рамка для 86 success criteria.
 
 ---
 
@@ -74,7 +74,7 @@ Assistive technology: программа для синтеза речи из с�
 ## W
 
 **WCAG (Web Content Accessibility Guidelines)**  
-W3C стандарт web accessibility. WCAG 2.2 (октябрь 2023) — текущий baseline. 87 success criteria, три уровня: A, AA, AAA. Level AA — legal compliance target (EAA, ADA, Section 508).
+W3C стандарт web accessibility. WCAG 2.2 (октябрь 2023) — текущий baseline. 86 success criteria (78 из 2.1 + 9 новых − 1 удалённый 4.1.1 Parsing), три уровня: A, AA, AAA. Level AA — legal compliance target (EAA, ADA, Section 508).
 
 ---
 

@@ -21,12 +21,12 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Lighthouse | **13.4.0** | Lab performance audit |
-| web-vitals (npm) | **5.3.0** | Field measurement library (~2KB brotli) |
+| Lighthouse | **13.5** | Lab performance audit |
+| web-vitals (npm) | **6.2** | Field measurement library (~3KB brotli) |
 | Lighthouse CI (`@lhci/cli`) | **0.15.1** | CI gates для performance |
 | CrUX API | v1 | Field data от Chrome пользователей |
 
@@ -71,7 +71,7 @@ CLS (Cumulative Layout Shift)
 
 ```
 LCP +0.1s  →  -1% конверсий (e-commerce, Google research)
-INP >500ms →  bounce rate +x% — пользователь считает сайт «лагающим»
+INP >500ms →  пользователь считает интерфейс «лагающим» → рост bounce rate
 CLS >0.1   →  случайные клики по неправильным элементам → отказы
 ```
 
@@ -205,7 +205,7 @@ function processLargeList(items: Item[]) {
   return items.map(item => expensiveTransform(item))  // 500ms+ на main thread
 }
 
-// ✅ Разбить на chunks через scheduler API (Chrome 115+)
+// ✅ Разбить на chunks через scheduler API (Chrome 129+)
 async function processLargeListChunked(items: Item[]) {
   const results: Result[] = []
 
@@ -214,7 +214,7 @@ async function processLargeListChunked(items: Item[]) {
 
     // Уступить управление браузеру каждые ~50 items
     if (results.length % 50 === 0) {
-      await scheduler.yield()  // scheduler.yield() → Chrome 115+
+      await scheduler.yield()  // scheduler.yield() → Chrome/Edge 129+, FF 142+
       // fallback: await new Promise(r => setTimeout(r, 0))
     }
   }
@@ -273,7 +273,7 @@ function SearchResults({ query }: { query: string }) {
 </script>
 ```
 
-**`scheduler.yield()` совместимость**: Chrome 115+, Firefox — нет. Для cross-browser: `await new Promise(r => setTimeout(r, 0))` как fallback.
+**`scheduler.yield()` совместимость**: Chrome/Edge 129+, Firefox 142+, Safari — не поддерживает. Для cross-browser: `await new Promise(r => setTimeout(r, 0))` как fallback или официальный `scheduler-polyfill`.
 
 **Почему это важно архитектору:** INP значительно строже FID который он заменил — сайты, легко проходившие FID, теперь могут провалить INP. React-приложения с тяжёлыми event handlers — зона риска.
 
@@ -479,7 +479,7 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
@@ -500,7 +500,7 @@ jobs:
     "path": "/*",
     "timings": [
       { "metric": "largest-contentful-paint", "budget": 2500 },
-      { "metric": "total-blocking-time", "budget": 300 }
+      { "metric": "total-blocking-time", "budget": 200 }
     ],
     "sizes": [
       { "resourceType": "script", "budget": 300 },

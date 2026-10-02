@@ -26,7 +26,7 @@
 ## E
 
 **Embedding Cache**
-Кэш векторов: L1 (in-memory) + L2 (Redis). Повторные запросы не платят за embeddings. Hit 94% → cost −90%.
+Кэш векторов: L1 (in-memory) + L2 (Redis). Повторные запросы не платят за embeddings. Hit 94% → cost −94%.
 
 ---
 

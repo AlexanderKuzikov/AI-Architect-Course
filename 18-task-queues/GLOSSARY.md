@@ -35,10 +35,10 @@
 Блокирующая Redis команда: ждёт появления элемента в LIST. BullMQ использует для получения задач из `waiting` списка без polling. Требует `maxRetriesPerRequest: null` в ioredis — иначе команда прерывается по таймауту retry.
 
 **BullMQ**  
-Node.js библиотека очередей задач на основе Redis. Версия 6.2.2 (сентябрь 2026). Поддерживает: приоритеты, delay, cron, FlowProducer (DAG), rate limiting, OpenTelemetry. Работает в режиме at-least-once.
+Node.js библиотека очередей задач на основе Redis. Версия 6.3.11 актуальна на октябрь 2026. Поддерживает: приоритеты, delay, cron, FlowProducer (DAG), rate limiting, OpenTelemetry. Работает в режиме at-least-once.
 
 **Bull Board**  
-Web UI для мониторинга BullMQ очередей. npm: `@bull-board/express` (6.x). Отображает состояния задач, прогресс, ошибки, возможность retry/удаления. Обязательно защищать от публичного доступа.
+Web UI для мониторинга BullMQ очередей. npm: `@bull-board/express` (9.x). Отображает состояния задач, прогресс, ошибки, возможность retry/удаления. Обязательно защищать от публичного доступа.
 
 ---
 
@@ -104,7 +104,7 @@ BullMQ класс для создания DAG-пайплайнов. `flowProduce
 Processor который можно выполнить несколько раз с одними данными без побочных эффектов. Обязателен при at-least-once семантике: при retry одна и та же задача выполняется повторно. Техника: проверять `documentId` в БД перед обработкой, использовать `jobId` как идемпотентный ключ.
 
 **ioredis**  
-Node.js Redis клиент. Версия 5.x (март 2026). Используется BullMQ как транспорт. Критичные опции для BullMQ: `maxRetriesPerRequest: null`, `enableReadyCheck: false`.
+Node.js Redis клиент. Версия 6.x актуальна на октябрь 2026: требует Node.js 20+ и использует RESP3 по умолчанию (`protocol: 2` возвращает wire-протокол v5). Используется BullMQ как транспорт. Критичные опции для BullMQ: `maxRetriesPerRequest: null`, `enableReadyCheck: false`.
 
 ---
 
@@ -138,7 +138,7 @@ Node.js Redis клиент. Версия 5.x (март 2026). Используе
 ## P
 
 **pg-boss**  
-Node.js библиотека очередей задач на основе PostgreSQL. Версия 12.8.0 (март 2026). Использует `SKIP LOCKED` для конкурентного получения задач. Поддерживает transactional enqueue через `{ tx: client }`. Не требует отдельной инфраструктуры если PostgreSQL уже используется.
+Node.js библиотека очередей задач на основе PostgreSQL. Версия 12.35.1 актуальна на октябрь 2026. Использует `SKIP LOCKED` для конкурентного получения задач. Поддерживает transactional enqueue через `{ tx: client }`. Не требует отдельной инфраструктуры если PostgreSQL уже используется.
 
 **pollingIntervalSeconds**  
 Параметр pg-boss Worker: как часто опрашивать таблицу задач. Дефолт: 2 секунды. PostgreSQL не имеет push-нотификаций для задач как Redis → pg-boss использует polling.

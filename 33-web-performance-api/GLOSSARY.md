@@ -48,7 +48,7 @@ Google база данных: field data от реальных Chrome польз
 Метрики из контролируемой тестовой среды. Инструменты: Lighthouse, WebPageTest, PageSpeed Insights. Воспроизводимо. Не отражает реальный опыт: нет extensions, фиксированный CPU throttle, нет кеша пользователя.
 
 **LoAF (Long Animation Frames API)**  
-Web API (Baseline 2024, Chrome 123+): наследник Long Tasks API. Сообщает о frames > 50ms с атрибуцией к конкретным скриптам (URL, duration, invoker). Главный инструмент диагностики INP в production.
+Web API (Chromium-only, не Baseline; Chrome/Edge 123+): наследник Long Tasks API. Сообщает о frames > 50ms с атрибуцией к конкретным скриптам (URL, duration, invoker). Главный инструмент диагностики INP в production — требует feature-detect, так как Firefox и Safari его не поддерживают.
 
 **Long Tasks API**  
 Web API (Chrome 58+, deprecated): сообщал о задачах > 50ms на main thread без атрибуции источника. Заменён LoAF который добавляет информацию о скриптах-виновниках.
@@ -82,7 +82,7 @@ Web API: timing для каждого загруженного ресурса (i
 ## S
 
 **sampling**  
-Стратегия сбора метрик: отправлять данные только от % сессий (например, 10%). Снижает нагрузку на backend и costs. При правильном stratification — достаточная точность для оптимизационных решений.
+Стратегия сбора метрик: отправлять данные только от % сессий (например, 10%). Снижает нагрузку на backend и затраты. При правильном stratification — достаточная точность для оптимизационных решений.
 
 **sendBeacon**  
 Web API: асинхронная отправка данных без блокировки страницы. Работает при `visibilitychange` и `unload`. Предпочтительный способ отправки RUM данных. Ограничение: только POST, без кастомных заголовков.

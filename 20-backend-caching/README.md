@@ -25,12 +25,12 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js | **24.x Active LTS** | июнь 2026 |
-| ioredis | **5.11.1** | июнь 2026 |
-| lru-cache | **11.5.1** | июнь 2026 |
-| node-cache | **5.1.2** | июнь 2026 |
-| quick-lru | **7.3.0** | июнь 2026 |
-| redis | **6.0.0** | июнь 2026 | npm client package |
+| Node.js | **24.x Active LTS** | октябрь 2026 |
+| ioredis | **6.0.0** | октябрь 2026 |
+| lru-cache | **11.5.3** | октябрь 2026 |
+| node-cache | **5.1.2** | октябрь 2026 |
+| quick-lru | **7.3.0** | октябрь 2026 |
+| redis | **6.3.0** | октябрь 2026 | npm client package |
 
 ---
 
@@ -1149,7 +1149,7 @@ app.get('/health', async (req, res) => {
 в корпусе, ~500 запросов/день. Каждый запрос → embedding вызов
 (∼50ms, ∼$0.0001) → pgvector search.
 
-**Стек:** Node.js 24, LRUCache 11.5 (L1), ioredis 5.11 (L2),
+**Стек:** Node.js 24, LRUCache 11.5 (L1), ioredis 6.0 (L2),
 актуальная embedding-модель, pgvector.
 
 **Гипотеза:** L1 (in-memory) + L2 (Redis) кэш embeddings сократит
@@ -1273,7 +1273,7 @@ L1 «трясёт» — каждый день перезаписываются �
 > «Добавь кэш для документов»
 
 Хорошая формулировка:
-> «Реализуй TypeScript класс `TwoLevelCache<T>` с конструктором `(options: {prefix: string, l1Max: number, l1TtlMs: number, l2TtlSeconds: number})`. Методы: `get(key: string): Promise<T | null>` — проверять L1 (LRUCache 11.5.1), потом L2 (RedisCache с ioredis 5.11.1), при L2 hit — populate L1; `set(key: string, value: T): Promise<void>` — писать оба уровня; `del(key: string): Promise<void>` — удалять оба уровня; `getStats(): {l1: {hits, misses, hitRate, size}, l2HitRate: number}` — возвращать статистику обоих уровней. L1 использовать InstrumentedLRUCache (ручные счётчики). L2 hit rate — считать через собственные counters в классе. Redis — singleton getRedis() из внешнего модуля.»
+> «Реализуй TypeScript класс `TwoLevelCache<T>` с конструктором `(options: {prefix: string, l1Max: number, l1TtlMs: number, l2TtlSeconds: number})`. Методы: `get(key: string): Promise<T | null>` — проверять L1 (LRUCache 11.5.3), потом L2 (RedisCache с ioredis 6.0.0), при L2 hit — populate L1; `set(key: string, value: T): Promise<void>` — писать оба уровня; `del(key: string): Promise<void>` — удалять оба уровня; `getStats(): {l1: {hits, misses, hitRate, size}, l2HitRate: number}` — возвращать статистику обоих уровней. L1 использовать InstrumentedLRUCache (ручные счётчики). L2 hit rate — считать через собственные counters в классе. Redis — singleton getRedis() из внешнего модуля.»
 
 Формула: оба уровня + populate on L2 hit + stats обоих уровней + singleton Redis.
 
@@ -1285,7 +1285,7 @@ L1 «трясёт» — каждый день перезаписываются �
 > «Закэшируй embeddings»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `getOrCreateEmbedding(text: string, model: string, callApi: (text: string, model: string) => Promise<number[]>): Promise<number[]>`. Ключ = SHA-256 от `model + ':' + text`, первые 32 символа hex. L1: LRUCache 11.5.1, max=5000, maxSize=100MB, sizeCalculation=(v)=>v.length*4+64 (float32), ttl=24h. L2: RedisCache prefix='emb', ttl=7 days. Кэшировать `{vector: number[], model: string, dimensions: number}`. При L2 hit — populate L1. Функцию `callApi` вызывать только при промахе обоих уровней. Не хранить исходный текст в Redis (только хэш как ключ).»
+> «Реализуй TypeScript функцию `getOrCreateEmbedding(text: string, model: string, callApi: (text: string, model: string) => Promise<number[]>): Promise<number[]>`. Ключ = SHA-256 от `model + ':' + text`, первые 32 символа hex. L1: LRUCache 11.5.3, max=5000, maxSize=100MB, sizeCalculation=(v)=>v.length*4+64 (float32), ttl=24h. L2: RedisCache prefix='emb', ttl=7 days. Кэшировать `{vector: number[], model: string, dimensions: number}`. При L2 hit — populate L1. Функцию `callApi` вызывать только при промахе обоих уровней. Не хранить исходный текст в Redis (только хэш как ключ).»
 
 Формула: ключ через хэш + размер по float32 + оба уровня + no plaintext в Redis.
 

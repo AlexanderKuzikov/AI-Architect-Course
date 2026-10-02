@@ -26,15 +26,15 @@
 
 | Инструмент | Версия | Примечание |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| undici | 7.24.6 | bundled в Node.js 24 |
-| got | 14.6.6 | ESM-only; Node.js 18+ |
-| ky | 1.x | ESM-only; fetch-based |
-| axios | **1.14.0** | ⚠️ 1.14.1 и 0.30.4 скомпрометированы (31.03.2026) |
-| p-retry | 6.x | utility для retry логики |
-| opossum | 8.x | circuit breaker |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| undici | 8.11.2 | bundled в Node.js 24 |
+| got | 16.0.0 | ESM-only; Node.js 22+ |
+| ky | 2.x | ESM-only; fetch-based |
+| axios | **1.20.0** | ⚠️ 1.14.1 и 0.30.4 скомпрометированы (31.03.2026), удалены из registry |
+| p-retry | 8.x | utility для retry логики |
+| opossum | 10.x | circuit breaker |
 
-> ⚠️ **CRITICAL (31.03.2026):** `axios@1.14.1` и `axios@0.30.4` содержат RAT через скомпрометированный npm аккаунт мейнтейнера. Безопасная версия: `1.14.0`. Детали в разделе 10.
+> ⚠️ **CRITICAL (31.03.2026):** `axios@1.14.1` и `axios@0.30.4` содержат RAT через скомпрометированный npm аккаунт мейнтейнера. Обе версии удалены из registry. Актуальная чистая версия на октябрь 2026 — `1.20.0`. Детали в разделе 10.
 
 ---
 
@@ -49,16 +49,16 @@
   └── fetch (global)           — встроен в Node.js 18+, undici под капотом
 
 Уровень 2: HTTP клиенты
-  ├── got 14.x                 — Node.js only, ESM, богатый API
-  └── ky 1.x                   — browser + Node.js, ESM, fetch-based
+  ├── got 16.x                 — Node.js only, ESM, богатый API
+  └── ky 2.x                   — browser + Node.js, ESM, fetch-based
 
 Уровень 3: Высокоуровневые (с axios-совместимым API)
-  └── axios 1.14.0             — ⚠️ legacy, supply chain incident (см. раздел 10)
+  └── axios 1.x                 — ⚠️ legacy, supply chain incident (см. раздел 10)
 ```
 
 ### Матрица выбора
 
-| Критерий | undici / fetch | got 14.x | axios 1.14.0 |
+| Критерий | undici / fetch | got 16.x | axios 1.x |
 |:--|:--|:--|:--|
 | Зависимости | 0 (встроен) | ~5 ESM | ~5 |
 | ESM | ✅ | ✅ only | ✅ CJS+ESM |
@@ -73,9 +73,9 @@
 **Правило выбора:**
 ```
 Zero-dependency + Node.js 24.x + нужен контроль пула → undici Pool
-Богатый API + retry + hooks + Node.js only → got 14.x
+Богатый API + retry + hooks + Node.js only → got 16.x
 Browser + Node.js + единый код → ky
-Axios в legacy codebase → пинить 1.14.0 жёстко до аудита
+Axios в legacy codebase → пинить конкретную версию жёстко до аудита
 ```
 
 **Практический вывод для архитектора:** В новых Node.js проектах 2026 — `undici` или `got`. `fetch()` глобальный удобен для простых запросов, но не даёт контроль над connection pooling и retry без дополнительных абстракций. Для AI API pipelines — `got` с кастомными retry hooks.
@@ -244,7 +244,7 @@ const apiClient: Got = got.extend({
   retry: {
     limit: 3,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    statusCodes: ,
+    statusCodes: [408, 413, 429, 500, 502, 503, 504],
     errorCodes: [
       'ETIMEDOUT', 'ECONNRESET', 'EADDRINUSE',
       'ECONNREFUSED', 'EPIPE', 'ENOTFOUND',
@@ -1079,8 +1079,8 @@ const sdk = new NodeSDK({
 6. RAT самоудаляется после установки
 ```
 
-**Затронутые версии:** `axios@1.14.1`, `axios@0.30.4`
-**Безопасные версии:** `axios@1.14.0`, `axios@0.30.3`
+**Затронутые версии:** `axios@1.14.1`, `axios@0.30.4` (удалены из registry)
+**Версии без инцидента:** `axios@1.14.0`, `axios@0.30.3`. Актуальная чистая — `1.20.0` (август 2026).
 
 ### Диагностика
 
@@ -1130,10 +1130,10 @@ axios: 100M+ загрузок/неделю = максимальная цель
 undici: встроен в Node.js (npm maintainer = Node.js core team)
 got: 5M загрузок/неделю, меньшая поверхность
 
-Для новых проектов (март 2026+):
+Для новых проектов:
   ✅ undici (Node.js 24.x, zero external deps)
-  ✅ got 14.6.6
-  ⚠️ axios — только при явной необходимости, пинить 1.14.0
+  ✅ got 16
+  ⚠️ axios — только при явной необходимости, пинить конкретную версию
 ```
 
 **Практический вывод для архитектора:** Этот инцидент — аргумент в пользу `undici` для новых проектов. Встроен в Node.js, npm maintainer = Node.js core team, нулевые внешние зависимости. Attack surface минимален по определению.
@@ -1146,7 +1146,7 @@ got: 5M загрузок/неделю, меньшая поверхность
 ~5000 запросов/день к CURRENT_REASONING_MODEL large.
 Ограничения: 30 RPM, 1000 RPD, 100K TPD. API нестабилен.
 
-**Стек:** Node.js 24, undici Pool, p-retry 6, opossum 8.
+**Стек:** Node.js 24, undici Pool, p-retry 8, opossum 10.
 
 **Гипотеза:** retry + exponential backoff + circuit breaker
 решат проблему нестабильности.
@@ -1236,7 +1236,7 @@ Retry-After = стабильнее чем агрессивный retry.
 
 **Выглядит правильно:** получить последнюю версию.
 
-**Почему ошибка:** после инцидента 31.03.2026 — `axios@1.14.1` активно ретроспективно исключается из registry, но window заражения несколько часов. Любой `npm install axios` или `npm update` в этом окне мог установить malicious версию. Точный пин `"axios": "1.14.0"` — единственная защита.
+**Почему ошибка:** после инцидента 31.03.2026 злоумышленная `axios@1.14.1` была исключена из registry, но window заражения составил несколько часов. Любой `npm install axios` или `npm update` в этом окне мог установить malicious версию. Точный пин версии в `package.json` — единственная защита.
 
 ---
 
@@ -1260,7 +1260,7 @@ Retry-After = стабильнее чем агрессивный retry.
 > «Сделай HTTP клиент для AI API»
 
 Хорошая формулировка:
-> «Реализуй TypeScript класс `AiApiClient` использующий undici 7.24.6 Pool. Конструктор принимает `{baseUrl: string, apiKey: string, poolSize?: number, inferenceTimeoutMs?: number}`. Дефолты: poolSize=10, inferenceTimeoutMs=120000. Метод `complete(prompt: string, signal?: AbortSignal): Promise<string>` — POST /v1/chat/completions, model: process.env.CURRENT_TEXT_MODEL || "current-text-model", парсить choices[0].message.content. Retry через p-retry 6.x: maxAttempts=4, exponential backoff с jitter (randomize: true), ретраить только 429/500/502/503/504 и network ошибки. Для 429 — читать Retry-After заголовок и ждать указанное время. AbortError — немедленно выбрасывать без retry. Метод `getStats()` возвращает `{connected, free, pending}` из Pool stats.»
+> «Реализуй TypeScript класс `AiApiClient` использующий undici 8.x Pool. Конструктор принимает `{baseUrl: string, apiKey: string, poolSize?: number, inferenceTimeoutMs?: number}`. Дефолты: poolSize=10, inferenceTimeoutMs=120000. Метод `complete(prompt: string, signal?: AbortSignal): Promise<string>` — POST /v1/chat/completions, model: process.env.CURRENT_TEXT_MODEL || "current-text-model", парсить choices[0].message.content. Retry через p-retry 8.x: maxAttempts=4, exponential backoff с jitter (randomize: true), ретраить только 429/500/502/503/504 и network ошибки. Для 429 — читать Retry-After заголовок и ждать указанное время. AbortError — немедленно выбрасывать без retry. Метод `getStats()` возвращает `{connected, free, pending}` из Pool stats.»
 
 Формула: pooling + retry семантика + Retry-After + AbortError handling + stats.
 
@@ -1272,7 +1272,7 @@ Retry-After = стабильнее чем агрессивный retry.
 > «Добавь circuit breaker для внешнего API»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `createCircuitBreaker<T>(fn: (...args: any[]) => Promise<T>, options: {name: string, timeout?: number, errorThreshold?: number, resetTimeout?: number, fallback?: (...args: any[]) => T|Promise<T>}): {fire: (...args: any[]) => Promise<T>, getStatus: () => {state: 'CLOSED'|'OPEN'|'HALF-OPEN', stats: object}}`. Использовать opossum 8.x. Дефолты: timeout=30000, errorThreshold=50, resetTimeout=60000. Логировать state transitions (open/halfOpen/close) через console.warn/log. На каждый success — вызывать metrics.histogram("cb_latency_ms", latency, {name}). На каждый failure — metrics.increment("cb_failures", {name}). metrics — глобальный объект передаваемый при инициализации модуля.»
+> «Реализуй TypeScript функцию `createCircuitBreaker<T>(fn: (...args: any[]) => Promise<T>, options: {name: string, timeout?: number, errorThresholdPercentage?: number, resetTimeout?: number, fallback?: (...args: any[]) => T|Promise<T>}): {fire: (...args: any[]) => Promise<T>, getStatus: () => {state: 'CLOSED'|'OPEN'|'HALF-OPEN', stats: object}}`. Использовать opossum 10.x. Дефолты: timeout=30000, errorThresholdPercentage=50, resetTimeout=30000 (дефолты самого opossum). Логировать state transitions (open/halfOpen/close) через console.warn/log. На каждый success — вызывать metrics.histogram("cb_latency_ms", latency, {name}). На каждый failure — metrics.increment("cb_failures", {name}). metrics — глобальный объект передаваемый при инициализации модуля.»
 
 Формула: дженерик + все опции + state logging + метрики + экспорт status.
 
@@ -1284,7 +1284,7 @@ Retry-After = стабильнее чем агрессивный retry.
 > «Проксируй стриминг от AI API»
 
 Хорошая формулировка:
-> «Реализуй Express middleware `streamAiProxy(req: Request, res: Response): Promise<void>`. Читать prompt из `req.body.prompt` (string). Устанавливать заголовки SSE: Content-Type=text/event-stream, Cache-Control=no-cache, Connection=keep-alive. Использовать undici 7.24.6 request к https://api.openai.com/v1/chat/completions с stream:true. Парсить SSE: каждая строка начинающаяся с "data: " — extract JSON, взять choices[0].delta.content, писать в res через `res.write("data: " + JSON.stringify({delta}) + "\\n\\n")`. При получении "[DONE]" — `res.write("data: [DONE]\\n\\n")` и `res.end()`. При `req.on("close")` — AbortController.abort(). Ошибки 429 — писать `data: {"error":"rate_limited"}` и завершать.»
+> «Реализуй Express middleware `streamAiProxy(req: Request, res: Response): Promise<void>`. Читать prompt из `req.body.prompt` (string). Устанавливать заголовки SSE: Content-Type=text/event-stream, Cache-Control=no-cache, Connection=keep-alive. Использовать undici 8.x request к https://api.openai.com/v1/chat/completions с stream:true. Парсить SSE: каждая строка начинающаяся с "data: " — extract JSON, взять choices[0].delta.content, писать в res через `res.write("data: " + JSON.stringify({delta}) + "\\n\\n")`. При получении "[DONE]" — `res.write("data: [DONE]\\n\\n")` и `res.end()`. При `req.on("close")` — AbortController.abort(). Ошибки 429 — писать `data: {"error":"rate_limited"}` и завершать.»
 
 Формула: SSE формат + SSE парсинг + AbortController + error events + chunked write.
 
@@ -1310,7 +1310,7 @@ Retry-After = стабильнее чем агрессивный retry.
 - [ ] Circuit status экспортируется в `/health` endpoint
 
 ### Security
-- [ ] `axios` в зависимостях — проверить версию, пинить `1.14.0`
+- [ ] `axios` в зависимостях — проверить версию, пинить конкретную версию
 - [ ] `npm ci --ignore-scripts` в CI/CD pipeline
 - [ ] `rejectUnauthorized: true` в TLS конфигурации — всегда
 

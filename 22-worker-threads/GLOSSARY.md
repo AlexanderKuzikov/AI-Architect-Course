@@ -74,7 +74,7 @@ Namespace глобальных атомарных операций для Shared
 Объект в Worker Thread для коммуникации с родительским потоком: `parentPort.postMessage(result)` и `parentPort.on('message', handler)`. Аналог `process.send()` в child_process. `null` если воркер создан не через `Worker` API.
 
 **Piscina**  
-Worker Thread Pool для Node.js. Управляет жизненным циклом воркеров, очередью задач, статистикой. Воркер — файл с default export функцией. Версия 5.1.4 (апрель 2026).
+Worker Thread Pool для Node.js. Управляет жизненным циклом воркеров, очередью задач, статистикой. Воркер — файл с default export функцией. Версия 5.3.2 актуальна на октябрь 2026.
 
 ---
 
@@ -104,7 +104,7 @@ Worker Thread Pool для Node.js. Управляет жизненным цик�
 Второй аргумент `postMessage`: массив Transferable объектов (ArrayBuffer, MessagePort, ReadableStream). После transfer объект detached в отправляющем потоке. Zero-copy — данные не копируются, а перемещаются.
 
 **tinypool**  
-Форк Piscina с меньшим размером (38KB vs ~800KB). Меньше возможностей (нет utilization, нет OS-приоритетов). Используется внутри Vitest для test isolation. Версия 2.1.0 (апрель 2026).
+Форк Piscina с меньшим размером (38KB vs ~800KB). Меньше возможностей (нет utilization, нет OS-приоритетов). Используется внутри Vitest для test isolation. Версия 2.2.0 актуальна на октябрь 2026.
 
 ---
 

@@ -26,13 +26,13 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
-| Vitest | **4.1** | Unit / integration, Node.js + Vite |
-| Playwright | **1.58.x** | E2E, component testing |
-| testcontainers-node | **11.13.0** | Real dependencies в тестах |
+| Vitest | **5.0** | Unit / integration, Node.js + Vite |
+| Playwright | **1.63.x** | E2E, component testing |
+| testcontainers | **12.2.0** | Real dependencies в тестах |
 | Supertest | **7.x** | HTTP integration testing |
 | Jest | **30.x** | Legacy проекты, CJS |
 
@@ -85,9 +85,9 @@ e2e         | ~3-10s   | высокая             | очень выс. | ~$0.1
 
 ## 2. Unit testing
 
-### Механика Vitest 4.x
+### Механика Vitest 5.x
 
-Vitest 4.1 требует Node.js ≥ 20 и Vite ≥ 6. Ключевое отличие от Jest: статический анализ `vi.mock()` поднят на уровень Vite-плагина, hoisting происходит до выполнения модуля.
+Vitest 5.0 требует Node.js ≥ 22.12 и Vite ≥ 6.4. Ключевое отличие от Jest: статический анализ `vi.mock()` поднят на уровень Vite-плагина, hoisting происходит до выполнения модуля.
 
 ```typescript
 // ✅ Правильно — тестируем поведение, не имплементацию
@@ -143,7 +143,7 @@ beforeEach(() => {
 
 ### Граничные случаи — где ломается
 
-**Temporal coupling в тестах**: тесты зависят от порядка выполнения — глобальное состояние, синглтоны, DB-соединения без изоляции. Vitest 4.x запускает файлы в worker threads параллельно — это выявляет coupling, которого Jest (однопоточный по умолчанию) не замечал.
+**Temporal coupling в тестах**: тесты зависят от порядка выполнения — глобальное состояние, синглтоны, DB-соединения без изоляции. Vitest 5.x запускает файлы в worker threads параллельно — это выявляет coupling, которого Jest (однопоточный по умолчанию) не замечал.
 
 ```typescript
 // ❌ Падает в Vitest при параллельном запуске
@@ -159,15 +159,15 @@ it('test 1', () => {
 })
 ```
 
-**Почему это важно архитектору:** при переезде с Jest на Vitest 4.x падают тесты, которые годами проходили. Это не баги Vitest — это баги в тестах, которые Jest скрывал.
+**Почему это важно архитектору:** при переезде с Jest на Vitest 5.x падают тесты, которые годами проходили. Это не баги Vitest — это баги в тестах, которые Jest скрывал.
 
 ---
 
 ## 3. Integration testing
 
-### testcontainers-node — механика
+### testcontainers — механика
 
-testcontainers-node 11.13.0 запускает реальные Docker-контейнеры из тестов. Жизненный цикл контейнера управляется через `AsyncDisposable` (TS 5.2+ `using`).
+testcontainers 12.2.0 запускает реальные Docker-контейнеры из тестов. Пакеты ставится по частям: `@testcontainers/postgresql`, `@testcontainers/redis` и др. Жизненный цикл контейнера управляется через `AsyncDisposable` (TS 5.2+ `using`).
 
 ```typescript
 import { PostgreSqlContainer } from '@testcontainers/postgresql'
@@ -252,7 +252,7 @@ DOCKER_HOST=unix:///var/run/docker.sock
 
 ## 4. E2E testing
 
-### Playwright 1.58 — архитектура
+### Playwright 1.63 — архитектура
 
 Playwright запускает реальные браузеры (Chromium, Firefox, WebKit) в изолированных контекстах. С версии 1.56 добавлены **Test Agents** — planner/generator/healer loops для AI-assisted authoring.
 
@@ -304,7 +304,7 @@ await page.click('#submit')
 await page.waitForSelector('.result[data-status="success"]')
 // или
 await expect(page.locator('.result')).toHaveText('Success')
-// Playwright auto-waits, но waitForSelector явнее communicates intent
+// Playwright ждёт автоматически, но waitForSelector явно выражает намерение
 ```
 
 **Практический вывод для архитектора:** если flakiness > 2% — это архитектурная проблема (race conditions, внешние зависимости, порядок тестов). Retry маскирует проблему, не решает.
@@ -659,7 +659,7 @@ E2E тест, который проверяет что форма сохраня
 > «Напиши тесты для модуля DocumentService»
 
 **Хорошая формулировка:**
-> «Используя Vitest 4.1 и testcontainers-node 11.13.0, напиши integration-тест для `DocumentService.process()`.
+> «Используя Vitest 5.0 и testcontainers 12.2, напиши integration-тест для `DocumentService.process()`.
 > Подними Postgres 16-alpine через `@testcontainers/postgresql`.
 > Сценарии: (1) документ со статусом `pending` переходит в `processed`, (2) документ с пустым `content` бросает `ValidationError`, (3) дубликат по `externalId` возвращает существующий документ без создания нового.
 > Не мокировать DB-слой. Изоляция через TRUNCATE в afterEach. Шаблон контейнера — в `test/helpers/postgres.ts`»
@@ -672,7 +672,7 @@ E2E тест, который проверяет что форма сохраня
 > «Добавь e2e тесты для checkout»
 
 **Хорошая формулировка:**
-> «Используя Playwright 1.58.x, напиши e2e тест для флоу оформления заказа.
+> «Используя Playwright 1.63.x, напиши e2e тест для флоу оформления заказа.
 > Селекторы — только `getByRole` и `getByTestId`, не CSS-классы.
 > Покрыть: успешный checkout с валидной картой, отказ при невалидной карте (mock payment API через `page.route()`).
 > Добавить `data-testid` к кнопке submit и confirmation message, если их нет.

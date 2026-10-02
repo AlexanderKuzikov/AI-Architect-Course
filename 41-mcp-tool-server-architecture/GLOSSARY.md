@@ -50,7 +50,7 @@ JSON-документ с id, url, capabilities, auth, owner, version. Источ
 ## J
 
 **JSON-RPC**  
-Протокол обмена MCP: `list_tools`, `call_tool`, `read_resource`, `subscribe`. Каждый вызов — JSON-сообщение с id, method, params.
+Протокол обмена MCP: `tools/list`, `tools/call`, `resources/read`, `subscriptions/listen`. Каждый вызов — JSON-сообщение с id, method, params.
 
 ---
 
@@ -138,14 +138,14 @@ Transport MCP: child process + stdin/stdout JSON-RPC. Локальная раз�
 Ответ tool: `{ok, data, warnings, traceId}`. Нормализованный и ограниченный. Не raw HTML/JSON без необходимости — tool output часть context window.
 
 **Transport**  
-Способ доставки JSON-RPC: STDIO, HTTP/SSE, WebSocket. Выбор определяет surface attack, multi-user и observability.
+Способ доставки JSON-RPC. В спецификации `2026-07-28` два стандартных: STDIO и Streamable HTTP; HTTP+SSE — deprecated, WebSocket в спецификацию не входит. Выбор определяет surface attack, multi-user и observability.
 
 ---
 
 ## W
 
 **WebSocket**  
-Transport для realtime-агентов: streaming, bidirectional. Сложнее в эксплуатации, чем HTTP/SSE.
+Bidirectional-канал для realtime-агентов: streaming в обе стороны. В спецификацию MCP не входит, требует собственного framing и cancellation.
 
 ---
 

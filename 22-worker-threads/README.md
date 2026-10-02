@@ -20,14 +20,14 @@
 
 ## Актуальные версии
 
-> Апрель 2026
+> Октябрь 2026
 
 | Инструмент | Версия | Назначение |
 | :-- | :-- | :-- |
 | Node.js | **24 LTS** | worker_threads встроен |
-| Piscina | **5.1.4** | Production worker pool |
-| tinypool | **2.1.0** | Минималистичный pool (используется внутри Vitest) |
-| @napi-rs/nice | **2.x** | Опциональный аддон для приоритетов потоков в Linux |
+| Piscina | **5.3.2** | Production worker pool |
+| tinypool | **2.2.0** | Минималистичный pool (используется внутри Vitest) |
+| @napi-rs/nice | **1.1.1** | Опциональный аддон для приоритетов потоков в Linux |
 
 ---
 
@@ -505,14 +505,14 @@ app.post('/process', async (req, res) => {
 > «Перенеси обработку изображений в worker threads»
 
 **Хорошая формулировка:**
-> «Создай Piscina 5.1.4 пул для обработки изображений через Sharp.
+> «Создай Piscina 5.3.2 пул для обработки изображений через Sharp.
 > Файл воркера: `workers/image.worker.ts`, обёртка для TypeScript: `workers/workerWrapper.js`.
 > Экспорты воркера: `resize(task: ResizeTask)`, `thumbnail(task: ThumbnailTask)`.
 > Конфиг пула: `maxThreads: 4`, `maxQueue: 50`, `resourceLimits.maxOldGenerationSizeMb: 256`.
 > В main — экспортировать синглтон `imagePool`. При `queue is full` — бросать `ServiceUnavailableError`.
 > UV_THREADPOOL_SIZE выставить в README к модулю.»
 
-Формула: конкретный пул (Piscina 5.1.4) + конфиг (maxThreads/maxQueue/resourceLimits) + workerWrapper + backpressure + синглтон.
+Формула: конкретный пул (Piscina 5.3.2) + конфиг (maxThreads/maxQueue/resourceLimits) + workerWrapper + backpressure + синглтон.
 
 ---
 

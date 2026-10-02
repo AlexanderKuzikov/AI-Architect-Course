@@ -60,7 +60,7 @@ Immutable (append-only) журнал действий: agentId, userId, toolName
 
 ## O
 
-**OWASP LLM Top 10**  
+**OWASP LLM Top 10 (2026)**  
 Базовый список рисков LLM-приложений: prompt injection, sensitive disclosure, supply chain, poisoning, excessive agency и др.
 
 ---

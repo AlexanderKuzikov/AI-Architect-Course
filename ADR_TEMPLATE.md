@@ -32,7 +32,7 @@
 **Минусы:**
 - ...
 
-**Ссылка на модуль курса:** [Модуль NN — ...](../NN-module/README.md#секция)
+**Ссылка на модуль курса:** [Модуль NN — ...](./NN-module/README.md#секция)
 
 ### Вариант B: <Название>
 
@@ -44,7 +44,7 @@
 **Минусы:**
 - ...
 
-**Ссылка на модуль курса:** [Модуль NN — ...](../NN-module/README.md#секция)
+**Ссылка на модуль курса:** [Модуль NN — ...](./NN-module/README.md#секция)
 
 ## Решение
 
@@ -103,7 +103,7 @@
 **Плюсы:** Простота, один pipeline
 **Минусы:** $20-30/day на 2000 изображений, 50% тратится на изображения без цен
 
-**Ссылка на модуль:** [Модуль 11 — Multi-model Orchestration](../11-multi-model-orchestration/README.md#4-cascade-filter)
+**Ссылка на модуль:** [Модуль 11 — Multi-model Orchestration](./11-multi-model-orchestration/README.md#4-cascade-filter-дешёвая-модель-как-gate)
 
 ### Вариант B: Cascade Filter (SLM gate + cloud VLM)
 
@@ -112,7 +112,7 @@
 **Плюсы:** Экономия 70% cost, gate latency ~1s
 **Минусы:** Recall gate не 100% — риск false negative, сложнее pipeline
 
-**Ссылка на модуль:** [Модуль 11 — Cascade Filter](../11-multi-model-orchestration/README.md#4-cascade-filter)
+**Ссылка на модуль:** [Модуль 11 — Cascade Filter](./11-multi-model-orchestration/README.md#4-cascade-filter-дешёвая-модель-как-gate)
 
 ## Решение
 
@@ -145,8 +145,8 @@
 
 ## Связанные решения
 
-- [Модуль 11 — Cascade Filter](../11-multi-model-orchestration/README.md)
-- [Модуль 08 — Local Inference](../08-local-inference/README.md) — выбор модели
+- [Модуль 11 — Cascade Filter](./11-multi-model-orchestration/README.md)
+- [Модуль 08 — Local Inference](./08-local-inference/README.md) — выбор модели
 ```
 
 ---
@@ -176,7 +176,7 @@
 **Плюсы:** DAG (FlowProducer), высокая производительность, Bull Board UI
 **Минусы:** Нужен Redis → ещё один сервис, at-least-once гарантия
 
-**Ссылка на модуль:** [Модуль 18 — Task Queues](../18-task-queues/README.md#2-bullmq-архитектура-и-lifecycle-задачи)
+**Ссылка на модуль:** [Модуль 18 — Task Queues](./18-task-queues/README.md#2-bullmq-архитектура-и-lifecycle-задачи)
 
 ### Вариант B: pg-boss
 
@@ -185,7 +185,7 @@
 **Плюсы:** Zero дополнительной инфраструктуры, exactly-once, транзакционный enqueue
 **Минусы:** Нет нативного DAG, ниже throughput (~1-5K job/s)
 
-**Ссылка на модуль:** [Модуль 18 — Task Queues](../18-task-queues/README.md#7-pg-boss-очередь-без-redis)
+**Ссылка на модуль:** [Модуль 18 — Task Queues](./18-task-queues/README.md#7-pg-boss-очередь-без-redis)
 
 ## Решение
 
@@ -210,8 +210,8 @@
 
 ## Связанные решения
 
-- [Модуль 18 — Task Queues](../18-task-queues/README.md#7-pg-boss-очередь-без-redis)
-- [Модуль 12 — RAG](../12-rag/README.md) — чанкинг (кэш для pgvector)
+- [Модуль 18 — Task Queues](./18-task-queues/README.md#7-pg-boss-очередь-без-redis)
+- [Модуль 12 — RAG](./12-rag/README.md) — чанкинг (кэш для pgvector)
 ```
 
 ---

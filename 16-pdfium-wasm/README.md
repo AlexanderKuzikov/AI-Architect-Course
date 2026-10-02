@@ -25,11 +25,11 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | март 2026 |
-| @hyzyla/pdfium | 2.1.12 | март 2026 |
-| @embedpdf/pdfium | 2.1.1 | март 2026 |
-| sharp | 0.34.x | март 2026 |
-| TypeScript | 5.x | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| @hyzyla/pdfium | 2.1.13 | октябрь 2026 |
+| @embedpdf/pdfium | 2.15.1 | октябрь 2026 |
+| sharp | 0.35.x | октябрь 2026 |
+| TypeScript | 5.x | октябрь 2026 |
 
 ---
 
@@ -989,7 +989,7 @@ sharp(opts.data, {
 ~500 PDF/день: судебные решения, договоры, сканы 1С. Chrome-grade
 качество рендеринга для VLM pipeline.
 
-**Стек:** Node.js 24, @hyzyla/pdfium 2.1, Sharp 0.34, Docker,
+**Стек:** Node.js 24, @hyzyla/pdfium 2.1, Sharp 0.35, Docker,
 локальная VLM (LM Studio).
 
 **Гипотеза:** PDFium будет стабильнее и быстрее PDF.js на
@@ -1118,7 +1118,7 @@ worker.postMessage({ type: 'render', data: bitmap }, [bitmap.buffer]);
 > «Сделай рендеринг PDF через PDFium»
 
 Хорошая формулировка:
-> «Реализуй TypeScript класс `PdfRenderService` с методами: `init(): Promise<void>` (инициализация singleton PDFiumLibrary из @hyzyla/pdfium 2.1.12 + Worker pool из 2 воркеров), `renderPage(pdfBuffer: Buffer, pageIndex: number, opts: {dpi: number, format: 'webp'|'png', maxDimPx: number}): Promise<Buffer>` (рендер через Worker, zero-copy transfer), `destroy(): Promise<void>`. Рендер-функция: Sharp 0.34.x, raw RGBA 4 channels, resize fit:inside withoutEnlargement. При ошибке Worker — логировать и перезапускать воркер. Экспортировать singleton экземпляр.»
+> «Реализуй TypeScript класс `PdfRenderService` с методами: `init(): Promise<void>` (инициализация singleton PDFiumLibrary из @hyzyla/pdfium 2.1.13 + Worker pool из 2 воркеров), `renderPage(pdfBuffer: Buffer, pageIndex: number, opts: {dpi: number, format: 'webp'|'png', maxDimPx: number}): Promise<Buffer>` (рендер через Worker, zero-copy transfer), `destroy(): Promise<void>`. Рендер-функция: Sharp 0.35.x, raw RGBA 4 channels, resize fit:inside withoutEnlargement. При ошибке Worker — логировать и перезапускать воркер. Экспортировать singleton экземпляр.»
 
 Формула: версии + Worker + zero-copy + error recovery + singleton.
 

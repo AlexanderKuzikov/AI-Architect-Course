@@ -26,14 +26,14 @@
 
 | Инструмент | Версия | Дата проверки |
 |:--|:--|:--|
-| Node.js Active LTS | 24.x | сентябрь 2026 |
-| BullMQ | 6.x (практика на 6.2.2; свежие 6.3.x) | март 2026 |
-| ioredis | 5.x | март 2026 |
-| pg-boss | 12.8.0 | март 2026 |
-| Redis | 8.x | март 2026 |
-| PostgreSQL | 18.x | март 2026 |
-| @bull-board/express | 6.x | март 2026 |
-| bullmq-otel | 1.x | март 2026 |
+| Node.js Active LTS | 24.x | октябрь 2026 |
+| BullMQ | 6.x (практика на 6.3.11) | октябрь 2026 |
+| ioredis | 6.x (RESP3 по умолчанию) | октябрь 2026 |
+| pg-boss | 12.35.1 | октябрь 2026 |
+| Redis | 8.x | октябрь 2026 |
+| PostgreSQL | 18.x | октябрь 2026 |
+| @bull-board/express | 9.x | октябрь 2026 |
+| bullmq-otel | 2.x | октябрь 2026 |
 
 ---
 
@@ -1207,7 +1207,7 @@ class IncrementalCollector {
 Каждый документ: text extraction → render preview → LLM summarization.
 Документы приходят пачками после парсинга Telegram-канала.
 
-**Стек:** Node.js 24, BullMQ 6.2.2, Redis 8, LM Studio, Got 14.
+**Стек:** Node.js 24, BullMQ 6.3.11, Redis 8, LM Studio, Got 16.
 
 **Гипотеза:** BullMQ FlowProducer с DAG «extract → render → summarize»
 даст чистый pipeline. Дети параллельно, родитель ждёт все результаты.
@@ -1343,7 +1343,7 @@ FlowProducer красиво выглядел на диаграмме, но дв�
 > «Сделай очередь для обработки PDF»
 
 Хорошая формулировка:
-> «Реализуй TypeScript модуль `pdf-queue.ts`. Экспортировать: `pdfQueue: Queue<PdfJobData, PdfJobResult>` (BullMQ 6.2.2, connection из env REDIS_HOST/REDIS_PORT), `pdfWorker: Worker` (concurrency=4, limiter max=20/1000ms), `dlqQueue: Queue`. Тип `PdfJobData`: `{documentId: string, pdfPath: string, priority: 1|10|50}`. Тип `PdfJobResult`: `{pageCount: number, textLength: number, durationMs: number}`. defaultJobOptions: attempts=3, exponential backoff delay=2000, removeOnComplete count=500, removeOnFail count=2000. При исчерпании попыток (attemptsMade >= attempts) — копировать в dlqQueue с полем originalData + error.message. Worker processor — заглушка: return {pageCount: 0, textLength: 0, durationMs: 0}. Graceful shutdown через SIGTERM: worker.close() с таймаутом 30s.»
+> «Реализуй TypeScript модуль `pdf-queue.ts`. Экспортировать: `pdfQueue: Queue<PdfJobData, PdfJobResult>` (BullMQ 6.3.11, connection из env REDIS_HOST/REDIS_PORT), `pdfWorker: Worker` (concurrency=4, limiter max=20/1000ms), `dlqQueue: Queue`. Тип `PdfJobData`: `{documentId: string, pdfPath: string, priority: 1|10|50}`. Тип `PdfJobResult`: `{pageCount: number, textLength: number, durationMs: number}`. defaultJobOptions: attempts=3, exponential backoff delay=2000, removeOnComplete count=500, removeOnFail count=2000. При исчерпании попыток (attemptsMade >= attempts) — копировать в dlqQueue с полем originalData + error.message. Worker processor — заглушка: return {pageCount: 0, textLength: 0, durationMs: 0}. Graceful shutdown через SIGTERM: worker.close() с таймаутом 30s.»
 
 Формула: полные типы + все параметры BullMQ + DLQ логика + graceful shutdown.
 
@@ -1355,7 +1355,7 @@ FlowProducer красиво выглядел на диаграмме, но дв�
 > «Создай pipeline для обработки документа»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `enqueueDocumentFlow(documentId: string, pdfPath: string): Promise<{flowJobId: string, childJobIds: string[]}>`. Использовать BullMQ 6.2.2 FlowProducer. Структура: родитель `llm-summarize` в очереди `summarize-queue` ждёт трёх children: `extract-text` (очередь `pdf-process`, attempts=3), `render-pages` (очередь `pdf-process`, attempts=3), `extract-meta` (очередь `pdf-meta`, attempts=2). Все children получают `{documentId, pdfPath}` как data. Родитель получает `{documentId}`. Вернуть id родительской задачи и массив id children. FlowProducer создавать как singleton, connection из redisConnectionOptions.»
+> «Реализуй TypeScript функцию `enqueueDocumentFlow(documentId: string, pdfPath: string): Promise<{flowJobId: string, childJobIds: string[]}>`. Использовать BullMQ 6.3.11 FlowProducer. Структура: родитель `llm-summarize` в очереди `summarize-queue` ждёт трёх children: `extract-text` (очередь `pdf-process`, attempts=3), `render-pages` (очередь `pdf-process`, attempts=3), `extract-meta` (очередь `pdf-meta`, attempts=2). Все children получают `{documentId, pdfPath}` как data. Родитель получает `{documentId}`. Вернуть id родительской задачи и массив id children. FlowProducer создавать как singleton, connection из redisConnectionOptions.»
 
 Формула: точная структура дерева + очереди + attempts + возврат всех id.
 
@@ -1367,7 +1367,7 @@ FlowProducer красиво выглядел на диаграмме, но дв�
 > «Добавь задачу в очередь при создании документа»
 
 Хорошая формулировка:
-> «Реализуй TypeScript функцию `createDocumentAndEnqueue(data: {userId: string, pdfBuffer: Buffer, filename: string}): Promise<{documentId: string, jobId: string}>`. Использовать pg-boss 12.8.0 + pg Pool. Алгоритм: 1) BEGIN транзакция через pg client; 2) INSERT в таблицу documents (userId, filename, status='pending') RETURNING id; 3) сохранить PDF в /tmp/{documentId}.pdf; 4) boss.send('process-document', {documentId, pdfPath}, {tx: client}) — та же транзакция; 5) COMMIT. При ошибке — ROLLBACK + удалить временный файл если создан. Вернуть documentId и jobId. boss и pool — синглтоны из внешнего модуля.»
+> «Реализуй TypeScript функцию `createDocumentAndEnqueue(data: {userId: string, pdfBuffer: Buffer, filename: string}): Promise<{documentId: string, jobId: string}>`. Использовать pg-boss 12.35.1 + pg Pool. Алгоритм: 1) BEGIN транзакция через pg client; 2) INSERT в таблицу documents (userId, filename, status='pending') RETURNING id; 3) сохранить PDF в /tmp/{documentId}.pdf; 4) boss.send('process-document', {documentId, pdfPath}, {tx: client}) — та же транзакция; 5) COMMIT. При ошибке — ROLLBACK + удалить временный файл если создан. Вернуть documentId и jobId. boss и pool — синглтоны из внешнего модуля.»
 
 Формула: точный алгоритм с tx + rollback cleanup + file cleanup + синглтоны.
 
