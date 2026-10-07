@@ -4,7 +4,7 @@
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { MODULES } from './modules.mjs';
+import { MODULES, LAST_MODULE } from './modules.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const problems = [];
@@ -91,10 +91,10 @@ if (!existsSync(htmlPath)) {
   const pagerCount = (body.match(/<nav class="pager"/g) || []).length;
   const mermaidCount = (html.match(/<div class="mermaid">/g) || []).length;
 
-  notes.push(`Секций: ${modCount} (52 модуля + глоссарий + 3 справочных)`);
+  notes.push(`Секций: ${modCount} (${LAST_MODULE} модулей + глоссарий + 3 справочных)`);
   notes.push(`Оглавлений модулей: ${tocCount}, пагинаторов: ${pagerCount}, диаграмм: ${mermaidCount}`);
-  if (tocCount !== 52) report('TOC', `оглавлений ${tocCount}, ожидалось 52`);
-  if (pagerCount !== 52) report('PAGER', `пагинаторов ${pagerCount}, ожидалось 52`);
+  if (tocCount !== LAST_MODULE) report('TOC', `оглавлений ${tocCount}, ожидалось ${LAST_MODULE}`);
+  if (pagerCount !== LAST_MODULE) report('PAGER', `пагинаторов ${pagerCount}, ожидалось ${LAST_MODULE}`);
 
   for (const [num] of Object.entries(MODULES)) {
     if (!html.includes(`id="module-${String(num).padStart(2, '0')}"`))
@@ -127,7 +127,43 @@ if (!existsSync(htmlPath)) {
   if (!body.includes('</html>')) report('BROKEN_HTML', 'нет </html>');
 }
 
-// ---------- 5. stale duplicate of the build ----------
+// ---------- 5. module counts claimed in root prose match the registry ----------
+// The build can be complete while README/AGENTS still say "52 модуля" — the
+// sections exist, only the prose lies. A count is a claim about state, so it is
+// audited like any other.
+// A stated total must read "N модулей / N модуля / N модуль" — case-sensitive
+// and with an explicit lookahead, so it does not fire on "2026-10 модулями 53–55"
+// (digits inside a date) or on a table row "53 Модульная архитектура".
+const COUNT_RE = /(\d{2})\s+(?:модулей|модуля|модуль)(?![а-яё])/g;
+// The lookbehind keeps dates like "2026-09" out of the range match.
+const RANGE_RE = /(?<!\d)(\d{2})\s*[–-]\s*(\d{2})(?!\d)/g;
+
+for (const file of ['README.md', 'AGENTS.md', 'ARCHITECTURE_LANDSCAPE.md', 'QUICKREF.md']) {
+  const p = join(ROOT, file);
+  if (!existsSync(p)) continue;
+  const src = readFileSync(p, 'utf-8');
+
+  // A stated total must equal the registry: "52 модуля" while 55 exist is the
+  // exact drift the 2026-10 glossary incident came from.
+  const totals = new Set([...src.matchAll(COUNT_RE)].map(m => parseInt(m[1])));
+  const wrongTotals = [...totals].filter(n => n !== LAST_MODULE);
+
+  // Every range end must name a module that exists ("27–40", "53–55").
+  const unknown = new Set();
+  for (const m of src.matchAll(RANGE_RE)) {
+    const lo = parseInt(m[1]), hi = parseInt(m[2]);
+    if (lo > hi) continue;
+    for (let n = lo; n <= hi; n++) if (!MODULES[n]) unknown.add(n);
+  }
+
+  if (wrongTotals.length)
+    report('STALE_COUNT',
+      `${file}: заявлено модулей ${[...totals].sort((a, b) => a - b).join(', ')}, в реестре ${LAST_MODULE}`);
+  if (unknown.size)
+    report('STALE_COUNT', `${file}: диапазоны ссылаются на несуществующие модули: ${[...unknown].sort((a, b) => a - b).join(', ')}`);
+}
+
+// ---------- 6. stale duplicate of the build ----------
 const idx = join(ROOT, 'index.html');
 if (existsSync(idx)) {
   report('STALE_ARTIFACT',

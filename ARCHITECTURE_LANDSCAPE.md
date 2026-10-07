@@ -21,7 +21,7 @@
 ║  Desktop/Data ──► SQL/Схемы ──► Cost Engineering              ║
 ║       │                                                        ║
 ║       ▼                                                        ║
-║  API Design ──► Resilience Patterns                           ║
+║  API Design ──► Resilience ──► Code Organization ──► Handoff   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
@@ -42,6 +42,9 @@
 50     Cost              │  Cost engineering, каскады, бюджеты, fallback
 51     API Design        │  Контракты, версии, пагинация, ошибки, идемпотентность
 52     Resilience        │  Retry storm, Bulkhead, Saga, CB, Fallback
+53     Code Organization │  Связность, срезы вместо слоёв, границы модулей, ACL
+54     Zero-Downtime     │  Expand-contract, флаги, откат, миграции без блокировок
+55     State Transfer    │  Handoff, штаб-сессии, файловый источник истины
 ```
 
 ---
@@ -151,6 +154,9 @@ N источников → queue → LLM batch → validation → storage
 | **Cost** | 11 §4 (Cascade economics), 08 §1 (VRAM budget), 09 §6 (CI cost) | 20 (Caching), 19 §7 (Connection pooling) |
 | **Observability** | 26 (Logging), 09 (Evaluator) | 18 §9 (Queue metrics), 19 §9 (HTTP metrics), 20 §9 (Cache metrics) |
 | **Resilience** | 52 (Retry storm, Bulkhead, Saga), 19 §6 (Circuit breaker), 19 §5 (Retry) | 23 (Rate Limiting), 18 §4 (DLQ), 18 §8 (Graceful shutdown) |
+| **Границы модулей** | 53 (связность, срезы, порты, ACL), 02 (типы как граница) | 49 (владение схемой), 51 (контрактные границы), 21 (тест на контракт) |
+| **Эволюция** | 54 (expand-contract, флаги, откат), 49 §2.4 (миграции) | 25 (CI/CD), 52 (откат в связке resilience) |
+| **Передача состояния** | 55 (handoff, штаб, приёмка) | 43 (память агента), 46 (AgentOps), 09 (эталон как источник истины) |
 | **Testing** | 21 (Testing) | 09 (Eval dataset), 19 §2 (undici MockAgent), 05 §6 (Go table tests) |
 | **Performance** | 36 (Critical Rendering Path), 37 (JS Perf), 08 §7 (TTF/TPS) | 04 §2 (GIL), 22 (Worker Threads), 20 (Caching) |
 
@@ -163,10 +169,12 @@ N источников → queue → LLM batch → validation → storage
 | Пробел | Почему важен | Когда добавить |
 |--------|-------------|----------------|
 | **Frontend architecture** | AI-продукт = не только API | Частично закрыто в 2026-09: токены как контракт и выбор витрины зафиксированы в модулях 31 и 48 как дополнения; отдельный модуль — при появлении второй витрины |
+| **Организация кода** | Закрыто в 2026-10 модулями 53–55: связность и границы, эволюция без простоя, передача состояния между сессиями | Закрыто |
 | **Domain-Driven Design** | Event storming, bounded context для AI pipeline | Открыт; материала из BPMN-потока пока мало для модуля |
 | **RBAC / API keys management** | OAuth 2.1/PKCE раскрыт в 41, но RBAC и управление ключами — нет | Частично закрыто в 2026-09: контраст локалки без auth и витрины с ролями зафиксирован в модуле 51; отдельный раздел — при появлении второго тенанта |
 
 > Закрыто в 2026-08: SQL/схемы (49), Cost engineering (50), Desktop (48), API design (51), Resilience patterns (52).
+> Закрыто в 2026-10: организация кода (53), эволюция без простоя (54), передача состояния (55); правки в 02 (типы как граница), 09 (критерий от заказчика, доменный датасет), 19 (таймаут как часть определения вызова), 21 (тест на контракт), 49 (миграции и блокировки), 50 (cost per correct).
 > Дополнено в 2026-09: слепые гейты и связки моделей (09, 11, 46), авария импорта (49), RBAC-контраст и SaaS-генератор (51, 14), голая VPS и деплой архивом (24, 25), fallback и PDF файлом (08, 10, 19), операторский контур (06, 27, 35), мост через профиль и shared-хостинг (44, 30), токены и штаб (31, 42), голосовой loopback (48).
 
 ---
@@ -276,6 +284,20 @@ graph TD
         E1[18 Task Queues] --> I2
     end
 
+    subgraph "Code Organization"
+        J1[53 Modular Architecture]
+        J2[54 Zero-Downtime Evolution]
+        J3[55 State Transfer]
+        A2[02 TypeScript] --> J1
+        H2 --> J1
+        I1 --> J1
+        J1 --> J2
+        H2 --> J2
+        E8[25 CI/CD] --> J2
+        J2 --> J3
+        G3[43 Agent Memory] -.-> J3
+    end
+
     C1 -.-> E1
     C2 -.-> E3
     D2 -.-> E5
@@ -283,6 +305,8 @@ graph TD
     D4 -.-> E7
     E1 -.-> E8
     E6 -.-> C1
+    E4[21 Testing] -.-> J1
+    J1 -.-> E4
 ```
 
 > **Легенда:** `A --> B` = A необходим для понимания B. `A -.-> B` = практическая связь при построении production-системы.
@@ -313,8 +337,24 @@ graph TD
 1. Measure: 28 (Core Web Vitals intro) + 39 (Diagnostics)
 2. Fix CRP: 36 (Critical Rendering Path) + 29 (Critical CSS)
 3. Fix images: 35 (Image Optimization)
-4. Fix JS: 37 (JS Performance) + 38 (HTTP Caching)
+4. Fix JS: 37 (JavaScript Performance) + 38 (HTTP Caching)
 5. Budget: 40 (Performance Budget)
+
+### «Код стал неуправляемым»
+
+1. Границы: 53 — вид связности, который рвётся; проверка `madge --circular` до всего остального
+2. Структура: 53 — срезы вместо слоёв, корень без рефлексии, порт от потребителя
+3. Граница в типах: 02 — домен вместо `*Row`, branded на внешних ID
+4. Тесты: 21 — контракт модуля вместо моков соседей
+5. Эволюция: 54 — expand-contract, флаги с датой удаления, откат как критерий
+6. Данные: 49 §2.4 — `lock_timeout`, `CONCURRENTLY`, `NOT VALID`
+
+### «Работаю в нескольких сессиях»
+
+1. State: 55 §1–2 — контекстное окно как ресурс, git как источник истины
+2. Handoff: 55 §3–5 — анатомия файла, деградация, один активный
+3. Штаб: 55 §6–8 — постановка задания файлом, приёмка по diff'у
+4. Контекст проекта: `AGENTS.md` + `docs/CONTEXT.md` + ADR (шаблон в корне)
 
 ---
 

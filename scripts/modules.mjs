@@ -52,7 +52,14 @@ const MODULES = {
   50: { dir: '50-cost-engineering',         name: 'Cost Engineering для AI' },
   51: { dir: '51-api-design',                name: 'API Design для интеграций' },
   52: { dir: '52-resilience-patterns',       name: 'Resilience Patterns' },
+  53: { dir: '53-modular-architecture',     name: 'Модульная архитектура' },
+  54: { dir: '54-zero-downtime-evolution',   name: 'Эволюция без даунтайма' },
+  55: { dir: '55-state-handoff-staff',       name: 'Передача состояния: handoff и штаб' },
 };
+
+// The last module number — every count in the build and audit derives from it,
+// so adding a module cannot leave prose claiming the old total.
+export const LAST_MODULE = Math.max(...Object.keys(MODULES).map(Number));
 
 function moduleLink(n) {
   const m = MODULES[n];

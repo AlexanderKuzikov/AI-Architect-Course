@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { MODULES } from './modules.mjs';
+import { MODULES, LAST_MODULE } from './modules.mjs';
 
 const _require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -25,8 +25,8 @@ function pad(n) { return String(n).padStart(2, '0'); }
 const stripTags = s => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
 
 /**
- * Namespaces every heading id in a section with `ns-` so that 52 modules
- * sharing headings like "Содержание" or "Антипаттерны" no longer collide.
+ * Namespaces every heading id in a section with `ns-` so that modules sharing
+ * headings like "Содержание" or "Антипаттерны" no longer collide.
  * Intra-section links are rewritten to follow.
  */
 const GLOBAL_ANCHORS = /^(module-\d+|glossary|architecture-landscape|tools-comparison|adr-template|top)$/;
@@ -119,8 +119,9 @@ function buildSidebar() {
     { name: 'Infrastructure',    range: [18, 26] },
     { name: 'Web Performance',   range: [27, 40] },
     { name: 'Agent Systems',     range: [41, 47] },
-    { name: 'Desktop / Data / Cost', range: [48, 50] },
-    { name: 'API / Resilience',      range: [51, 52] },
+    { name: 'Desktop / Data / Cost',   range: [48, 50] },
+    { name: 'API / Resilience',          range: [51, 52] },
+    { name: 'Code Organization',         range: [53, 55] },
   ];
 
   let h = `<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>`;
@@ -201,10 +202,10 @@ async function main() {
 
   let body = '';
   let moduleCount = 0;
-  for (let i = 1; i <= 52; i++) {
+  for (let i = 1; i <= LAST_MODULE; i++) {
     const module = readModule(i);
     if (module?.content) { body += moduleToHtml(module, md); moduleCount++; }
-    process.stdout.write(`\r  ${i}/52 modules`);
+    process.stdout.write(`\r  ${i}/${LAST_MODULE} modules`);
   }
   body += buildGlossary(md);
 
@@ -242,8 +243,8 @@ async function main() {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Architect Course — 52 модуля</title>
-<meta name="description" content="Учебник AI-архитектора: 52 модуля — языки, AI-фундамент, RAG, агенты, инфраструктура, API и устойчивость.">
+<title>AI Architect Course — ${LAST_MODULE} модулей</title>
+<meta name="description" content="Учебник AI-архитектора: ${LAST_MODULE} модулей — языки, AI-фундамент, RAG, агенты, инфраструктура, API, устойчивость, организация кода и передача состояния.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a365d'/%3E%3Ctext x='16' y='22' font-family='system-ui,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EAI%3C/text%3E%3C/svg%3E">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -378,7 +379,7 @@ ${hljsCss}
     <div class="hero">
       <h1>AI Architect Course</h1>
       <p>${moduleCount} модулей · один день изучения на модуль</p>
-      <p class="sub">Node.js · TypeScript · PHP · Python · Go · RAG · агенты · MCP · A2A · API · resilience</p>
+      <p class="sub">Node.js · TypeScript · PHP · Python · Go · RAG · агенты · MCP · A2A · API · resilience · границы кода</p>
     </div>
     ${body}
   </main>
