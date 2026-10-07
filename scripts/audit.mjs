@@ -12,20 +12,56 @@ const notes = [];
 
 function report(kind, msg) { problems.push({ kind, msg }); }
 
-// ---------- 1. source modules present and non-trivial ----------
+// ---------- 1. source modules present and structurally complete ----------
+// Volume is deliberately not a criterion: a module is as long as the topic
+// warrants, and padding to hit a line count is the same disease as a thin
+// module. What is checkable is structure — the template sections exist, edge
+// cases name real failures, and every section ends in a practical takeaway.
+// Headings are numbered in some modules and not in others, and Anti-checklist
+// is optional by the Prompt.md rule ("только если есть что сказать"), so only
+// the sections without which a module cannot teach anything are required.
+// Heading prefix: level, optional "N." numbering, horizontal space only — \s*
+// would also swallow the newline and match the next line's text.
+const H = String.raw`(?:#{2,4}[ \t]*(?:\d+[.)][ \t]*)?)`;
+const REQUIRED_SECTIONS = [
+  { re: new RegExp(`^${H}Актуальные версии`, 'm'), label: 'Актуальные версии' },
+  { re: new RegExp(`^${H}Задачи AI-кодеру`, 'm'), label: 'Задачи AI-кодеру' },
+  { re: new RegExp(`^${H}Чеклист архитектора`, 'm'), label: 'Чеклист архитектора' },
+];
+
+// Edge cases appear either as a heading or as a bold marker inside a section.
+const EDGE_RE = new RegExp(`(?:^${H}[^\\n]*[Гг]раничные случаи|\\*\\*Граничные случаи)`, 'm');
+// Takeaways are phrased per module — same meaning, different wording. Narrowing
+// this list produced false positives on 01/03/04/05, so it matches any bold
+// lead-in that promises an architectural consequence.
+const TAKEAWAY_RE = /\*\*[^*]*(?:архитектор|Практическ|Архитектурн|Последств|применени|Следстви|Диагностик|Важно)[^*]*:\*\*/i;
+
 let totalLines = 0;
-let thin = [];
+const noChecklist = [];
 for (const [num, m] of Object.entries(MODULES)) {
   const readme = join(ROOT, m.dir, 'README.md');
   if (!existsSync(readme)) { report('MISSING', `${num} ${m.dir}/README.md`); continue; }
-  const lines = readFileSync(readme, 'utf-8').split(/\r?\n/).length;
-  totalLines += lines;
-  if (lines < 400) thin.push(`${num} ${m.dir} ${lines} строк`);
+  const src = readFileSync(readme, 'utf-8');
+  totalLines += src.split(/\r?\n/).length;
+
+  const absent = REQUIRED_SECTIONS.filter(s => !s.re.test(src)).map(s => s.label);
+  if (absent.length) report('STRUCTURE', `${num} ${m.dir}: нет ${absent.join(', ')}`);
+
+  if (!EDGE_RE.test(src))
+    report('STRUCTURE', `${num} ${m.dir}: нет «Граничных случаев» — где ломается`);
+
+  // Takeaways are phrased per module, and which section carries one is an
+  // editorial judgement, not a fact — so only their total absence is reported.
+  if (!TAKEAWAY_RE.test(src))
+    report('STRUCTURE', `${num} ${m.dir}: ни одного практического вывода для архитектора`);
+
+  if (!new RegExp(`^${H}Anti-checklist`, 'm').test(src)) noChecklist.push(num);
+
   const gloss = join(ROOT, m.dir, 'GLOSSARY.md');
   if (!existsSync(gloss)) report('MISSING', `${num} ${m.dir}/GLOSSARY.md`);
 }
-notes.push(`Модулей: ${Object.keys(MODULES).length}, строк README: ${totalLines}`);
-if (thin.length) notes.push(`Тонкие модули (<400 строк): ${thin.length}`);
+notes.push(`Модулей: ${Object.keys(MODULES).length}, строк README: ${totalLines} (объём не критерий)`);
+if (noChecklist.length) notes.push(`Без Anti-checklist (по правилу Prompt.md — норма): ${noChecklist.join(', ')}`);
 
 // ---------- 2. leftover placeholders in sources ----------
 // CURRENT_* is the project's deliberate convention for "the model chosen at
