@@ -16,8 +16,9 @@
 
 ## Conventions
 - Multi-language курс (JS/TS/PHP/Python/Go)
-- 55 модулей: от основ до RAG, MCP, A2A, agent memory, desktop, cost, API design,
-  resilience, организация кода, эволюция без простоя, передача состояния
+- 58 модулей: от основ до RAG, MCP, A2A, agent memory, desktop, cost, API design,
+  resilience, организация кода, эволюция без простоя, передача состояния,
+  бухгалтерия, сверка без доступа к учётной системе, контроль ФНС
 - Node.js scripts для сборки HTML
 - Стиль коммитов: по-русски, с большой буквы, без точки в конце, коротко по сути
 - Число модулей живёт в `scripts/modules.mjs` (`LAST_MODULE`); счётчики в `README.md`,
@@ -25,7 +26,7 @@
   обновляются вместе с реестром — аудит проверяет это
 
 ## Структура
-- `NN-<slug>/README.md` + `NN-<slug>/GLOSSARY.md` — модуль (55 шт.)
+- `NN-<slug>/README.md` + `NN-<slug>/GLOSSARY.md` — модуль (58 шт.)
 - `GLOSSARY.md` — корневой глоссарий
 - `scripts/modules.mjs` — реестр модулей (номер → папка, название)
 - `scripts/build-html.mjs` — сборка `course.html`

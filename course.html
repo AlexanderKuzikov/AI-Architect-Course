@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Architect Course — 55 модулей</title>
-<meta name="description" content="Учебник AI-архитектора: 55 модулей — языки, AI-фундамент, RAG, агенты, инфраструктура, API, устойчивость, организация кода и передача состояния.">
+<title>AI Architect Course — 58 модулей</title>
+<meta name="description" content="Учебник AI-архитектора: 58 модулей — языки, AI-фундамент, RAG, агенты, инфраструктура, API, устойчивость, организация кода и передача состояния.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a365d'/%3E%3Ctext x='16' y='22' font-family='system-ui,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EAI%3C/text%3E%3C/svg%3E">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -83,6 +83,11 @@ pre code{padding:0;background:none}
 .module-content blockquote p:last-child{margin-bottom:0}
 .module-content pre{margin:16px 0;border-radius:8px;overflow-x:auto;background:var(--pb)}
 .module-content pre code{display:block;padding:16px;font-size:.85rem;line-height:1.6}
+/* Инлайновый код в тексте и таблицах — длинные URL, идентификаторы, команды.
+   Без переноса он расширяет страницу целиком: горизонтальный скролл
+   задан только блокам pre и table, а code внутри абзаца им не охвачен. */
+.module-content p code,.module-content li code,.module-content td code,
+.module-content th code,.module-content blockquote code,.toc code{overflow-wrap:anywhere;word-break:break-word}
 .module-content table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem;display:block;overflow-x:auto}
 .module-content td,.module-content th{padding:7px 11px;border:1px solid var(--bd);text-align:left;vertical-align:top}
 .module-content th{background:var(--th);font-weight:600;white-space:nowrap}
@@ -132,6 +137,16 @@ pre code{padding:0;background:none}
   .pager{padding:16px}
   .hero{padding:32px 16px}
   .hero h1{font-size:1.5rem}
+  /* Узкий экран: код и таблицы — горизонтальный скролл внутри своего блока,
+     а не растягивание страницы и не мелкий шрифт ради влезания целиком. */
+  .module-content pre code{font-size:.78rem;line-height:1.5;padding:12px}
+  .module-content table{font-size:.82rem}
+  .module-content td,.module-content th{padding:6px 8px}
+  .mermaid{padding:10px}
+  .module-content h1{font-size:1.45rem}
+  .module-content h2{font-size:1.15rem;margin:26px 0 10px}
+  .module-content h3{font-size:1rem}
+  .pn{max-width:100%}
 }
 pre code.hljs{display:block;overflow-x:auto;padding:1em}code.hljs{padding:3px 5px}/*!
   Theme: GitHub Dark
@@ -149,12 +164,12 @@ pre code.hljs{display:block;overflow-x:auto;padding:1em}code.hljs{padding:3px 5p
 <body>
 <div id="progress"></div>
 <div class="layout" id="top">
-  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div><nav class="sidebar" id="sidebar" aria-label="Навигация по курсу"><div class="sidebar-header"><a class="brand" href="#top">AI Architect Course</a><button class="sidebar-toggle" onclick="closeSidebar()" aria-label="Закрыть меню">&#10005;</button></div><input type="search" id="search" placeholder="Поиск по курсу…" aria-label="Поиск" oninput="searchModules(this.value)" onfocus="openSidebar()"><div class="search-results" id="searchResults" role="listbox"></div><div class="controls"><div class="control-group"><label>Тема</label><div class="theme-buttons" id="themeButtons"></div></div><div class="control-group"><label>Шрифт</label><div class="fs-controls"><button onclick="changeFontSize(-1)" aria-label="Уменьшить шрифт">A&#8722;</button><span id="fontSizeLabel">100%</span><button onclick="changeFontSize(1)" aria-label="Увеличить шрифт">A+</button></div></div></div><div class="nav-section"><div class="nav-section-title active" onclick="toggleNavSection(this)">Справочники</div><div class="nav-section-content active"><a href="#glossary">Глоссарий</a><a href="#architecture-landscape">Карта архитектуры</a><a href="#tools-comparison">Сравнение инструментов</a><a href="#adr-template">Шаблон ADR</a></div></div><div class="nav-section"><div class="nav-section-title active" onclick="toggleNavSection(this)">Модули</div><div class="nav-section-content active"><div class="nav-track-label">Languages</div><a href="#module-01" data-mod="01" onclick="closeSidebar()">01 JavaScript / Node.js</a><a href="#module-02" data-mod="02" onclick="closeSidebar()">02 TypeScript</a><a href="#module-03" data-mod="03" onclick="closeSidebar()">03 PHP</a><a href="#module-04" data-mod="04" onclick="closeSidebar()">04 Python</a><a href="#module-05" data-mod="05" onclick="closeSidebar()">05 Go</a><div class="nav-track-label">AI Foundation</div><a href="#module-06" data-mod="06" onclick="closeSidebar()">06 Prompt Engineering</a><a href="#module-07" data-mod="07" onclick="closeSidebar()">07 JSON Schema / Structured Output</a><a href="#module-08" data-mod="08" onclick="closeSidebar()">08 Local Inference</a><a href="#module-09" data-mod="09" onclick="closeSidebar()">09 Evaluator / Benchmark Design</a><a href="#module-10" data-mod="10" onclick="closeSidebar()">10 Prompt Engineering (VLM)</a><div class="nav-track-label">AI Systems</div><a href="#module-11" data-mod="11" onclick="closeSidebar()">11 Multi-model Orchestration</a><a href="#module-12" data-mod="12" onclick="closeSidebar()">12 RAG</a><a href="#module-13" data-mod="13" onclick="closeSidebar()">13 Fine-tuning / LoRA</a><div class="nav-track-label">Documents</div><a href="#module-14" data-mod="14" onclick="closeSidebar()">14 OOXML / DOCX internals</a><a href="#module-15" data-mod="15" onclick="closeSidebar()">15 PDF internals</a><a href="#module-16" data-mod="16" onclick="closeSidebar()">16 PDFium WASM</a><a href="#module-17" data-mod="17" onclick="closeSidebar()">17 Excel / XLSX internals</a><div class="nav-track-label">Infrastructure</div><a href="#module-18" data-mod="18" onclick="closeSidebar()">18 Task Queues</a><a href="#module-19" data-mod="19" onclick="closeSidebar()">19 HTTP Clients / Retry</a><a href="#module-20" data-mod="20" onclick="closeSidebar()">20 Backend Caching</a><a href="#module-21" data-mod="21" onclick="closeSidebar()">21 Testing</a><a href="#module-22" data-mod="22" onclick="closeSidebar()">22 Worker Threads / Piscina</a><a href="#module-23" data-mod="23" onclick="closeSidebar()">23 Rate Limiting</a><a href="#module-24" data-mod="24" onclick="closeSidebar()">24 Docker</a><a href="#module-25" data-mod="25" onclick="closeSidebar()">25 CI/CD (GitHub Actions)</a><a href="#module-26" data-mod="26" onclick="closeSidebar()">26 Logging / Observability</a><div class="nav-track-label">Web Performance</div><a href="#module-27" data-mod="27" onclick="closeSidebar()">27 Static Site Generation</a><a href="#module-28" data-mod="28" onclick="closeSidebar()">28 Core Web Vitals: intro</a><a href="#module-29" data-mod="29" onclick="closeSidebar()">29 Critical CSS</a><a href="#module-30" data-mod="30" onclick="closeSidebar()">30 Schema.org / Structured Data</a><a href="#module-31" data-mod="31" onclick="closeSidebar()">31 Mobile-first CSS</a><a href="#module-32" data-mod="32" onclick="closeSidebar()">32 Accessibility / WCAG</a><a href="#module-33" data-mod="33" onclick="closeSidebar()">33 Web Performance API</a><a href="#module-34" data-mod="34" onclick="closeSidebar()">34 Lazy Loading / Intersection Observer</a><a href="#module-35" data-mod="35" onclick="closeSidebar()">35 Image Optimization</a><a href="#module-36" data-mod="36" onclick="closeSidebar()">36 Critical Rendering Path / CSS</a><a href="#module-37" data-mod="37" onclick="closeSidebar()">37 JavaScript Performance / Memory</a><a href="#module-38" data-mod="38" onclick="closeSidebar()">38 HTTP / Service Worker Caching</a><a href="#module-39" data-mod="39" onclick="closeSidebar()">39 CWV Diagnostics / RUM</a><a href="#module-40" data-mod="40" onclick="closeSidebar()">40 Performance Budget</a><div class="nav-track-label">Agent Systems</div><a href="#module-41" data-mod="41" onclick="closeSidebar()">41 MCP Tool Server Architecture</a><a href="#module-42" data-mod="42" onclick="closeSidebar()">42 A2A Protocol / Multi-Agent</a><a href="#module-43" data-mod="43" onclick="closeSidebar()">43 Agent Memory / Knowledge Graphs</a><a href="#module-44" data-mod="44" onclick="closeSidebar()">44 Browser Use / Computer Use</a><a href="#module-45" data-mod="45" onclick="closeSidebar()">45 Agentic RAG / Graph RAG</a><a href="#module-46" data-mod="46" onclick="closeSidebar()">46 AgentOps</a><a href="#module-47" data-mod="47" onclick="closeSidebar()">47 AI Security для агентов</a><div class="nav-track-label">Desktop / Data / Cost</div><a href="#module-48" data-mod="48" onclick="closeSidebar()">48 Desktop: Go + WebView</a><a href="#module-49" data-mod="49" onclick="closeSidebar()">49 SQL / Database Schema Design</a><a href="#module-50" data-mod="50" onclick="closeSidebar()">50 Cost Engineering для AI</a><div class="nav-track-label">API / Resilience</div><a href="#module-51" data-mod="51" onclick="closeSidebar()">51 API Design для интеграций</a><a href="#module-52" data-mod="52" onclick="closeSidebar()">52 Resilience Patterns</a><div class="nav-track-label">Code Organization</div><a href="#module-53" data-mod="53" onclick="closeSidebar()">53 Модульная архитектура</a><a href="#module-54" data-mod="54" onclick="closeSidebar()">54 Эволюция без даунтайма</a><a href="#module-55" data-mod="55" onclick="closeSidebar()">55 Передача состояния: handoff и штаб</a></div></div></nav><button class="sidebar-bottom-toggle" onclick="toggleSidebar()" aria-label="Открыть меню">&#9776; Меню</button>
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div><nav class="sidebar" id="sidebar" aria-label="Навигация по курсу"><div class="sidebar-header"><a class="brand" href="#top">AI Architect Course</a><button class="sidebar-toggle" onclick="closeSidebar()" aria-label="Закрыть меню">&#10005;</button></div><input type="search" id="search" placeholder="Поиск по курсу…" aria-label="Поиск" oninput="searchModules(this.value)" onfocus="openSidebar()"><div class="search-results" id="searchResults" role="listbox"></div><div class="controls"><div class="control-group"><label>Тема</label><div class="theme-buttons" id="themeButtons"></div></div><div class="control-group"><label>Шрифт</label><div class="fs-controls"><button onclick="changeFontSize(-1)" aria-label="Уменьшить шрифт">A&#8722;</button><span id="fontSizeLabel">100%</span><button onclick="changeFontSize(1)" aria-label="Увеличить шрифт">A+</button></div></div></div><div class="nav-section"><div class="nav-section-title active" onclick="toggleNavSection(this)">Справочники</div><div class="nav-section-content active"><a href="#glossary">Глоссарий</a><a href="#architecture-landscape">Карта архитектуры</a><a href="#tools-comparison">Сравнение инструментов</a><a href="#adr-template">Шаблон ADR</a></div></div><div class="nav-section"><div class="nav-section-title active" onclick="toggleNavSection(this)">Модули</div><div class="nav-section-content active"><div class="nav-track-label">Languages</div><a href="#module-01" data-mod="01" onclick="closeSidebar()">01 JavaScript / Node.js</a><a href="#module-02" data-mod="02" onclick="closeSidebar()">02 TypeScript</a><a href="#module-03" data-mod="03" onclick="closeSidebar()">03 PHP</a><a href="#module-04" data-mod="04" onclick="closeSidebar()">04 Python</a><a href="#module-05" data-mod="05" onclick="closeSidebar()">05 Go</a><div class="nav-track-label">AI Foundation</div><a href="#module-06" data-mod="06" onclick="closeSidebar()">06 Prompt Engineering</a><a href="#module-07" data-mod="07" onclick="closeSidebar()">07 JSON Schema / Structured Output</a><a href="#module-08" data-mod="08" onclick="closeSidebar()">08 Local Inference</a><a href="#module-09" data-mod="09" onclick="closeSidebar()">09 Evaluator / Benchmark Design</a><a href="#module-10" data-mod="10" onclick="closeSidebar()">10 Prompt Engineering (VLM)</a><div class="nav-track-label">AI Systems</div><a href="#module-11" data-mod="11" onclick="closeSidebar()">11 Multi-model Orchestration</a><a href="#module-12" data-mod="12" onclick="closeSidebar()">12 RAG</a><a href="#module-13" data-mod="13" onclick="closeSidebar()">13 Fine-tuning / LoRA</a><div class="nav-track-label">Documents</div><a href="#module-14" data-mod="14" onclick="closeSidebar()">14 OOXML / DOCX internals</a><a href="#module-15" data-mod="15" onclick="closeSidebar()">15 PDF internals</a><a href="#module-16" data-mod="16" onclick="closeSidebar()">16 PDFium WASM</a><a href="#module-17" data-mod="17" onclick="closeSidebar()">17 Excel / XLSX internals</a><div class="nav-track-label">Infrastructure</div><a href="#module-18" data-mod="18" onclick="closeSidebar()">18 Task Queues</a><a href="#module-19" data-mod="19" onclick="closeSidebar()">19 HTTP Clients / Retry</a><a href="#module-20" data-mod="20" onclick="closeSidebar()">20 Backend Caching</a><a href="#module-21" data-mod="21" onclick="closeSidebar()">21 Testing</a><a href="#module-22" data-mod="22" onclick="closeSidebar()">22 Worker Threads / Piscina</a><a href="#module-23" data-mod="23" onclick="closeSidebar()">23 Rate Limiting</a><a href="#module-24" data-mod="24" onclick="closeSidebar()">24 Docker</a><a href="#module-25" data-mod="25" onclick="closeSidebar()">25 CI/CD (GitHub Actions)</a><a href="#module-26" data-mod="26" onclick="closeSidebar()">26 Logging / Observability</a><div class="nav-track-label">Web Performance</div><a href="#module-27" data-mod="27" onclick="closeSidebar()">27 Static Site Generation</a><a href="#module-28" data-mod="28" onclick="closeSidebar()">28 Core Web Vitals: intro</a><a href="#module-29" data-mod="29" onclick="closeSidebar()">29 Critical CSS</a><a href="#module-30" data-mod="30" onclick="closeSidebar()">30 Schema.org / Structured Data</a><a href="#module-31" data-mod="31" onclick="closeSidebar()">31 Mobile-first CSS</a><a href="#module-32" data-mod="32" onclick="closeSidebar()">32 Accessibility / WCAG</a><a href="#module-33" data-mod="33" onclick="closeSidebar()">33 Web Performance API</a><a href="#module-34" data-mod="34" onclick="closeSidebar()">34 Lazy Loading / Intersection Observer</a><a href="#module-35" data-mod="35" onclick="closeSidebar()">35 Image Optimization</a><a href="#module-36" data-mod="36" onclick="closeSidebar()">36 Critical Rendering Path / CSS</a><a href="#module-37" data-mod="37" onclick="closeSidebar()">37 JavaScript Performance / Memory</a><a href="#module-38" data-mod="38" onclick="closeSidebar()">38 HTTP / Service Worker Caching</a><a href="#module-39" data-mod="39" onclick="closeSidebar()">39 CWV Diagnostics / RUM</a><a href="#module-40" data-mod="40" onclick="closeSidebar()">40 Performance Budget</a><div class="nav-track-label">Agent Systems</div><a href="#module-41" data-mod="41" onclick="closeSidebar()">41 MCP Tool Server Architecture</a><a href="#module-42" data-mod="42" onclick="closeSidebar()">42 A2A Protocol / Multi-Agent</a><a href="#module-43" data-mod="43" onclick="closeSidebar()">43 Agent Memory / Knowledge Graphs</a><a href="#module-44" data-mod="44" onclick="closeSidebar()">44 Browser Use / Computer Use</a><a href="#module-45" data-mod="45" onclick="closeSidebar()">45 Agentic RAG / Graph RAG</a><a href="#module-46" data-mod="46" onclick="closeSidebar()">46 AgentOps</a><a href="#module-47" data-mod="47" onclick="closeSidebar()">47 AI Security для агентов</a><div class="nav-track-label">Desktop / Data / Cost</div><a href="#module-48" data-mod="48" onclick="closeSidebar()">48 Desktop: Go + WebView</a><a href="#module-49" data-mod="49" onclick="closeSidebar()">49 SQL / Database Schema Design</a><a href="#module-50" data-mod="50" onclick="closeSidebar()">50 Cost Engineering для AI</a><div class="nav-track-label">API / Resilience</div><a href="#module-51" data-mod="51" onclick="closeSidebar()">51 API Design для интеграций</a><a href="#module-52" data-mod="52" onclick="closeSidebar()">52 Resilience Patterns</a><div class="nav-track-label">Code Organization</div><a href="#module-53" data-mod="53" onclick="closeSidebar()">53 Модульная архитектура</a><a href="#module-54" data-mod="54" onclick="closeSidebar()">54 Эволюция без даунтайма</a><a href="#module-55" data-mod="55" onclick="closeSidebar()">55 Передача состояния: handoff и штаб</a><div class="nav-track-label">Accounting / Compliance</div><a href="#module-56" data-mod="56" onclick="closeSidebar()">56 Бухгалтерия как граф документов</a><a href="#module-57" data-mod="57" onclick="closeSidebar()">57 Сверка без доступа к учётной системе</a><a href="#module-58" data-mod="58" onclick="closeSidebar()">58 Контроль соответствия требованиям ФНС</a></div></div></nav><button class="sidebar-bottom-toggle" onclick="toggleSidebar()" aria-label="Открыть меню">&#9776; Меню</button>
   <main class="main" id="main">
     <div class="hero">
       <h1>AI Architect Course</h1>
-      <p>55 модулей · один день изучения на модуль</p>
-      <p class="sub">Node.js · TypeScript · PHP · Python · Go · RAG · агенты · MCP · A2A · API · resilience · границы кода</p>
+      <p>58 модулей · один день изучения на модуль</p>
+      <p class="sub">Node.js · TypeScript · PHP · Python · Go · RAG · агенты · MCP · A2A · API · resilience · границы кода · бухгалтерия</p>
     </div>
     <section class="module" id="module-01"><div class="module-content"><h1 id="m01-модуль-01-javascript-node-js" tabindex="-1">Модуль 01 — JavaScript / Node.js</h1>
 <blockquote>
@@ -12190,16 +12205,44 @@ Approval ── belongsTo ── Policy
 <li><strong>События добавляются чаще, чем меняется решение</strong>: «последняя версия» блока — по updated_at, не «первый попавшийся».</li>
 </ol>
 <h3 id="m12-метрики" tabindex="-1">Метрики</h3>
-<blockquote>
-<p>⚠️ Плейсхолдеры — реальные значения будут вставлены автором (не выдумывать).</p>
-</blockquote>
-<ul>
-<li>Recall@k на семантических вопросах: <code>[МЕТРИКА: заполнить]</code></li>
-<li>Точность извлечения дат/сумм из решений (schema-валидация): <code>[МЕТРИКА: заполнить]</code></li>
-<li>Cost/день на эмбеддинги + VLM OCR: <code>[МЕТРИКА: заполнить]</code></li>
-<li>Latency p95 запроса (retrieval → ответ): <code>[МЕТРИКА: заполнить]</code></li>
-<li>Доля ответов с abstain («не найдено» вместо галлюцинации): <code>[МЕТРИКА: заполнить]</code></li>
-</ul>
+<p>Значения не выдумываются: метрики измеряются на своём датасете после постройки индекса. Ниже — что именно измерять и по чему судить, а не заглушки под числа.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Метрика</th>
+<th style="text-align:left">Зачем она архитектору</th>
+<th style="text-align:left">Как снимается</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Recall@k на семантических вопросах</td>
+<td style="text-align:left">отличает RAG от точного поиска</td>
+<td style="text-align:left">вручную размеченный набор вопросов домена</td>
+</tr>
+<tr>
+<td style="text-align:left">Точность извлечения дат и сумм (валидация по схеме)</td>
+<td style="text-align:left">в судебном домене неверная сумма хуже отсутствия ответа</td>
+<td style="text-align:left">сверка извлечённого с текстом источника</td>
+</tr>
+<tr>
+<td style="text-align:left">Cost в день на эмбеддинги и OCR</td>
+<td style="text-align:left">индексация дорожает быстрее, чем кажется</td>
+<td style="text-align:left">счёт вызовов провайдера</td>
+</tr>
+<tr>
+<td style="text-align:left">Latency p95 запроса</td>
+<td style="text-align:left">поиск, который не укладывается в окно, не используется</td>
+<td style="text-align:left">трейс одного запроса целиком</td>
+</tr>
+<tr>
+<td style="text-align:left">Доля ответов с abstain</td>
+<td style="text-align:left">единственная честная мера качества: система обязана уметь сказать «не найдено»</td>
+<td style="text-align:left">ручная разметка выборки ответов</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Практический вывод для архитектора:</strong> набор метрик без измеренных значений бесполезен для решения, но полезен для проектирования — он фиксирует, что именно продукт обязан доказывать. Отдельно отслеживать долю abstain: если она нулевая, система не признаёт границы знаний и галлюцинирует систематически.</p>
 <h3 id="m12-вывод-противоречащий-интуиции-структурно" tabindex="-1">Вывод, противоречащий интуиции (структурно)</h3>
 <p>Главный вывод из проектирования: <strong>в судебном домене точный поиск ценнее семантического</strong> — большая часть реальных запросов 1С/юристов структурна (номер, ФИО, даты), и RAG для них — потеря надёжности. RAG оправдан на текстах решений/договоров, где нет структуры. Гибрид «индекс для точного + вектора для семантики» — не компромисс, а правильная архитектура домена.</p>
 <p>Второй вывод: RAG в юриспруденции невозможен без verification и temporal awareness — ответ без ссылки и с устаревшей версией документа хуже отсутствия ответа.</p>
@@ -41540,9 +41583,1341 @@ git diff --<span class="hljs-built_in">stat</span> main
 <p><em>Модуль 55 завершён.</em>
 <em>Курс пройден: от механики языков до организации кода, контрактов, устойчивости, эволюции и передачи состояния между сессиями.</em>
 <em>Следующий шаг — собственные production-системы: проектируй границы (53), обеспечивай эволюцию без простоя (54), фиксируй состояние (55).</em></p>
-</div><nav class="pager"><a class="pn prev" href="#module-54"><span>← Назад</span>54 Эволюция без даунтайма</a><span class="pn-gap"></span></nav></section><section class="module" id="glossary"><div class="module-content glossary"><h1 id="g-glossary-master-glossary" tabindex="-1">GLOSSARY — Master Glossary</h1>
+</div><nav class="pager"><a class="pn prev" href="#module-54"><span>← Назад</span>54 Эволюция без даунтайма</a><a class="pn next" href="#module-56"><span>Вперёд →</span>56 Бухгалтерия как граф документов</a></nav></section><section class="module" id="module-56"><div class="module-content"><h1 id="m56-модуль-56-бухгалтерия-как-граф-документов" tabindex="-1">Модуль 56 — Бухгалтерия как граф документов</h1>
+<blockquote>
+<p><strong>Для AI-архитектора:</strong> разработчику, который идёт в автоматизацию бухгалтерии, кажется, что задача — посчитать налоги. Это ложная постановка: считает учётная система, а её ошибки живут не в арифметике, а в связях между документами. Реальный предмет автоматизации — <strong>граф первички</strong>: какие документы обязаны сойтись, кто их породил, кто подтвердил и где разрыв стоит денег. Модуль даёт карту этого графа и правило отбора проверок, которые ловят разрывы до налоговой.</p>
+<p>Один день изучения — от вопроса «кто кому должен документ» до контрольного соотношения, которое поймало бы пропущенную оплату за 40 дней до проверки.</p>
+</blockquote>
+<h2 id="m56-содержание" tabindex="-1">Содержание</h2><nav class="toc" aria-label="Содержание раздела"><ol><li><a href="#m56-актуальные-версии">Актуальные версии</a></li><li><a href="#m56-1-учёт-это-не-арифметика">1. Учёт — это не арифметика</a></li><li><a href="#m56-2-топология-первички">2. Топология первички</a></li><li><a href="#m56-3-три-источника-правды-и-почему-они-расходятся">3. Три источника правды и почему они расходятся</a></li><li><a href="#m56-4-оборотно-сальдовая-ведомость-как-единственный-интерфейс">4. Оборотно-сальдовая ведомость как единственный интерфейс</a></li><li><a href="#m56-5-контрольные-соотношения">5. Контрольные соотношения</a></li><li><a href="#m56-6-цена-разрыва-в-рублях">6. Цена разрыва в рублях</a></li><li><a href="#m56-7-правило-отбора-проверок">7. Правило отбора проверок</a></li><li><a href="#m56-8-реальный-кейс">8. Реальный кейс</a></li><li><a href="#m56-9-антипаттерны">9. Антипаттерны</a></li><li><a href="#m56-anti-checklist">Anti-checklist ☠️</a></li><li><a href="#m56-задачи-ai-кодеру">Задачи AI-кодеру</a></li><li><a href="#m56-чеклист-архитектора">Чеклист архитектора</a></li></ol></nav><h2 id="m56-актуальные-версии" tabindex="-1">Актуальные версии</h2>
+<blockquote>
+<p>Проверено: октябрь 2026. Механики модуля — документные, версии привязаны к редакциям НК РФ на дату проверки.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Источник</th>
+<th style="text-align:left">Редакция</th>
+<th style="text-align:left">Что задаёт для архитектуры</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">НК РФ, ст. 88</td>
+<td style="text-align:left">ред. от 01.01.2026 (425-ФЗ от 28.11.2025)</td>
+<td style="text-align:left">камеральная проверка: экстерритория, сроки, основания для требования</td>
+</tr>
+<tr>
+<td style="text-align:left">Письмо ФНС</td>
+<td style="text-align:left">ЕА-36-15/4924@ от 09.06.2026</td>
+<td style="text-align:left">регламент камеральной проверки, порядок проверки уточнённой декларации</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 75</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">пени: 1/300 ключевой ставки за каждый день просрочки</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 76</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">приостановление операций по счёту при просрочке отчётности</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 122</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">штраф за грубое нарушение: процент от неуплаченной суммы</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 11.3</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">единый налоговый счёт: условия отражения уточнённой декларации</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, п. 8 ст. 164</td>
+<td style="text-align:left">с 01.01.2026</td>
+<td style="text-align:left">основная ставка НДС 22%, расчётная 22/122 для авансов</td>
+</tr>
+<tr>
+<td style="text-align:left">54-ФЗ, ст. 14.5 КоАП</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">санкции за применение ККТ, размеры зависят от повторности</td>
+</tr>
+<tr>
+<td style="text-align:left">КНД</td>
+<td style="text-align:left">актуальный перечень ФНС</td>
+<td style="text-align:left">форма декларации — часть контракта с проверкой</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Практический вывод для архитектора:</strong> любая цифра в этом модуле — процент, срок или ставка — имеет дату. Проверяющий код, который их сравнивает, должен хранить правило с датой вступления в силу, а не константу.</p>
+<hr>
+<h2 id="m56-1-учёт-это-не-арифметика" tabindex="-1">1. Учёт — это не арифметика</h2>
+<p>Калькулятор налогов написан один раз и работает одинаково у всех. Ошибка в нём видна сразу: сумма не сходится с известной суммой. Ошибка в связях не видна нигде — она проявляется через 3–18 месяцев, когда налоговая задаёт вопрос про документ, который никто не создал.</p>
+<p>Отсюда разница в предмете автоматизации:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Что автоматизируют</th>
+<th style="text-align:left">Что ломается</th>
+<th style="text-align:left">Кто ловит</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">расчёт налога</td>
+<td style="text-align:left">формула, ставка, база</td>
+<td style="text-align:left">проверяющий тест на эталоне</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>связь документов</strong></td>
+<td style="text-align:left">пропущенный шаг, чужая подпись, другая версия</td>
+<td style="text-align:left"><strong>внешняя проверка, через месяцы</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Бухгалтер на аутсорсе не «считает» — он <strong>следит за графом</strong>: пришло ли, подписано ли, отражено ли, сошлось ли с оплатой. Это работа с состояниями документов и сроками, а не с формулами. Значит, и автоматизация здесь — про состояния и сроки.</p>
+<p><strong>Практический вывод для архитектора:</strong> продукт в этой нише продаётся не «быстрее считаем», а «раньше узнаём о разрыве». Первое — это скорость, второе — это снятие риска. Продаётся второе.</p>
+<h3 id="m56-граничные-случаи-где-ломается" tabindex="-1">Граничные случаи — где ломается</h3>
+<p><strong>Расчёт сходится, а учёт неверен.</strong> Классика: НДС начислен верно, декларация подана верно, но входящий счёт-фактура не проведён — то есть нет суммы к вычету. Декларация с уменьшением не прошла, компания заплатила лишнее. Ни один тест на арифметику этого не видит: арифметика корректна, корректна и невыгодна.</p>
+<p><strong>Один платёж закрывает четыре документа.</strong> Входящее 500 000 ₽ — за четыре накладные по 125 000 ₽. Ни одна пара «платёж ↔ накладная» не равна, проверка по точному совпадению сумм молчит, а проверка по дате закрывает платёж первым документом и теряет три остальных. Дефект не в бухгалтерии — в модели правила.</p>
+<p><strong>Дата документа ≠ дата признания.</strong> Прибыль по отгрузке, НДС по отгрузке с особым порядком для авансов, вычеты — по факту счёта-фактуры. Граница периода проходит по разным датам для разных налогов. Правило «дата документа входит в период» неверно всегда.</p>
+<p><strong>Почему это важно архитектору:</strong> проверка, написанная на равенство двух чисел, даёт ноль сигнала на самых дорогих кейсах. Модель данных проверки должна хранить связь (документ, контрагент, период, сумма), а не пару чисел — иначе её придётся переписывать на первой же неделе работы с реальным клиентом.</p>
+<hr>
+<h2 id="m56-2-топология-первички" tabindex="-1">2. Топология первички</h2>
+<p>Бизнес-процесс бухгалтерии — это несколько повторяющихся цепочек. Каждая цепочка — граф с обязательными вершинами и переходами.</p>
+<pre class="hljs"><code>ЗАКУПКА
+  счёт ─→ заказ ─→ накладная/УПД ─→ счёт-фактура ─→ оплата
+   │                    │                    │            │
+  (реквизиты)      (приёмка)           (вычет НДС)   (списание Дт)
+
+ПРОДАЖА
+  заказ ─→ отгрузка ─→ УПД ─→ оплата
+              │          │        │
+          (отпуск)  (выручка)  (дебиторка)
+
+КАССА (розница, общепит, услуги)
+  чек ОФД ─→ Z-отчёт ─→ выручка/расход в учёте
+
+МАРКИРОВКА
+  карточка ГИС МТ ─→ коды Data Matrix ─→ УПД с кодами ─→ ЭДО ─→ отчёт
+
+ЗАРПЛАТА
+  табель ─→ расчёт ─→ ведомость ─→ выплата ─→ выписка банка
+</code></pre>
+<p>Четыре свойства этого графа определяют, что автоматизируемо:</p>
+<ol>
+<li><strong>Вершины принадлежат разным владельцам.</strong> Накладная — ваша, счёт-фактура — контрагента, чек — кассе, код маркировки — ГИС МТ. Проверить можно только то, что вы получили.</li>
+<li><strong>Переходы асинхронны.</strong> Реализация разошлась с отгрузкой на 2 дня, подписание — на 11. Граф меняется после того, как сверка прошла.</li>
+<li><strong>Часть вершин неизменяема.</strong> Подписанный УПД не переписывается, исправление идёт отдельным документом. Значит, «поправить в учёте» не всегда допустимо.</li>
+<li><strong>Есть обязательные, но не вычисляемые условия.</strong> Подпись контрагента, оплата в срок, наличие в реестре маркировки. Это проверки факта, а не формулы.</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">graph LR
+  A[счёт] --&gt; B[заказ]
+  B --&gt; C[накладная / УПД]
+  C --&gt; D[счёт-фактура]
+  C --&gt; E[приёмка]
+  D --&gt; F[вычет НДС]
+  C --&gt; G[оплата]
+  G --&gt; H[списание Дт 60]
+  F --&gt; I[декларация НДС]
+  H --&gt; J[выписка банка]
+</div></code></pre>
+<p><strong>Практический вывод для архитектора:</strong> автоматизируется не документ, а <strong>переход между документами</strong>. Отсюда естественная декомпозиция продукта: сверка переходов (быстро, дёшево, ручная настройка) и контроль фактов (дороже, требует доступа к внешним системам).</p>
+<hr>
+<h2 id="m56-3-три-источника-правды-и-почему-они-расходятся" tabindex="-1">3. Три источника правды и почему они расходятся</h2>
+<p>Одна и та же сделка существует в трёх системах, и каждая считает себя правильной:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Источник</th>
+<th style="text-align:left">Что видит</th>
+<th style="text-align:left">Скорость</th>
+<th style="text-align:left">Как узнать об изменении</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Учётная система (1С)</td>
+<td style="text-align:left">свои документы, свои проводки, свой НДС</td>
+<td style="text-align:left">секунды после проведения</td>
+<td style="text-align:left">только внутри себя</td>
+</tr>
+<tr>
+<td style="text-align:left">Оператор ЭДО</td>
+<td style="text-align:left">факт подписания, отказа, маршрут подписи</td>
+<td style="text-align:left">минуты-часы</td>
+<td style="text-align:left">webhook, опрос событий</td>
+</tr>
+<tr>
+<td style="text-align:left">Банк</td>
+<td style="text-align:left">деньги</td>
+<td style="text-align:left">дни</td>
+<td style="text-align:left">выписка, инкрементальная выписка</td>
+</tr>
+</tbody>
+</table>
+<p>Расхождение между ними — не ошибка, а нормальное состояние. ЭДО отстаёт от учёта, банк — от ЭДО, и в каждом окне между ними есть минуты, где система права, а данные не дошли.</p>
+<p><strong>Практический вывод для архитектора:</strong> сверка должна иметь представление об ожидаемой задержке. Сравнение «здесь и сейчас» без модели задержки даёт ложные срабатывания — а продукт, который кричит об ошибке каждый день, отключают на третий день.</p>
+<p><strong>Граничные случаи — где ломается:</strong></p>
+<p><strong>Обновление выписки в середине дня.</strong> Банк отдаёт операцию, позже меняет назначение платежа или дату исполнения. Если система считает деньги по первой выгрузке, она получает ложное расхождение. Значит, в модели сверки нужна идемпотентность по ключу операции, а не по позиции в файле.</p>
+<p><strong>Двойной приём одного УПД через роуминг.</strong> Документ приходит дважды: от двух операторов ЭДО, через роуминг. По счётчику совпадений это две операции, по номеру и дате — одна. Проверка без ключа идемпотентности удваивает долг.</p>
+<p><strong>Снятие с учёта без закрытия сделки.</strong> Контрагент вернул товар: у вас есть корректировка, у него — возврат, у банка — возврат денег. Граф расходится в трёх местах, и все три расхождения легитимны.</p>
+<p><strong>Почему это важно архитектору:</strong> «ложное срабатывание» в бухгалтерском продукте хуже пропущенного разрыва. Пропуск клиент обнаружит один раз, а раздражающий ложный сигнал отключит сверку навсегда. Следовательно, порог и приоритет — часть контракта продукта, а не настройка.</p>
+<hr>
+<h2 id="m56-4-оборотно-сальдовая-ведомость-как-единственный-интерфейс" tabindex="-1">4. Оборотно-сальдовая ведомость как единственный интерфейс</h2>
+<p>Разработчику не нужен доступ к базе учётной системы. Нужна одна выгрузка, которая даёт ответ на «как сходится учёт»:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Показатель</th>
+<th style="text-align:left">Что берётся из ведомости</th>
+<th style="text-align:left">Зачем</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">начальное сальдо</td>
+<td style="text-align:left">входящий остаток периода</td>
+<td style="text-align:left">база для расчёта оборотов</td>
+</tr>
+<tr>
+<td style="text-align:left">обороты Дт / Кт</td>
+<td style="text-align:left">движения за период</td>
+<td style="text-align:left">сумма, участвующая в сверке</td>
+</tr>
+<tr>
+<td style="text-align:left">конечное сальдо</td>
+<td style="text-align:left">исходящий остаток</td>
+<td style="text-align:left">проверка арифметики: Нн + Дт − Кт = Кк</td>
+</tr>
+<tr>
+<td style="text-align:left">разбивка по субсчетам</td>
+<td style="text-align:left">60, 62, 68, 90, 51</td>
+<td style="text-align:left">предмет сверки</td>
+</tr>
+</tbody>
+</table>
+<p>Формула проверки целостности самой выгрузки:</p>
+<pre class="hljs"><code>Сальдо_нач + Оборот_Дт − Оборот_Кт = Сальдо_кон      (для дебетового сальдо)
+Сальдо_нач − Оборот_Дт + Оборот_Кт = Сальдо_кон      (для кредитового сальдо)
+</code></pre>
+<p>Если для счёта не выполняется — проблема в выгрузке, а не в бизнесе. Это первая проверка, которую нужно делать до всех остальных: она отсекает слой «мусор на входе» и не даёт анализировать чужой баг.</p>
+<pre class="hljs"><code><span class="hljs-comment">-- Проверка целостности выгрузки ОСВ до запуска сверок</span>
+<span class="hljs-keyword">SELECT</span> account,
+       opening_debit <span class="hljs-operator">+</span> turnover_debit <span class="hljs-operator">-</span> turnover_credit <span class="hljs-keyword">AS</span> computed,
+       closing_debit                                   <span class="hljs-keyword">AS</span> reported,
+       opening_credit <span class="hljs-operator">+</span> turnover_credit <span class="hljs-operator">-</span> turnover_debit <span class="hljs-keyword">AS</span> computed_credit,
+       closing_credit                                  <span class="hljs-keyword">AS</span> reported_credit
+  <span class="hljs-keyword">FROM</span> osv_extract
+ <span class="hljs-keyword">WHERE</span> opening_debit <span class="hljs-operator">+</span> turnover_debit <span class="hljs-operator">-</span> turnover_credit <span class="hljs-operator">&lt;&gt;</span> closing_debit
+    <span class="hljs-keyword">OR</span> opening_credit <span class="hljs-operator">+</span> turnover_credit <span class="hljs-operator">-</span> turnover_debit <span class="hljs-operator">&lt;&gt;</span> closing_credit;
+</code></pre>
+<p><strong>Практический вывод для архитектора:</strong> если данные не проходят арифметическую проверку на своей же таблице — их нельзя анализировать. Слой «проверить вход» отделяет ошибки источника от ошибок бизнес-правил и должен быть первым в конвейере.</p>
+<hr>
+<h2 id="m56-5-контрольные-соотношения" tabindex="-1">5. Контрольные соотношения</h2>
+<p>Контрольное соотношение — утверждение о данных, нарушение которого имеет цену. Хорошее соотношение выполняется на 100% нормальных данных и ловит дорогие кейсы.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Соотношение</th>
+<th style="text-align:left">Что ловит</th>
+<th style="text-align:left">Цена нарушения</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">сальдо Дт 51 = выписка банка</td>
+<td style="text-align:left">неотраженный платёж, расхождение с банком</td>
+<td style="text-align:left">расхождение по требованию, пени</td>
+</tr>
+<tr>
+<td style="text-align:left">оборот по Дт 62 = сумма УПД покупателям</td>
+<td style="text-align:left">неотправленный УПД</td>
+<td style="text-align:left">вычет НДС не подтверждён, доначисление</td>
+</tr>
+<tr>
+<td style="text-align:left">сумма книг покупок = сумма СФ в учёте</td>
+<td style="text-align:left">расхождение декларации и регистра</td>
+<td style="text-align:left">камеральная проверка, доначисление</td>
+</tr>
+<tr>
+<td style="text-align:left">выручка по 90.1 = чеки ОФД за период (в рознице)</td>
+<td style="text-align:left">непробитый чек</td>
+<td style="text-align:left">штраф по ст. 14.5 КоАП</td>
+</tr>
+<tr>
+<td style="text-align:left">по каждому договору: Σ неоплаченных УПД = сальдо Дт 60</td>
+<td style="text-align:left">расхождение дебиторки и фактов</td>
+<td style="text-align:left">спор с контрагентом, претензия</td>
+</tr>
+<tr>
+<td style="text-align:left">коды маркировки в УПД = коды в ГИС МТ</td>
+<td style="text-align:left">неполная передача сведений</td>
+<td style="text-align:left">предписание, запрет оборота</td>
+</tr>
+<tr>
+<td style="text-align:left">дата оплаты ≤ срок по договору + льготный период</td>
+<td style="text-align:left">просрочка контрагента</td>
+<td style="text-align:left">пени по договору, претензия</td>
+</tr>
+<tr>
+<td style="text-align:left">остатки в учёте = остатки в ГИС МТ</td>
+<td style="text-align:left">расхождение по маркированному товару</td>
+<td style="text-align:left">штраф за неприменение, предписание</td>
+</tr>
+<tr>
+<td style="text-align:left">НДС к вычету в декларации ≤ НДС по принятым СФ</td>
+<td style="text-align:left">вычет без документа</td>
+<td style="text-align:left">доначисление + пени</td>
+</tr>
+</tbody>
+</table>
+<h3 id="m56-почему-соотношения-это-данные-а-не-код" tabindex="-1">Почему соотношения — это данные, а не код</h3>
+<p>Набор соотношений меняется каждый год: ставка НДС, пороги, состав деклараций, перечень обязательных реквизитов. Если правило написано в коде, его изменение требует релиза. Если правило лежит в конфиге с датой — его меняют рядом с бухгалтером, без сборки.</p>
+<pre class="hljs"><code><span class="hljs-bullet">-</span> <span class="hljs-attr">id:</span> <span class="hljs-string">bank-vs-ledger-51</span>
+  <span class="hljs-attr">title:</span> <span class="hljs-string">Сальдо</span> <span class="hljs-string">счёта</span> <span class="hljs-number">51</span> <span class="hljs-string">не</span> <span class="hljs-string">равно</span> <span class="hljs-string">банковскому</span> <span class="hljs-string">остатку</span>
+  <span class="hljs-attr">severity:</span> <span class="hljs-string">critical</span>
+  <span class="hljs-attr">effectiveFrom:</span> <span class="hljs-number">2026-01-01</span>
+  <span class="hljs-attr">sources:</span> [<span class="hljs-string">osv</span>, <span class="hljs-string">bank_statement</span>]
+  <span class="hljs-attr">assertion:</span> <span class="hljs-string">&quot;osv.account(&#x27;51&#x27;).closingDebit == bank.closingBalance&quot;</span>
+  <span class="hljs-attr">tolerance:</span> <span class="hljs-number">0.00</span>
+  <span class="hljs-attr">action:</span> <span class="hljs-string">&quot;сверить выписку с журналом банковских операций в учётной системе&quot;</span>
+  <span class="hljs-attr">owner:</span> <span class="hljs-string">главный</span> <span class="hljs-string">бухгалтер</span>
+</code></pre>
+<p>Три поля здесь обязательны: <code>severity</code> (что делать с сигналом), <code>effectiveFrom</code> (с какого числа действует), <code>action</code> (кто и что делает). Правило без <code>action</code> — это статистика, а не инструмент.</p>
+<p><strong>Граничные случаи — где ломается:</strong></p>
+<p><strong>Допуск в 1 копейку накапливается.</strong> Сверка с округлением до рубля проходит месяцами, потом накапливает расхождение в несколько тысяч, которое не имеет объяснения. Допуск должен быть нулевым на уровне копеек, а округление — только в отчёте для человека.</p>
+<p><strong>Соотношение проходит, а бизнес разорван.</strong> Сальдо Дт 62 сошёлся, потому что бухгалтер внёс фиктивную отгрузку. Арифметика цела, граф мёртв. Никакое соотношение на равенство сумм это не увидит — нужны соотношения на признаки: дата, контрагент, отсутствие первичного документа.</p>
+<p><strong>Правило «на всё» даёт ноль сигнала.</strong> Соотношение, которое срабатывает на 30% нормальных данных, не проверяется вообще: бухгалтер отключит его первым.</p>
+<p><strong>Почему это важно архитектору:</strong> ценность контрольного соотношения измеряется не полнотой, а долей срабатываний, которые действительно требуют действия. Продукт, где 9 из 10 сигналов — шум, продаётся один раз и отключается навсегда.</p>
+<hr>
+<h2 id="m56-6-цена-разрыва-в-рублях" tabindex="-1">6. Цена разрыва в рублях</h2>
+<p>Пока цену разрыва нельзя посчитать, продукт нельзя продать: директор покупает не «контроль соотношений», а «чтобы счёт не заблокировали».</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Компонент</th>
+<th style="text-align:left">Механика</th>
+<th style="text-align:left">Что меняется в продукте</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">пени</td>
+<td style="text-align:left">1/300 ключевой ставки за каждый день просрочки</td>
+<td style="text-align:left">нужен расчёт «на сегодня», а не «на дату декларации»</td>
+</tr>
+<tr>
+<td style="text-align:left">штраф</td>
+<td style="text-align:left">процент от неуплаченной суммы по ст. 122 НК РФ</td>
+<td style="text-align:left">нужен сценарий «уточнёнка до обнаружения недоимки»</td>
+</tr>
+<tr>
+<td style="text-align:left">приостановление операций по счёту</td>
+<td style="text-align:left">ст. 76 НК РФ, при просрочке отчётности</td>
+<td style="text-align:left">нужен календарь сроков с опережением</td>
+</tr>
+<tr>
+<td style="text-align:left">камеральная проверка</td>
+<td style="text-align:left">ст. 88 НК РФ, экстерриториальная с 2026</td>
+<td style="text-align:left">нужен список сценариев, которые ФНС проверяет</td>
+</tr>
+<tr>
+<td style="text-align:left">потеря вычета</td>
+<td style="text-align:left">вычет без подтверждающего документа</td>
+<td style="text-align:left">нужен контроль комплектности первички</td>
+</tr>
+<tr>
+<td style="text-align:left">санкции по ККТ</td>
+<td style="text-align:left">ст. 14.5 КоАП, размер зависит от повторности</td>
+<td style="text-align:left">нужен контроль чеков против учёта</td>
+</tr>
+</tbody>
+</table>
+<p>Условие, дающее клиенту способ избежать штрафа: уточнённая декларация подана до обнаружения недоимки <strong>и</strong> сальдо единого налогового счёта на дату подачи положительное и покрывает недоимку с пенями. Оба условия одновременно — выполнение одного не работает.</p>
+<p><strong>Практический вывод для архитектора:</strong> фича «проверить декларацию перед подачей» ценна ровно настолько, насколько она снижает вероятность попасть в акт проверки. Значит, метрика продукта — не «сколько соотношений сработало», а «сколько раз разрыв найден до срока подачи отчётности».</p>
+<hr>
+<h2 id="m56-7-правило-отбора-проверок" tabindex="-1">7. Правило отбора проверок</h2>
+<p>Проверок можно написать сотни. Клиент получит ноль ценности и двадцать сигналов в неделю. Правило отбора — из трёх вопросов:</p>
+<ol>
+<li><strong>Можно ли узнать об этой ошибке дешевле, чем её последствия?</strong> Если последствие — 500 ₽ пени, а проверка требует месяц интеграции — не делаем.</li>
+<li><strong>Есть ли источник правды вне учётной системы?</strong> Расхождение внутри одной системы не доказывает ошибку: это может быть корректная особенность учёта. Доказывает только второй источник — банк, ЭДО, ГИС МТ, ЕГРЮЛ.</li>
+<li><strong>Что именно делать, если сработало?</strong> Без действия сигнал не нужен. Если нельзя сформулировать действие — это метрика для внутреннего пользователя, а не продуктовая фича.</li>
+</ol>
+<pre class="hljs"><code>Проверка проходит отбор, если:
+
+  цена_пропуска  &gt;  стоимость_проверки_в_месяц × срок_эксплуатации
+  ∧ есть_внешний_источник_правды(проверка)
+  ∧ сформулировано_действие(проверка)
+</code></pre>
+<p><strong>Практический вывод для архитектора:</strong> первая версия продукта — это 3–5 проверок с самым высоким отношением цена пропуска к стоимости, а не покрытие темы. Расширение покрытия — следствие накопленных подтверждений от клиентов, а не плана на второй спринт.</p>
+<hr>
+<h2 id="m56-8-реальный-кейс" tabindex="-1">8. Реальный кейс</h2>
+<p><strong>Входные данные.</strong> Автор рассматривает выход на рынок автоматизации для бухгалтерии в России. Ограничение, заданное сразу: не встраиваться внутрь учётных систем. Гипотеза продукта: «дашборд контроля сходимости вместо доработки учёта».</p>
+<p><strong>Ход рассуждения.</strong> Первая версия продукта формулировалась как «контроль расхождений между источниками». При разборе графа первички выяснилось, что контролировать нечего без правил, а правила без графа — это список пар чисел. Реальный предмет — <strong>переходы</strong>: подписан ли УПД, оплачен ли, не истёк ли срок. Проверки перешли из плоскости «сходятся ли суммы» в плоскость «существует ли документ в нужном состоянии в нужный срок».</p>
+<p><strong>Результат.</strong> Три вывода, изменивших продукт:</p>
+<ul>
+<li>Камеральная проверка ФНС по ст. 88 с 2026 года проводится экстерриториально. Значит, «проверка идёт у меня в ИФНС» перестало быть утешительным аргументом — и перестало быть причиной для клиента откладывать.</li>
+<li>Условие освобождения от штрафа требует положительного сальдо ЕНС на дату подачи уточнённой декларации. Значит, продукт должен считать сальдо ЕНС, а не только сумму налога. Это одно требование добавило внешний источник данных и превратило продукт из сверки в подсказку к действию.</li>
+<li>Порог блокировки по ст. 76 НК РФ — 20 дней просрочки, и ФНС получила право предварительно уведомить за 14 дней. Значит, ценность продукта измеряется в календарных днях до срока, а не в количестве найденных ошибок. Метрика переписалась до первой продажи, а не после.</li>
+</ul>
+<p><strong>Вывод, противоречащий интуиции.</strong> Первая версия продукта строилась вокруг слова «автоматизация», и это было ошибкой. Пока продукт описывается как автоматизация, он сравнивается с бесплатным модулем внутри учётной системы. Переформулировка в «раннее предупреждение с переводом в рубли» сразу дала продукт, у которого нет бесплатного аналога: встроенный модуль не звонит бухгалтеру и не переносит вывод в отчёт для директора.</p>
+<p>Второй вывод: граница «не лезем внутрь 1С» оказалась архитектурным требованием, а не ограничением. Единственные точки данных, которых реально хватало — выгрузка оборотно-сальдовой ведомости, выписка банка, состояния документов из ЭДО. Ни одна из них не требует доступа к внутренностям учётной системы.</p>
+<hr>
+<h2 id="m56-9-антипаттерны" tabindex="-1">9. Антипаттерны</h2>
+<h3 id="m56-продукт-посчитал-налог-сам" tabindex="-1">Продукт «посчитал налог сам»</h3>
+<p>Проверяющий код, который пересчитывает налог и сравнивает с декларацией, ввязывается в учётную политику, льготы и региональные правила. Ответственность за ошибку переходит на разработчика, а предмет спора смещается с бизнеса на софт. Считает учётная система — её верность подтверждает проверяющий тест, а не второй самодельный расчёт.</p>
+<h3 id="m56-отчёт-о-расхождениях-как-финальный-продукт" tabindex="-1">Отчёт о расхождениях как финальный продукт</h3>
+<p>Список из 40 строк «платёж не найден» без действия и без суммы последствия читается один раз и дальше игнорируется. Каждая строка отчёта обязана отвечать на два вопроса: что делать и сколько это стоит.</p>
+<h3 id="m56-единый-движок-правил-для-всех-клиентов" tabindex="-1">Единый движок правил для всех клиентов</h3>
+<p>Правило, настроенное под первого клиента, через второй месяц оказывается исключением для третьего. Конфиг правил должен быть данными с версией и датой, а общность — достигаться параметрами, а не ветвлением.</p>
+<h3 id="m56-порог-по-умолчанию-чтобы-не-шумело" tabindex="-1">Порог по умолчанию «чтобы не шумело»</h3>
+<p>Смягчение порога, чтобы сигналов было меньше, убирает ровно тот класс ошибок, который никогда не повторится второй раз. Мягче делать нужно не порог, а приоритет: редкий и дорогой сигнал показывается отдельной строкой «требует внимания», а не смешивается с рутиной.</p>
+<h3 id="m56-сверка-в-облаке-без-разбора-режима" tabindex="-1">Сверка в облаке без разбора режима</h3>
+<p>Учётные данные — коммерческая тайна с правом клиента потребовать обработки внутри своей юрисдикции. Облачная сверка требует отдельного договора о передаче данных и выигрывает только у клиентов, которым уже можно отдать данные.</p>
+<hr>
+<h2 id="m56-anti-checklist" tabindex="-1">Anti-checklist ☠️</h2>
+<ul>
+<li>[ ] Проверка построена на равенстве двух сумм без модели связей — не срабатывает на самых дорогих кейсах</li>
+<li>[ ] Правило без <code>action</code> в конфиге — сигнал есть, решения нет, продукт отключают</li>
+<li>[ ] Правило без <code>effectiveFrom</code> — правка ставки требует релиза вместо смены конфига</li>
+<li>[ ] Допуск округления задан в копейках правила, а не в отчёте — расхождение растёт незаметно</li>
+<li>[ ] Сверка без модели ожидаемой задержки источника — ложные срабатывания в первый же день</li>
+<li>[ ] Идемпотентность по позиции в файле, а не по ключу операции — дубль при обновлении выписки</li>
+<li>[ ] Ошибка входной выгрузки попадает в бизнес-правила — диагностика уходит не туда</li>
+<li>[ ] Проверка срабатывает на 30% нормальных данных — её отключат в первую неделю</li>
+<li>[ ] Пересчёт налогов внутри продукта — ответственность за ошибку переносится на разработчика</li>
+<li>[ ] Цена пропуска не посчитана — директору нечем обосновать оплату</li>
+</ul>
+<hr>
+<h2 id="m56-задачи-ai-кодеру" tabindex="-1">Задачи AI-кодеру</h2>
+<p>Плохая формулировка:</p>
+<blockquote>
+<p>«Сделай проверку расхождений между банком и учётной системой для бухгалтерии.»</p>
+</blockquote>
+<p>Разбор: не указано, что считается источником правды, какой допуск по сумме, что делать при срабатывании и кто владелец сигнала. Результат — отчёт со списком строк без действия и с порогом, откалиброванным на глаз.</p>
+<p>Хорошая формулировка:</p>
+<blockquote>
+<p>«В модуле 56 зафиксировано контрольное соотношение <code>bank-vs-ledger-51</code>: остаток счёта 51 в ОСВ должен совпадать с банковским остатком на ту же дату, допуск 0, действие — «сверить выписку с журналом банковских операций».</p>
+<p>Задача: реализовать проверку как единый конфиг правил с полями <code>id</code>, <code>severity</code>, <code>effectiveFrom</code>, <code>sources</code>, <code>assertion</code>, <code>action</code>, <code>owner</code>.</p>
+<p>Границы: не трогать существующий код расчёта налогов; не реализовывать другие соотношения из таблицы модуля; не добавлять зависимостей.</p>
+<p>Критерии готовности:</p>
+<ul>
+<li><code>npm test</code> → зелёный, есть тест с расхождением в 1 копейку, ожидающий результат — сигнал</li>
+<li><code>npm test</code> → зелёный, есть тест с расхождением, помеченным как <code>effectiveFrom</code> в будущем, ожидающий результат — пропуск проверки</li>
+<li>при срабатывании в отчёте присутствуют <code>severity</code> и <code>action</code>, а не только разница сумм</li>
+<li><code>npm run check</code> → код 0</li>
+</ul>
+<p>Контекст проекта: <code>AGENTS.md</code>, <code>docs/CONTEXT.md</code>, модуль 56 (раздел 5)».</p>
+</blockquote>
+<p>Формула: что делает + границы + конкретные критерии с ожидаемым результатом + ссылка на источник требования в модуле.</p>
+<p>Вторая задача — на формулировку требования:</p>
+<blockquote>
+<p>«Переформулируй это требование так, чтобы его можно было принять, не читая код: ‘сделай так, чтобы бухгалтеру показывалось, что сошлось, а что нет’. Что должно быть в формулировке, чего не хватает сейчас и какой критерий готовности ты предложишь.»</p>
+</blockquote>
+<p>Ожидаемый ответ: не хватает определения источников, модели задержки, критерия «сошлось» (счёт, период, допуск, источник правды), формулировки действия и владельца сигнала. Критерий готовности: тест на каждый из трёх исходов — сошлось, расхождение в пределах допуска, расхождение сверх допуска, — с указанием, что при нарушении даты правила проверка не выполняется.</p>
+<hr>
+<h2 id="m56-чеклист-архитектора" tabindex="-1">Чеклист архитектора</h2>
+<h3 id="m56-модель-данных" tabindex="-1">Модель данных</h3>
+<ul>
+<li>[ ] Проверка хранит связь (документ, контрагент, период, источник, сумма), а не пару чисел</li>
+<li>[ ] Ключи идемпотентности привязаны к идентификатору операции, а не к позиции в файле</li>
+<li>[ ] Деньги хранятся в копейках целым числом; округление — только на выходе отчёта</li>
+<li>[ ] Правила лежат в конфиге с <code>severity</code>, <code>effectiveFrom</code>, <code>action</code>, <code>owner</code></li>
+<li>[ ] Источник правды у каждой проверки явно назван и отличается от проверяемой системы</li>
+</ul>
+<h3 id="m56-конвейер-проверок" tabindex="-1">Конвейер проверок</h3>
+<ul>
+<li>[ ] Первым шагом идёт проверка целостности входной выгрузки</li>
+<li>[ ] У каждой связи есть ожидаемая задержка источника</li>
+<li>[ ] Правила с <code>effectiveFrom</code> в будущем не выполняются</li>
+<li>[ ] Доля сигналов, требующих действия, измеряется и отслеживается</li>
+<li>[ ] Проверки, сработавшие на нормальных данных, разбираются до расширения покрытия</li>
+</ul>
+<h3 id="m56-продукт-и-риск" tabindex="-1">Продукт и риск</h3>
+<ul>
+<li>[ ] Цена пропуска посчитана в рублях для каждой проверки верхнего уровня</li>
+<li>[ ] Продукт позиционируется как предупреждение, а не как автоматизация расчёта</li>
+<li>[ ] Отчёт отвечает на «что делать» и «сколько стоит», а не «где разница»</li>
+<li>[ ] Режим обработки данных (локальный, в контуре клиента) выбран осознанно</li>
+<li>[ ] Ни одна проверка не пересчитывает налог</li>
+</ul>
+<h3 id="m56-работа-с-клиентом" tabindex="-1">Работа с клиентом</h3>
+<ul>
+<li>[ ] Понятно, кто покупает (собственник) и кто пользуется (бухгалтер)</li>
+<li>[ ] Первый пилот ограничен 3–5 проверками, а не покрытием темы</li>
+<li>[ ] Сигнал доходит до человека без программирования</li>
+</ul>
+<hr>
+<p><em>Модуль 56 завершён.</em>
+<em>Курс пройден: от механики языков до организации кода, контрактов, устойчивости и предметной области.</em>
+<em>Следующий: <a href="#module-57">Модуль 57 — Сверка без доступа к учётной системе</a></em></p>
+</div><nav class="pager"><a class="pn prev" href="#module-55"><span>← Назад</span>55 Передача состояния: handoff и штаб</a><a class="pn next" href="#module-57"><span>Вперёд →</span>57 Сверка без доступа к учётной системе</a></nav></section><section class="module" id="module-57"><div class="module-content"><h1 id="m57-модуль-57-сверка-без-доступа-к-учётной-системе" tabindex="-1">Модуль 57 — Сверка без доступа к учётной системе</h1>
+<blockquote>
+<p><strong>Для AI-архитектора:</strong> модуль 56 дал предмет — граф первички. Этот модуль даёт доступ: какие данные реально можно получить извне, в каких форматах они приходят, что с ними происходит по дороге и почему «просто подключиться к 1С» — это проект на месяцы, а не на день. Разбирается архитектурное решение «читать, но не встраиваться», разбирается цена каждого способа входа и граничные случаи, где формат молча искажает суммы.</p>
+<p>Один день изучения — от выгрузки оборотно-сальдовой до работающей сверки по трём источникам: выписка банка, состояния ЭДО, сведения из реестра.</p>
+</blockquote>
+<h2 id="m57-содержание" tabindex="-1">Содержание</h2><nav class="toc" aria-label="Содержание раздела"><ol><li><a href="#m57-актуальные-версии">Актуальные версии</a></li><li><a href="#m57-1-пять-легальных-входов">1. Пять легальных входов</a></li><li><a href="#m57-2-цена-каждого-способа-входа">2. Цена каждого способа входа</a></li><li><a href="#m57-3-форматы-на-входе">3. Форматы на входе</a></li><li><a href="#m57-4-банковская-выписка">4. Банковская выписка</a></li><li><a href="#m57-5-электронный-документооборот">5. Электронный документооборот</a></li><li><a href="#m57-6-сверка-как-процесс">6. Сверка как процесс</a></li><li><a href="#m57-7-нормализация-и-единицы">7. Нормализация и единицы</a></li><li><a href="#m57-8-реальный-кейс">8. Реальный кейс</a></li><li><a href="#m57-9-антипаттерны">9. Антипаттерны</a></li><li><a href="#m57-anti-checklist">Anti-checklist ☠️</a></li><li><a href="#m57-задачи-ai-кодеру">Задачи AI-кодеру</a></li><li><a href="#m57-чеклист-архитектора">Чеклист архитектора</a></li></ol></nav><h2 id="m57-актуальные-версии" tabindex="-1">Актуальные версии</h2>
+<blockquote>
+<p>Проверено: октябрь 2026. Форматы внешних систем меняются; версии API проверять по первичной документации вендора перед интеграцией.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Источник</th>
+<th style="text-align:left">Что берём</th>
+<th style="text-align:left">Версия / примечание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ФНС, ЕГРЮЛ / ЕГРИП</td>
+<td style="text-align:left">открытые сведения о контрагенте</td>
+<td style="text-align:left">режим «Доступ для интеграции», FTP с сертификатом клиента</td>
+</tr>
+<tr>
+<td style="text-align:left">ФНС, ЕГРЮЛ</td>
+<td style="text-align:left">форматы выгрузки</td>
+<td style="text-align:left">4.08 (ЕГРЮЛ) и 4.07 (ЕГРИП) с 01.02.2026; прежние 4.07 / 4.06 доступны до 22.01.2027</td>
+</tr>
+<tr>
+<td style="text-align:left">Сбер, Sber API</td>
+<td style="text-align:left">выписка по счёту</td>
+<td style="text-align:left">HTTP API, ресурсы <code>/v2/statement/transactions</code>, <code>/v2/statement/summary</code>, выгрузка в форматах 1C и MT940</td>
+</tr>
+<tr>
+<td style="text-align:left">Сбер, MCP statement</td>
+<td style="text-align:left">выписка, инкрементальная выписка</td>
+<td style="text-align:left">отдельный MCP-сервер Финтех-платформы; глубина выписки — 5 лет</td>
+</tr>
+<tr>
+<td style="text-align:left">Т-Банк, T-API</td>
+<td style="text-align:left">счета и выписки</td>
+<td style="text-align:left">OpenAPI-спецификация в репозитории вендора</td>
+</tr>
+<tr>
+<td style="text-align:left">Операторы ЭДО</td>
+<td style="text-align:left">статусы документов, подписи, маршруты</td>
+<td style="text-align:left">API и SDK различаются по вендору; часть вендоров уходит в REST</td>
+</tr>
+<tr>
+<td style="text-align:left">ЦРПТ, Честный ЗНАК</td>
+<td style="text-align:left">движение маркированного товара</td>
+<td style="text-align:left">True API, авторизация по УКЭП; документация закрытая, спецификация запрашивается</td>
+</tr>
+<tr>
+<td style="text-align:left">1С, формат EnterpriseData</td>
+<td style="text-align:left">бизнес-сущности учётной системы</td>
+<td style="text-align:left">XML для обмена; веб-сервисы <code>GetData</code> / <code>PutData</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Практический вывод для архитектора:</strong> ни один из этих источников не является стабильным контрактом в смысле OpenAPI с обязательствами. Стабильна семантика («остаток на дату», «статус подписания»), несовместима структура. Следовательно, первым артефактом проекта является не код интеграции, а адаптер на границе с явной моделью внутренних данных.</p>
+<hr>
+<h2 id="m57-1-пять-легальных-входов" tabindex="-1">1. Пять легальных входов</h2>
+<p>Способы получить данные для сверки, от простых к дорогим:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Вход</th>
+<th style="text-align:left">Что отдаёт</th>
+<th style="text-align:left">Приватность</th>
+<th style="text-align:left">Сложность</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">выгрузка ОСВ из учётной системы</td>
+<td style="text-align:left">остатки и обороты по счетам</td>
+<td style="text-align:left">внутри компании</td>
+<td style="text-align:left">минимальная</td>
+</tr>
+<tr>
+<td style="text-align:left">файлы банк-клиента / выписка</td>
+<td style="text-align:left">деньги</td>
+<td style="text-align:left">внутри компании</td>
+<td style="text-align:left">низкая</td>
+</tr>
+<tr>
+<td style="text-align:left">API банка (Sber API, T-API)</td>
+<td style="text-align:left">деньги с задержкой в часы</td>
+<td style="text-align:left">наружу, по договору</td>
+<td style="text-align:left">средняя</td>
+</tr>
+<tr>
+<td style="text-align:left">API оператора ЭДО</td>
+<td style="text-align:left">статусы, подписи, отказы</td>
+<td style="text-align:left">наружу, по договору</td>
+<td style="text-align:left">высокая</td>
+</tr>
+<tr>
+<td style="text-align:left">True API Честного ЗНАКА</td>
+<td style="text-align:left">движение маркированного товара</td>
+<td style="text-align:left">наружу, по договору с УКЭП</td>
+<td style="text-align:left">высокая</td>
+</tr>
+<tr>
+<td style="text-align:left">ЕГРЮЛ / ЕГРИП ФНС</td>
+<td style="text-align:left">регистрационные сведения контрагента</td>
+<td style="text-align:left">открытые данные</td>
+<td style="text-align:left">низкая</td>
+</tr>
+</tbody>
+</table>
+<p>Ключевое наблюдение: <strong>первые два входа не требуют ни одного соглашения с внешним поставщиком.</strong> Их достаточно, чтобы закрыть 80% ценности. Это же означает, что продукт может быть начат без юридической работы и без интеграционных контрактов — а это же снимает главный барьер входа в отрасль.</p>
+<p><strong>Практический вывод для архитектора:</strong> порядок подключения источников определяется не технической сложностью, а соотношением ценности к цене подключения. Начинать надо с того, что не требует согласований.</p>
+<hr>
+<h2 id="m57-2-цена-каждого-способа-входа" tabindex="-1">2. Цена каждого способа входа</h2>
+<p>Выбор способа — это выбор между скоростью, приватностью и стоимостью. Разложение:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Путь</th>
+<th style="text-align:left">Скорость появления данных</th>
+<th style="text-align:left">Что уходит наружу</th>
+<th style="text-align:left">Риск</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">файлы выгрузки</td>
+<td style="text-align:left">дни</td>
+<td style="text-align:left">ничего</td>
+<td style="text-align:left">расхождение форматов, ручной труд</td>
+</tr>
+<tr>
+<td style="text-align:left">API банка</td>
+<td style="text-align:left">часы</td>
+<td style="text-align:left">реквизиты счёта и операций</td>
+<td style="text-align:left">отзыв токена, лимиты, договор</td>
+</tr>
+<tr>
+<td style="text-align:left">чтение базы учётной системы</td>
+<td style="text-align:left">мгновенно</td>
+<td style="text-align:left">ничего</td>
+<td style="text-align:left"><strong>согласие 1С, блокировки, лицензия</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Вариант «зайти в базу 1С напрямую» почти всегда выглядит самым быстрым и оказывается худшим. Причины:</p>
+<ol>
+<li><strong>Схема базы меняется при обновлении конфигурации.</strong> Любая интеграция превращается в постоянное сопровождение.</li>
+<li><strong>Обращения к базе 1С блокируются рабочим процессом.</strong> Проверка в рабочее время мешает пользователям, проверка ночью нарушает регламент обслуживания.</li>
+<li><strong>Нужен доступ, который бухгалтер не даст и не должен давать.</strong> Права на изменение данных из сверки не нужны; возможность их получить разрушает доверие.</li>
+<li><strong>Стоимость лицензирования.</strong> Работа с 1С через их API имеет отдельную модель лицензирования, которая в сумме превышает стоимость задачи.</li>
+</ol>
+<p>При этом официальные точки входа существуют и легальны: веб-сервисы 1С <code>GetData</code> / <code>PutData</code>, формат EnterpriseData, файловые выгрузки. Они дают нужные данные без вторжения внутрь.</p>
+<p><strong>Практический вывод для архитектора:</strong> «не лезть внутрь 1С» — не отказ от интеграции, а выбор легальной точки входа. Формулировка «мы читаем через стандартные интерфейсы обмена» снимает возражение бухгалтера, формулировка «мы не работаем с вашей учётной системой» заставляет клиента недооценивать стоимость внедрения.</p>
+<p><strong>Граничные случаи — где ломается:</strong></p>
+<p><strong>У клиента нет прав на выгрузку, потому что учёт ведётся в облаке.</strong> Файл выгрузки получить можно, но с задержкой в сутки и через личный кабинет вручную. Продукт, построенный на файлах, деградирует до ежедневной ручной операции — и это меняет весь его ценовой класс.</p>
+<p><strong>У клиента два учётные системы: бухгалтерия и склад.</strong> Данные о продажах есть в одной, о поступлении — в другой. Сверка «учёт ↔ банк» работает, сверка «склад ↔ бухгалтерия» требует второго источника правды, которого у вас нет. Несовместимость схем здесь не техническая, а организационная, и она не лечится кодом.</p>
+<p><strong>Бухгалтер ведёт учёт в двух системах параллельно.</strong> Объясняется это просто: одна для ФНС, другая для себя. Источник правды не выбирается — он распределён, и правило сверки становится неоднозначным по определению.</p>
+<p><strong>Почему это важно архитектору:</strong> контракт с клиентом фиксирует, откуда берётся истина. Если источников два и они не согласованы, продукт не может выдать однозначный вывод, а значит, вся работа превращается в список вопросов клиенту.</p>
+<hr>
+<h2 id="m57-3-форматы-на-входе" tabindex="-1">3. Форматы на входе</h2>
+<p>Разнообразие форматов — не проблема, а рутина. Проблема возникает, когда разнообразие протекает внутрь системы.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Формат</th>
+<th style="text-align:left">Что это</th>
+<th style="text-align:left">Подводное место</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">XML</td>
+<td style="text-align:left">EnterpriseData, банковские форматы, ЭДО</td>
+<td style="text-align:left">версии схем, кодировка, отличия реализаций</td>
+</tr>
+<tr>
+<td style="text-align:left">JSON</td>
+<td style="text-align:left">API банков, API ЭДО</td>
+<td style="text-align:left">пагинация, курсоры, токены</td>
+</tr>
+<tr>
+<td style="text-align:left">XLSX</td>
+<td style="text-align:left">выгрузки банк-клиентов, отчёты</td>
+<td style="text-align:left">объединённые ячейки заголовков, числа как текст</td>
+</tr>
+<tr>
+<td style="text-align:left">MT940</td>
+<td style="text-align:left">банковский стандарт выписки</td>
+<td style="text-align:left">состав полей опциональный, у каждого банка свой</td>
+</tr>
+<tr>
+<td style="text-align:left">TXT / CSV</td>
+<td style="text-align:left">фискальные выгрузки, выгрузки 1С</td>
+<td style="text-align:left">разделители, кодировки CP1251, порядок колонок</td>
+</tr>
+<tr>
+<td style="text-align:left">PDF</td>
+<td style="text-align:left">печатные формы выписок, сканы документов</td>
+<td style="text-align:left">извлечение текста, см. модуль 15</td>
+</tr>
+</tbody>
+</table>
+<p>Главное правило: <strong>внутренняя модель не должна быть похожа ни на один внешний формат.</strong> Внешний формат живёт в адаптере и умирает вместе с ним.</p>
+<pre class="hljs"><code>Банк A (XLSX)  ─┐
+Банк B (MT940) ─┤
+Банк C (JSON)  ─┼─→ [адаптер] → внутренняя модель → [правила] → отчёт
+ОСВ (CSV)      ─┤        (уникальная)   (из модуля 56)
+ЭДО (XML)      ─┘
+</code></pre>
+<p><strong>Практический вывод для архитектора:</strong> внутренняя модель — это то, ради чего потом пишутся проверки. Если она диктуется форматом выписки, каждое изменение формата банком становится изменением модели, а вместе с ней — миграцией и перевыпуском проверок.</p>
+<hr>
+<h2 id="m57-4-банковская-выписка" tabindex="-1">4. Банковская выписка</h2>
+<p>Банк — самый предсказуемый источник, потому что у него есть отраслевой стандарт. Рабочий путь от простого к сложному:</p>
+<ol>
+<li><strong>Файл выгрузки из банк-клиента.</strong> XLSX или MT940. Ноль интеграций, всё локально.</li>
+<li><strong>API банка.</strong> Часовая-дневная задержка, авторизация по токену, требует договора.</li>
+<li><strong>Инкрементальная выписка.</strong> Запрос операций за интервал внутри операционного дня. Экономит трафик, но вводит понятие задержки данных.</li>
+</ol>
+<p>Формат MT940 — отраслевой стандарт, но <strong>опциональные поля</strong> в нём опциональны по-разному у разных банков: поле может отсутствовать, присутствовать пустым или заполненным по правилам банка. Парсер, написанный под один банк, на другом ломается на отсутствии поля, а не на неверном значении.</p>
+<pre class="hljs"><code><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;account&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;40702810***********&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;currency&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;RUB&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;generatedAt&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-10-15T18:04:11+03:00&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;entries&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;bankOperationId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;F1234567890&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;operationDate&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-10-14&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;valueDate&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-10-14&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;direction&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;in&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;amount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;125000.00&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;counterpartyName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ООО Ромашка&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;counterpartyInn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;7701234567&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;purpose&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Оплата по сч. 41 от 12.10.2026 за тов. по дог. 17/2026&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;purposeNormalized&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Оплата по сч. 41 от 12.10.2026 за тов. по дог. 17/2026&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;isCorrection&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;openingBalance&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;480000.00&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;closingBalance&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;605000.00&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>Три поля в этой модели — не декорация:</p>
+<ul>
+<li><code>bankOperationId</code> — основа идемпотентности. Без него повторная выгрузка даёт двойные расхождения.</li>
+<li><code>isCorrection</code> — банк помечает операции, изменённые после первоначального проведения. Их нужно обрабатывать как отмену предыдущей, а не как новую.</li>
+<li><code>operationDate</code> и <code>valueDate</code> — расходятся при операциях в валюте и при задержке исполнения. Сверка по одной дате даёт ложные расхождения на границе периода.</li>
+</ul>
+<h3 id="m57-граничные-случаи-где-ломается" tabindex="-1">Граничные случаи — где ломается</h3>
+<p><strong>Сумма приходит строкой с неразделителем.</strong> «125000,00» или «125 000.00» или «125,000.00» — три записи одной суммы. Наивный <code>parseFloat</code> даёт 125000 и 125 соответственно. Это ошибка на порядки, и она не проявится в тестах на «нормальных» данных.</p>
+<p><strong>Назначение платежа не разбирается правилами.</strong> Реальные назначения — «за ж/у, сч. 41 от 12.10, дог. 17/2026, в т.ч. НДС 20%», «оплата по Договору поставки №17 от 01.09.2026 за март», «за приобретение тов. согласно УПД № 0000123 от 14.10». Правила здесь хрупкие: год вычета НДС, написание «дог.», пробелы, латиница против кириллицы в ИНН.</p>
+<p><strong>Комиссия банка сажается на ту же сумму.</strong> Операция 100 000 с комиссией 500 приходит двумя строками или одной с разделителем. Сверка «сумма платежа = неоплаченный документ» ломается, хотя бизнес в порядке.</p>
+<p><strong>Конвертация валюты.</strong> Оплата 1 000 EUR от 14.10 и проведение 14.10 по курсу на 13.10 дают разницу. Это не расхождение, но правило должно уметь это объяснить, иначе оно сработает на каждой валютной операции.</p>
+<p><strong>Отсутствие оборотов за день.</strong> Пустой день в выписке — норма. Код, который считает его пропуском операций, генерирует ложные тревоги ежедневно.</p>
+<p><strong>Почему это важно архитектору:</strong> банковская выписка — источник №1 по ценности и №1 по числу граблей в парсинге. Здесь нужны golden-тесты на реальных обезличенных выписках, а не моки: мок воспроизводит только те случаи, о которых разработчик подумал заранее.</p>
+<hr>
+<h2 id="m57-5-электронный-документооборот" tabindex="-1">5. Электронный документооборот</h2>
+<p>ЭДО отвечает на вопрос «существует ли документ в согласованном состоянии» — это ровно тот факт, которого нет в учётной системе. Клиент может провести УПД, но контрагент его не подписал: сумма висит в учёте, а обязательства сторон не возникли.</p>
+<p>Ценность статуса ЭДО: подписан → отказ → маршрут подписи → отклонён при проверке схемы. Каждый статус — причина расхождения, а не сам дефект.</p>
+<pre class="hljs"><code>черновик → подписан отправителем → отправлен → доставлен →
+  подписан получателем ✅ (согласован)
+  отказ получателя ❌ (документа нет)
+  отклонён оператором (ошибка схемы) ❌ (реквизиты неполны)
+</code></pre>
+<p>Тонкость, определяющая архитектуру: <strong>операторы ЭДО отличаются API.</strong> У одного это SDK с колбэками, у другого REST с курсорами, у третьего — вебхуки по подписке. Поэтому код против конкретного оператора — это отдельный адаптер, а общая модель должна описывать состояние документа, а не способ доставки этого состояния.</p>
+<p>Регуляторная часть, которую надо отслеживать: переход на универсальные сообщения вместо извещения о получении и уведомления об уточнении. Если интеграция завязана на старые сущности, она отстанет от регулятора раньше, чем от бизнеса.</p>
+<p><strong>Практический вывод для архитектора:</strong> интеграция с ЭДО — это не «получить данные», а «держать актуальное состояние». Различие проявляется в архитектуре: нужен локальный кэш состояний с временем жизни и правило, что делать при недоступности оператора, а не просто периодический опрос.</p>
+<p><strong>Граничные случаи — где ломается:</strong></p>
+<p><strong>Документ отправлен, но доставка не подтверждена.</strong> Это не значит, что доставки не будет. Построенный на этом вывод продукт отправит контрагенту повторный документ — то есть создаст двойной УПД.</p>
+<p><strong>Двойной приём через роуминг.</strong> Два оператора вернули одно и то же. Дедупликация обязана идти по номеру и дате документа, а не по идентификатору сообщения у оператора.</p>
+<p><strong>Реквизиты документа содержат только то, что заполнил бухгалтер.</strong> УПД без ИНН получателя принимается оператором и уходит в никуда — документ в статусе «доставлен» при отсутствии адресата. Проверка «статус хороший» без проверки «реквизиты полны» даёт ложный успех.</p>
+<p><strong>Контрагент отказал с основанием «ошибка в реквизитах», но причина — его внутренняя настройка.</strong> Текст отказа не машиночитаем. Классификация отказа — задача нормализации, а не парсинга, и ошибка здесь стоит повторного цикла документооборота.</p>
+<p><strong>Почему это важно архитектору:</strong> состояние ЭДО — единственный источник, который отличает «документ есть» от «документ имеет силу». Ошибка в этой классификации даёт ложное подтверждение, а ложное подтверждение хуже отсутствия сигнала: клиент прекратит читать отчёт целиком.</p>
+<hr>
+<h2 id="m57-6-сверка-как-процесс" tabindex="-1">6. Сверка как процесс</h2>
+<p>Сверка — не запрос к источнику, а трёхшаговый процесс с явными состояниями и повторяемостью.</p>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+  A[получение данных] --&gt; B[нормализация]
+  B --&gt; C[проверка целостности]
+  C --&gt;|ошибка| D[стоп: отчёт о входе]
+  C --&gt;|ок| E[применение правил]
+  E --&gt; F[обогащение: ЕГРЮЛ, срок договора]
+  F --&gt; G[приоритизация по цене пропуска]
+  G --&gt; H[отчёт: что делать и сколько стоит]
+</div></code></pre>
+<p>Три свойства, которые обязаны быть в конструкции:</p>
+<ol>
+<li><strong>Идемпотентность.</strong> Повторный запуск на тех же данных даёт тот же результат и не плодит дубли. Основа — ключ операции и версия правила.</li>
+<li><strong>Версионирование правил.</strong> Каждый результат хранит, какой версией правила он получен. Иначе через месяц нельзя объяснить, почему сигнал был или не был.</li>
+<li><strong>Отказ вместо тихой пустоты.</strong> Если источник не отдал данные, это результат, а не отсутствие результата. «Нет данных» и «данных нет» — разные состояния, и второе обязано быть видно.</li>
+</ol>
+<pre class="hljs"><code>Результат сверки = набор сигналов, каждый из которых несёт:
+  ruleId + ruleVersion + severity
+  + предмет (что именно расходится)
+  + источник правды
+  + действие (кто и что делает)
+  + цена (в рублях, на дату расчёта)
+</code></pre>
+<p><strong>Практический вывод для архитектора:</strong> пустой отчёт и невыполненная сверка не должны выглядеть одинаково. Это различие стоит одной строки в модели результата и экономит месяц расследования «почему у клиента всё хорошо» при наличии непроверенного источника.</p>
+<hr>
+<h2 id="m57-7-нормализация-и-единицы" tabindex="-1">7. Нормализация и единицы</h2>
+<p>Прежде чем что-то сравнивать, нужно привести к общему виду. Слой нормализации — самый недооценённый и самый дорогой по числу часов.</p>
+<p><strong>Деньги.</strong> Хранение в копейках целым числом — не рекомендация, а требование. Округление применяется один раз, при выводе в отчёт.</p>
+<pre class="hljs"><code><span class="hljs-comment">// ❌ Накопление ошибки и невозможность объяснить расхождение в 1 копейку</span>
+<span class="hljs-keyword">const</span> total = rows.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">sum, r</span>) =&gt;</span> sum + <span class="hljs-built_in">parseFloat</span>(r.<span class="hljs-property">amount</span>), <span class="hljs-number">0</span>);
+
+<span class="hljs-comment">// ✅ Деньги как целые копейки, разбор в адаптере формата</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Kopecks</span> = <span class="hljs-built_in">bigint</span>;
+<span class="hljs-keyword">const</span> parseAmount = (<span class="hljs-attr">raw</span>: <span class="hljs-built_in">string</span>): <span class="hljs-function"><span class="hljs-params">Kopecks</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> normalized = raw.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/[\s\u00a0&#x27;]/g</span>, <span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-title function_">replace</span>(<span class="hljs-string">&#x27;,&#x27;</span>, <span class="hljs-string">&#x27;.&#x27;</span>);
+  <span class="hljs-keyword">const</span> [whole, frac = <span class="hljs-string">&#x27;&#x27;</span>] = normalized.<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;.&#x27;</span>);
+  <span class="hljs-keyword">const</span> sign = whole.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;-&#x27;</span>) ? -<span class="hljs-number">1n</span> : <span class="hljs-number">1n</span>;
+  <span class="hljs-keyword">const</span> abs = whole.<span class="hljs-title function_">replace</span>(<span class="hljs-string">&#x27;-&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>);
+  <span class="hljs-keyword">const</span> digits = (frac + <span class="hljs-string">&#x27;00&#x27;</span>).<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
+  <span class="hljs-keyword">return</span> sign * (<span class="hljs-title class_">BigInt</span>(abs) * <span class="hljs-number">100n</span> + <span class="hljs-title class_">BigInt</span>(digits));
+};
+</code></pre>
+<p><strong>Идентификаторы.</strong> ИНН — строка, а не число: 12 значащих цифр, а JS <code>Number</code> хранит 15–16 значащих цифр и потеряет точность на длинных значениях. Плюс проверка контрольного разряда ИНН отсекает опечатки раньше, чем они попадут в сверку.</p>
+<p><strong>Даты.</strong> Год, месяц, день — компоненты, а не одна строка. Разбор «12.10.2026» без указания формата путает 2 октября и 12 октября; обе даты встречаются в реальных выписках.</p>
+<p><strong>Названия.</strong> Сравнение названий контрагентов по строке не работает: «ООО Ромашка», «Общество с ограниченной ответственностью Ромашка», «Ромашка» — один контрагент. Ключ — ИНН плюс КПП для обособленных подразделений. Название используется только для показа и как последний резерв.</p>
+<p><strong>Назначение платежа.</strong> Свободный текст. Здесь уместна модель — извлечение реквизитов из текста, но с явным правилом: извлечённое значение — гипотеза, а не факт, и оно требует подтверждения совпадением суммы и даты.</p>
+<p><strong>Практический вывод для архитектора:</strong> слой нормализации — единственное место, где формат влияет на предметную область. Если он протекает глубже, дальше по коду начнут множиться частные случаи. Тест на этот разрыв: в бизнес-логике не должно быть ни одного упоминания внешнего формата.</p>
+<hr>
+<h2 id="m57-8-реальный-кейс" tabindex="-1">8. Реальный кейс</h2>
+<p><strong>Входные данные.</strong> Гипотеза: сверка из трёх источников — выписка банка, ОСВ, статусы ЭДО. Первый клиент — малое ООО на общей системе с одним расчётным счётом, одним оператором ЭДО и типовой конфигурацией учётной системы.</p>
+<p><strong>Ход рассуждения.</strong> Реализация началась с чтения базы учётной системы: это было быстрее всего, и позволяло получить любые данные без настройки выгрузок. Проверка гипотезы показала, что это решение делает невозможной передачу продукта другому клиенту: у каждого своя конфигурация и своя схема, а версии платформы обновляются. Стоимость подключения нового клиента линейно росла.</p>
+<p><strong>Результат.</strong> Переход на два входа — файл выгрузки ОСВ и выгрузка выписки из банк-клиента — дал две вещи, которых не давал первый вариант:</p>
+<ul>
+<li>Подключение нового клиента свелось к двум ручным операциям и настройке правил под его учётную политику.</li>
+<li>Продукт стал работать без согласований: ни договора с банком, ни с оператором ЭДО, ни с вендором учётной системы.</li>
+</ul>
+<p>При этом выяснилось, что файлов достаточно для большинства проверок: расхождение банк ↔ учёт и расхождение между периодами определяются двумя файлами. ЭДО потребовался позже и только для проверки комплектности первички.</p>
+<p><strong>Вывод, противоречащий интуиции.</strong> Интеграция с API выглядит как развитие продукта, а оказалась архитектурным ущербом: она добавляет юридическую зависимость, требует поддержки форматов при смене вендора и уменьшает число клиентов, которых можно подключить без согласований. Файловая сверка выглядела как «деревенский вариант» и выиграла на дистанции.</p>
+<p>Второй вывод: большая часть усилий ушла не в правила сверки, а в нормализацию — разбор сумм, дат, ИНН и назначений платежа. Правила сверки заняли меньше половины времени. План, в котором правила стоят первыми, систематически недооценивает срок в 2–3 раза.</p>
+<hr>
+<h2 id="m57-9-антипаттерны" tabindex="-1">9. Антипаттерны</h2>
+<h3 id="m57-чтение-базы-учётной-системы-для-скорости" tabindex="-1">Чтение базы учётной системы «для скорости»</h3>
+<p>Кажется быстрее, чем договор. Результат: блокировки в рабочее время, поломка при обновлении конфигурации, необходимость согласования, невозможность подключить другого клиента. Быстрый доступ к данным в одной базе покупает ценой невозможности масштабирования.</p>
+<h3 id="m57-нормализация-размазанная-по-бизнес-логике" tabindex="-1">Нормализация, размазанная по бизнес-логике</h3>
+<p>Проверка начинает знать про формат выписки. Через месяц в ней появляется частный случай для второго банка, потом третий. Итог: правила не переиспользуются, добавление банка — это ревью всей кодовой базы.</p>
+<h3 id="m57-идемпотентность-по-номеру-строки" tabindex="-1">Идемпотентность по номеру строки</h3>
+<p>Номер строки меняется при повторной выгрузке. Повторный запуск даёт двойные расхождения, а пользователь после первого такого ложного сигнала начинает игнорировать отчёт целиком.</p>
+<h3 id="m57-проверка-без-модели-задержки-источника" tabindex="-1">Проверка без модели задержки источника</h3>
+<p>Сравнение «текущее состояние учёта» с «последней выпиской» даёт ложные срабатывания в течение суток после каждого платежа. Пользователь отключает проверку, и она больше не включается.</p>
+<h3 id="m57-llm-как-источник-реквизитов-из-назначения-платежа" tabindex="-1">LLM как источник реквизитов из назначения платежа</h3>
+<p>Модель разбирает назначение платежа уверенно и ошибается на 2–5% случаев, причём ошибается правдоподобно: не «не поняла», а «поняла не тот номер счёта». Нужны подтверждение суммой и датой, статус «гипотеза» в выводе и отсутствие автоматического действия по неподтверждённому разбору.</p>
+<hr>
+<h2 id="m57-anti-checklist" tabindex="-1">Anti-checklist ☠️</h2>
+<ul>
+<li>[ ] Обращения идут к базе учётной системы — блокировки, поломка при обновлении, невозможность масштабирования</li>
+<li>[ ] Формат внешнего источника протекает в правила сверки — добавление банка становится ревью кодовой базы</li>
+<li>[ ] Идемпотентность по номеру строки — повторная выгрузка даёт ложные двойные расхождения</li>
+<li>[ ] <code>parseFloat</code> над суммой из выписки — тихая потеря копеек или потеря разряда</li>
+<li>[ ] ИНН хранится как число — потеря точности на 12-значном идентификаторе</li>
+<li>[ ] Сверка без модели задержки источника — ложные срабатывания отключаются пользователем</li>
+<li>[ ] Пустой отчёт неотличим от невыполненной сверки — «всё хорошо» при непроверенном источнике</li>
+<li>[ ] Результат не хранит версию правила — через месяц нельзя объяснить сигнал</li>
+<li>[ ] Операция с флагом коррекции обработана как новая — расхождение в учёте навсегда</li>
+<li>[ ] Реквизиты ЭДО проверяются по статусу, а не по заполненности — ложное подтверждение</li>
+</ul>
+<hr>
+<h2 id="m57-задачи-ai-кодеру" tabindex="-1">Задачи AI-кодеру</h2>
+<p>Плохая формулировка:</p>
+<blockquote>
+<p>«Сделай парсер банковских выписок и сверяй их с учётной системой.»</p>
+</blockquote>
+<p>Разбор: не указаны форматы, способ входа, что считается расхождением, как обрабатываются коррекции и что делает пользователь при сигнале. Результат — парсер, работающий на одном банке, и сверка, которую отключают после первого ложного срабатывания.</p>
+<p>Хорошая формулировка:</p>
+<blockquote>
+<p>«В модуле 57 описаны входы для сверки: файл выгрузки ОСВ, выписка из банк-клиента (XLSX, MT940), API банка, API оператора ЭДО.</p>
+<p>Задача: реализовать слой адаптеров, приводящих каждый вход к единой внутренней модели операции и остатка по счёту. Внутренняя модель описана в модуле 57 (раздел 4).</p>
+<p>Границы: не реализовывать правила сверки — это модуль 56; не добавлять зависимостей; не обращаться к базе учётной системы ни при каких условиях; не работать с API банков и операторов ЭДО — только файловые входы.</p>
+<p>Требования:</p>
+<ul>
+<li>сумма разбирается в копейки целым числом, форматы «125000,00», «125 000.00», «125,000.00» дают одинаковый результат</li>
+<li>дата операции и дата исполнения хранятся раздельно</li>
+<li>флаг коррекции банка представлен во внутренней модели</li>
+<li>адаптер не выпускает наружу строковый тип для денег и идентификаторов</li>
+</ul>
+<p>Критерии готовности:</p>
+<ul>
+<li><code>npm test</code> → зелёный, тест на три написания одной суммы даёт один результат</li>
+<li><code>npm test</code> → зелёный, тест на строку без разделителя дробной части</li>
+<li><code>npm test</code> → зелёный, тест на отсутствующее опциональное поле MT940 у другого банка</li>
+<li><code>npm test</code> → зелёный, golden-тест на обезличенной реальной выписке</li>
+<li><code>npm run check</code> → код 0</li>
+</ul>
+<p>Контекст проекта: <code>AGENTS.md</code>, <code>docs/CONTEXT.md</code>, модули 56 (разделы 5, 7) и 57 (разделы 3, 4, 7)».</p>
+</blockquote>
+<p>Формула: что делает + границы (включая явный запрет) + конкретные проверяемые свойства + критерии готовности с ожидаемым результатом.</p>
+<p>Вторая задача — на границу ответственности:</p>
+<blockquote>
+<p>«Определи, где в системе сверки проходит граница между нормализацией формата и бизнес-правилами, и какие признаки в коде показывают, что граница нарушена. Ответ дай в виде правил, а не в виде описания текущего кода.»</p>
+</blockquote>
+<p>Ожидаемый ответ: граница проходит по типу внутреннего значения — во внутренней модели нет строковых денег, строковых ИНН и неразобранных дат. Признаки нарушения: <code>parseFloat</code>, <code>new Date(str)</code>, разбор строки назначения в коде правила, обращение к колонке внешнего файла в модуле правил. Критерий проверки: в каталоге правил нет ни одного упоминания внешнего формата.</p>
+<hr>
+<h2 id="m57-чеклист-архитектора" tabindex="-1">Чеклист архитектора</h2>
+<h3 id="m57-источники" tabindex="-1">Источники</h3>
+<ul>
+<li>[ ] Каждый источник назван, у каждого определена ожидаемая задержка данных</li>
+<li>[ ] Отсутствие данных от источника отличается от нулевого результата</li>
+<li>[ ] Порядок подключения источников обоснован ценностью, а не сложностью</li>
+<li>[ ] Ни один путь до данных не идёт к внутренней базе чужой системы</li>
+<li>[ ] Для внешних API зафиксирована версия спецификации и дата её проверки</li>
+</ul>
+<h3 id="m57-форматы-и-нормализация" tabindex="-1">Форматы и нормализация</h3>
+<ul>
+<li>[ ] Внутренняя модель не повторяет ни один внешний формат</li>
+<li>[ ] Деньги — целые копейки; округление только на выходе</li>
+<li>[ ] Идентификаторы — строки с проверкой контрольного разряда, где он есть</li>
+<li>[ ] Дата операции и дата исполнения хранятся раздельно</li>
+<li>[ ] Извлечение из свободного текста помечено как гипотеза и требует подтверждения</li>
+</ul>
+<h3 id="m57-сверка" tabindex="-1">Сверка</h3>
+<ul>
+<li>[ ] Обработка идемпотентна по ключу операции</li>
+<li>[ ] Результат хранит версию правила и цену пропуска</li>
+<li>[ ] Модель задержки источника участвует в правилах</li>
+<li>[ ] Покрытие golden-тестами на реальных обезличенных данных, а не на моках</li>
+<li>[ ] Отчёт отвечает на «что делать» и «сколько стоит»</li>
+</ul>
+<h3 id="m57-приватность-и-эксплуатация" tabindex="-1">Приватность и эксплуатация</h3>
+<ul>
+<li>[ ] Режим обработки данных соответствует требованию клиента о коммерческой тайне</li>
+<li>[ ] Логи не содержат полных реквизитов и назначений платежей</li>
+<li>[ ] Смена версии внешнего контракта проверяется вручную до обновления</li>
+</ul>
+<hr>
+<p><em>Модуль 57 завершён.</em>
+<em>Следующий: <a href="#module-58">Модуль 58 — Контроль соответствия требованиям ФНС</a></em></p>
+</div><nav class="pager"><a class="pn prev" href="#module-56"><span>← Назад</span>56 Бухгалтерия как граф документов</a><a class="pn next" href="#module-58"><span>Вперёд →</span>58 Контроль соответствия требованиям ФНС</a></nav></section><section class="module" id="module-58"><div class="module-content"><h1 id="m58-модуль-58-контроль-соответствия-требованиям-фнс" tabindex="-1">Модуль 58 — Контроль соответствия требованиям ФНС</h1>
+<blockquote>
+<p><strong>Для AI-архитектора:</strong> модули 56 и 57 дали граф и доступ. Осталось превратить находку в продукт, который покупают: из «найдено расхождение» в «вот действие и вот сколько это стоит в рублях». Модуль разбирает механику налогового контроля 2026 года как набор проверяемых требований, показывает, почему pre-flight перед подачей декларации стоит больше любого отчёта после проверки, и отделяет контроль от учёта — границу, за которой продукт начинает брать чужую ответственность.</p>
+<p>Один день изучения — от регламента камеральной проверки до отчёта, который директор читает за минуту и который меняет решение о подаче уточнённой декларации.</p>
+</blockquote>
+<h2 id="m58-содержание" tabindex="-1">Содержание</h2><nav class="toc" aria-label="Содержание раздела"><ol><li><a href="#m58-актуальные-версии">Актуальные версии</a></li><li><a href="#m58-1-налоговый-контроль-как-протокол">1. Налоговый контроль как протокол</a></li><li><a href="#m58-2-что-именно-проверяет-фнс-машино">2. Что именно проверяет ФНС машино</a></li><li><a href="#m58-3-pre-flight-перед-подачей">3. Pre-flight перед подачей</a></li><li><a href="#m58-4-дерево-решений-по-декларации">4. Дерево решений по декларации</a></li><li><a href="#m58-5-цена-сигнала">5. Цена сигнала</a></li><li><a href="#m58-6-контроль-а-не-учёт">6. Контроль, а не учёт</a></li><li><a href="#m58-7-регуляторный-контур-как-данные">7. Регуляторный контур как данные</a></li><li><a href="#m58-8-реальный-кейс">8. Реальный кейс</a></li><li><a href="#m58-9-антипаттерны">9. Антипаттерны</a></li><li><a href="#m58-anti-checklist">Anti-checklist ☠️</a></li><li><a href="#m58-задачи-ai-кодеру">Задачи AI-кодеру</a></li><li><a href="#m58-чеклист-архитектора">Чеклист архитектора</a></li></ol></nav><h2 id="m58-актуальные-версии" tabindex="-1">Актуальные версии</h2>
+<blockquote>
+<p>Проверено: октябрь 2026. Регламент камеральной проверки изменился в 2026 году; ссылки на письмо 2013 года в подзаконных актах и методичках устарели.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Источник</th>
+<th style="text-align:left">Редакция / дата</th>
+<th style="text-align:left">Что задаёт</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">НК РФ, ст. 88</td>
+<td style="text-align:left">с 01.01.2026</td>
+<td style="text-align:left">экстерриториальная камеральная проверка, сроки, основания для требования</td>
+</tr>
+<tr>
+<td style="text-align:left">Письмо ФНС</td>
+<td style="text-align:left">ЕА-36-15/4924@ от 09.06.2026</td>
+<td style="text-align:left">регламент: контроль сроков, камеральная проверка, проверка уточнённой декларации, акт, решение</td>
+</tr>
+<tr>
+<td style="text-align:left">Письмо ФНС</td>
+<td style="text-align:left">АС-4-2/12705 от 16.07.2013</td>
+<td style="text-align:left"><strong>утратило силу</strong> с 09.06.2026 — ссылка на него устарела</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 75</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">пени: 1/300 ключевой ставки за каждый день просрочки</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 76</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">приостановление операций по счёту при просрочке отчётности, порог 20 дней</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 101 (п. 11)</td>
+<td style="text-align:left">ред. 201-ФЗ от 26.06.2026</td>
+<td style="text-align:left">рассмотрение материалов без участия налогоплательщика по одному составу нарушения</td>
+</tr>
+<tr>
+<td style="text-align:left">НК РФ, ст. 122</td>
+<td style="text-align:left">действующая</td>
+<td style="text-align:left">штраф за грубое нарушение</td>
+</tr>
+<tr>
+<td style="text-align:left">425-ФЗ от 28.11.2025</td>
+<td style="text-align:left">с 01.01.2026</td>
+<td style="text-align:left">основная ставка НДС 22%, расчётная 22/122, порог НДС на УСН снижен</td>
+</tr>
+<tr>
+<td style="text-align:left">ФНС, перечень КНД</td>
+<td style="text-align:left">актуальная редакция</td>
+<td style="text-align:left">форма декларации как часть контракта с проверкой</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Практический вывод для архитектора:</strong> регуляторный контур меняется быстрее кода. Отсюда правило проектирования: суммы, ставки, сроки и пороги — версионируемые данные с датой, а не константы в коде. Продукт, который не может объяснить, по какой редакции закона выдан его вывод, нельзя предъявлять клиенту как основание для решения.</p>
+<hr>
+<h2 id="m58-1-налоговый-контроль-как-протокол" tabindex="-1">1. Налоговый контроль как протокол</h2>
+<p>Ключевое изменение 2026 года: <strong>камеральная проверка стала экстерриториальной</strong> — её может проводить налоговый орган, уполномоченный надзорным органом, а не только инспекция по месту учёта налогоплательщика. Аргумент «проверка придёт к нам в ИФНС, а это соседний регион» перестал работать как причина откладывать.</p>
+<p>Новый регламент ФНС (письмо от 09.06.2026) описывает пять стадий, и каждая соответствует своей точке приложения продукта:</p>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+  A[контроль сроков и приём отчётности] --&gt; B{сроки соблюдены?}
+  B --&gt;|нет| A1[риск приостановления по ст. 76]
+  B --&gt;|да| C[камеральная проверка]
+  C --&gt; D[проверка уточнённой декларации]
+  D --&gt; E[оформление акта]
+  E --&gt; F[решение]
+  C -.-&gt;|выявлено требование| R[ответ через ЭДО]
+</div></code></pre>
+<p>Стадии пронумерованы в тексте выше, а не в подписях узлов: подпись, начинающаяся с цифры и точки, вermaid разбирает как список и печатает на диаграмме «Unsupported markdown».</p>
+<p>Три практических следствия для архитектуры:</p>
+<ol>
+<li><strong>Стадия 1 не про налоги, а про сроки.</strong> Продукт, который начинается с проверки декларации по существу, пропускает самую дешёвую по стоимости и самую болезненную по последствиям стадию.</li>
+<li><strong>Ответ на требование для плательщиков НДС — только через оператора ЭДО.</strong> Бумажный ответ считается непредставленным. Это делает канал ЭДО обязательным, а не дополнительным, и объясняет, почему состояние документов из модуля 57 нужно именно плательщику НДС.</li>
+<li><strong>Проверка уточнённой декларации — самостоятельный контур.</strong> Порядок зависит от того, когда подана уточнёнка: до окончашения камеральной проверки, после неё, но до акта, или после акта. Эти четыре случая дают разные последствия, и продукт обязан различать их.</li>
+</ol>
+<p><strong>Практический вывод для архитектора:</strong> продукт должен иметь компонент календаря сроков, независимый от проверки содержания. Клиент покупает в первую очередь «мы не пропустим», потому что пропуск срока стоит дороже любой ошибки в сумме.</p>
+<hr>
+<h2 id="m58-2-что-именно-проверяет-фнс-машино" tabindex="-1">2. Что именно проверяет ФНС машино</h2>
+<p>Регламент перечисляет инструменты, которыми инспектор пользуется. Почти все они работают на данных, а не на документах, — и это делает продукт возможным.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Инструмент контроля</th>
+<th style="text-align:left">На чём основан</th>
+<th style="text-align:left">Что проверяем у себя</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">автоматизированные сверки</td>
+<td style="text-align:left">данные декларации, сведения о сделках, данные банков</td>
+<td style="text-align:left">согласованность декларации с регистрами</td>
+</tr>
+<tr>
+<td style="text-align:left">межведомственный обмен</td>
+<td style="text-align:left">сведения о сделках, данные о контрсчётном объекте</td>
+<td style="text-align:left">наличие расхождений, которые увидит ФНС</td>
+</tr>
+<tr>
+<td style="text-align:left">запрос пояснений</td>
+<td style="text-align:left">конкретные показатели декларации</td>
+<td style="text-align:left">готовность объяснить каждое отклонение</td>
+</tr>
+<tr>
+<td style="text-align:left">истребование документов</td>
+<td style="text-align:left">ст. 93, 93.1 НК РФ, в том числе у контрагентов</td>
+<td style="text-align:left">наличие документов по цепочке</td>
+</tr>
+<tr>
+<td style="text-align:left">осмотр, выемка</td>
+<td style="text-align:left">расширено с 2026 года</td>
+<td style="text-align:left">целостность первички и её соответствие учёту</td>
+</tr>
+<tr>
+<td style="text-align:left">допрос свидетелей</td>
+<td style="text-align:left">люди, а не данные</td>
+<td style="text-align:left">риск противоречивых объяснений</td>
+</tr>
+<tr>
+<td style="text-align:left">экспертиза</td>
+<td style="text-align:left">специальные знания</td>
+<td style="text-align:left">качество оформления документов</td>
+</tr>
+</tbody>
+</table>
+<p>Отдельно регламент описывает контроль при операциях с использованием системы прослеживаемости и подтверждения ожидания поставки, а также при заявлении вычетов по НДС и при операциях с импортом из ЕАЭС. Для клиента это означает, что часть расхождений возникает не внутри его учёта, а между его декларацией и данными, которые он не формировал сам.</p>
+<p><strong>Практический вывод для архитектора:</strong> перечень источников, которыми располагает ФНС, определяет приоритет проверок продукта. Проверка «сходится ли у нас» без оглядки на внешние источники бесполезна: инспектор сравнивает с данными, которых у клиента нет.</p>
+<hr>
+<h2 id="m58-3-pre-flight-перед-подачей" tabindex="-1">3. Pre-flight перед подачей</h2>
+<p>Обычный отчёт отвечает на вопрос «что было». Pre-flight отвечает на вопрос «что будет, если подать это». Разница в цене решения.</p>
+<pre class="hljs"><code>Обычный отчёт:   отчёт → бухгалтер разбирается → решение
+
+Pre-flight:      проверка → «если подать, вот два расхождения;
+                 вот что это стоит; вот вариант с уточнёнкой
+                 и условие, при котором штрафа не будет»
+                 → решение о подаче принимается с открытыми глазами
+</code></pre>
+<p>Три обязательных свойства pre-flight:</p>
+<ol>
+<li><strong>Работает на данных, которые в реальности уйдут в налоговую.</strong> Проверка по промежуточным остаткам бесполезна: в декларации суммы считаются иначе, чем в учёте, часть расхождений возникает именно на переходе.</li>
+<li><strong>Даёт количественную оценку.</strong> «Расхождение 120 000 ₽, потенциальные пени 1 400 ₽, штраф при грубом нарушении — до 40% от суммы» переводит вопрос в плоскость, где решение принимается за секунды.</li>
+<li><strong>Даёт варианты, а не только факты.</strong> Минимум: подать как есть; подать уточнёнку с доплатой; снять вычет и подать без него. Каждый вариант — с суммой и с условиями.</li>
+</ol>
+<p><strong>Практический вывод для архитектора:</strong> pre-flight — это не отчётность, а калькулятор решений. Единица полезности — «сколько денег сэкономлено на конкретном решении», а не «сколько строк в отчёте».</p>
+<hr>
+<h2 id="m58-4-дерево-решений-по-декларации" tabindex="-1">4. Дерево решений по декларации</h2>
+<p>Центральная развилка, вокруг которой строится продукт: подавать уточнённую декларацию или нет.</p>
+<pre class="hljs"><code>Уточнённая декларация подана
+├── до окончачения камеральной проверки первичной
+│     → предыдущая проверка прекращается, счёт заново
+├── после окончачения проверки, до составления акта
+│     → акт всё равно составляется по первичной декларации,
+│       уточнёнка проверяется отдельно
+└── после составления акта, до вынесения решения
+      → инспекция вправе не учитывать уточнёнку с учётом
+        объёма изменений и действительной цели подачи
+
+Освобождение от штрафа требует ОДНОВРЕМЕННО:
+  ✓ уточнёнка подана до обнаружения недоимки
+  ✓ сальдо ЕНС на дату подачи положительное
+    и покрывает недоимку с пенями
+</code></pre>
+<p>Отсюда предметная область продукта — не «сверка декларации», а <strong>сценарии декларации</strong>. Их конечное число, они перечислимы и покрывают большую часть реальных случаев:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Сценарий</th>
+<th style="text-align:left">Что проверяем</th>
+<th style="text-align:left">Что советуем</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">суммы сходятся</td>
+<td style="text-align:left">контрольные соотношения</td>
+<td style="text-align:left">подавать можно</td>
+</tr>
+<tr>
+<td style="text-align:left">вычет без подтверждающего документа</td>
+<td style="text-align:left">наличие СФ на дату подачи</td>
+<td style="text-align:left">снять вычет или приложить документ</td>
+</tr>
+<tr>
+<td style="text-align:left">вычет есть, сальдо ЕНС отрицательное</td>
+<td style="text-align:left">состояние ЕНС</td>
+<td style="text-align:left">внести разницу до подачи</td>
+</tr>
+<tr>
+<td style="text-align:left">уточнёнка на уменьшение</td>
+<td style="text-align:left">сальдо ЕНС после окончания проверки</td>
+<td style="text-align:left">срок уменьшения отложен, учитывать в планировании</td>
+</tr>
+<tr>
+<td style="text-align:left">нарушен срок подачи</td>
+<td style="text-align:left">календарь</td>
+<td style="text-align:left">минимизировать и описать причину</td>
+</tr>
+<tr>
+<td style="text-align:left">формат декларации не проходит проверку приёма</td>
+<td style="text-align:left">КНД и формат</td>
+<td style="text-align:left">декларация считается непредставленной</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Практический вывод для архитектора:</strong> ограниченный перечень сценариев — преимущество, а не ограничение. Он делает продукт объяснимым, позволяет покрыть его тестами и делает цену разработки предсказуемой: это десятки проверок, а не тысячи.</p>
+<hr>
+<h2 id="m58-5-цена-сигнала" tabindex="-1">5. Цена сигнала</h2>
+<p>Отчёт для директора существует ровно в одной форме: сумма риска, действие и цена решения.</p>
+<pre class="hljs"><code>Отчёт для собственника
+  Риск: 2 расхождения, суммарная величина 138 400 ₽
+    1. Вычет НДС 120 000 ₽ по счёту-фактуре от контрагента,
+       который не сдал декларацию. Пени: 1 400 ₽
+    2. Просрочка представления расчёта по взносам 21 день.
+       Блокировка счёта: риск с 20-го дня
+  Решение: снять вычет в текущем квартале (штраф исключается
+           при подаче уточнёнки до обнаружения недоимки
+           при положительном сальдо ЕНС)
+  Стоимость решения: снять 120 000 ₽ из вычета сейчас
+                     или рисковать доначислением
+</code></pre>
+<p>Три требования к формулировке сигнала:</p>
+<ol>
+<li><strong>Называть контрагента и документ.</strong> «Расхождение 120 000 ₽» нельзя закрыть. «Вычет по СФ от такого-то контрагента» — можно.</li>
+<li><strong>Давать срок.</strong> «Пени растут каждый день, до 20-го числа счёт могут заблокировать» — это информация, на основе которой решают сегодня.</li>
+<li><strong>Давать вариант с условиями.</strong> Не «снимите вычет», а «снять вычет в этом квартале — штраф не начисляется, если уточнёнка подана до обнаружения недоимки и сальдо ЕНС положительное».</li>
+</ol>
+<p><strong>Практический вывод для архитектора:</strong> разделение интерфейсов на «для бухгалтера» (что именно не так и где документ) и «для собственника» (сколько стоит и что делать) — не косметика. Смешанный отчёт читают только бухгалтеры, а платит собственник.</p>
+<h3 id="m58-граничные-случаи-где-ломается" tabindex="-1">Граничные случаи — где ломается</h3>
+<p><strong>Пени посчитаны на дату запуска, а не на дату отчётности.</strong> Ключевая ставка меняется, и сумма в отчёте перестаёт совпадать с расчётом налоговой. Признак: пользователь сверил цифру, получил расхождение в десятки рублей и перестал доверять сумме — а вместе с ней и всему отчёту.</p>
+<p><strong>Штраф показан как «до 40%», прочитан как «40%».</strong> Клиент планирует на максимуме, которого не будет. Реальная величина зависит от признания нарушения грубым, от добровольной корректировки и от позиции инспектора. Диапазон полезен только рядом с условиями, при которых применяется каждая граница.</p>
+<p><strong>Единый порог «малозначительности» на все правила.</strong> Правило, срабатывающее на нормальных данных, отключается; правило с широким порогом выкидывает разовую потерю вычета — ошибку, которая не повторится и которую клиент зафиксирует как недосмотр продукта.</p>
+<p><strong>Данные для проверки есть, данных для решения нет.</strong> Вычет по контрагенту без декларации — факт. Сумма пени — расчёт. Рекомендация — суждение, требующее позиции клиента по контракту. Продукт, выдающий рекомендацию без отмеченной границы собственных знаний, получает претензию за совет, который клиент принял.</p>
+<p><strong>Уточнёнка подана по устаревшей методике.</strong> Порядок проверки уточнённой декларации изменился в 2026 году, и правило, написанное по письму 2013 года, даёт клиенту неверный вывод о последствиях. Здесь отсутствие <code>effectiveFrom</code> стоит дороже, чем где-либо ещё в продукте.</p>
+<p><strong>Почему это важно архитектору:</strong> цена сигнала — самый доверительный элемент продукта. Ошибка в ней не приводит к падению: она приводит к тому, что клиент перестаёт открывать отчёт. Отсюда решение: расчёт цены изолируется в отдельный компонент с собственными тестами и редакцией, а его результат всегда сопровождается условиями применения.</p>
+<hr>
+<h2 id="m58-6-контроль-а-не-учёт" tabindex="-1">6. Контроль, а не учёт</h2>
+<p>Граница, за которой продукт из помощника бухгалтера превращается в лицо, отвечающее за цифры.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Контроль</th>
+<th style="text-align:left">Учёт</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">находит расхождение и спрашивает</td>
+<td style="text-align:left">формирует проводку и налог</td>
+</tr>
+<tr>
+<td style="text-align:left">формулирует «здесь не сходится»</td>
+<td style="text-align:left">формулирует «правильно так»</td>
+</tr>
+<tr>
+<td style="text-align:left">опирается на правила и первичку</td>
+<td style="text-align:left">берёт на себя применение учётной политики</td>
+</tr>
+<tr>
+<td style="text-align:left">отвечает за полноту проверки</td>
+<td style="text-align:left">отвечает за правильность цифр</td>
+</tr>
+<tr>
+<td style="text-align:left">бухгалтер принимает решение</td>
+<td style="text-align:left">система заменяет решение</td>
+</tr>
+</tbody>
+</table>
+<p>Практический критерий: <strong>продукт не должен ни разу сказать «правильная сумма — такая»</strong>. Любая фраза такого рода переносит ответственность за учёт на разработчика. Формулировки в интерфейсе — не стилистика, а юридическая позиция:</p>
+<pre class="hljs"><code>❌ «Счёт-фактура №41 от 12.03 содержит ошибку, НДС должен быть 12 400 ₽»
+✅ «Счёт-фактура №41 от 12.03: сумма НДС 12 400 ₽.
+    Проверьте расчёт — расхождение с регистром НДС за период»
+</code></pre>
+<p>Плюс явный дисклеймер в интерфейсе и в отчёте: результат проверки не является заключением и не заменяет решение бухгалтера. Это не формальность — это то, что позволяет продавать продукт бухгалтерии, а не конкурировать с ней за подпись.</p>
+<p><strong>Практический вывод для архитектора:</strong> ограничение «не говорить, что правильно» проще соблюдать, чем объяснять. Если в продукте нет места, где нужно вынести суждение о правильности цифры, ответственность не возникает.</p>
+<hr>
+<h2 id="m58-7-регуляторный-контур-как-данные" tabindex="-1">7. Регуляторный контур как данные</h2>
+<p>Правила проверок стареют быстрее кода. Раз в год ставка, раз в год формы, раз в год процедура проверки. Архитектура обязана вынести это в данные.</p>
+<pre class="hljs"><code><span class="hljs-bullet">-</span> <span class="hljs-attr">id:</span> <span class="hljs-string">vat-basic-rate</span>
+  <span class="hljs-attr">kind:</span> <span class="hljs-string">constant</span>
+  <span class="hljs-attr">value:</span> <span class="hljs-number">22</span>
+  <span class="hljs-attr">unit:</span> <span class="hljs-string">percent</span>
+  <span class="hljs-attr">effectiveFrom:</span> <span class="hljs-number">2026-01-01</span>
+  <span class="hljs-attr">source:</span> <span class="hljs-string">&quot;425-ФЗ от 28.11.2025, п. 8 ст. 164 НК РФ&quot;</span>
+
+<span class="hljs-bullet">-</span> <span class="hljs-attr">id:</span> <span class="hljs-string">payment-block-threshold</span>
+  <span class="hljs-attr">kind:</span> <span class="hljs-string">threshold</span>
+  <span class="hljs-attr">value:</span> <span class="hljs-number">20</span>
+  <span class="hljs-attr">unit:</span> <span class="hljs-string">days</span>
+  <span class="hljs-attr">effectiveFrom:</span> <span class="hljs-number">2026-06-09</span>
+  <span class="hljs-attr">source:</span> <span class="hljs-string">&quot;письмо ФНС ЕА-36-15/4924@ от 09.06.2026, ст. 76 НК РФ&quot;</span>
+
+<span class="hljs-bullet">-</span> <span class="hljs-attr">id:</span> <span class="hljs-string">vat-advance-rate</span>
+  <span class="hljs-attr">kind:</span> <span class="hljs-string">formula</span>
+  <span class="hljs-attr">value:</span> <span class="hljs-string">&quot;22/122&quot;</span>
+  <span class="hljs-attr">effectiveFrom:</span> <span class="hljs-number">2026-01-01</span>
+  <span class="hljs-attr">source:</span> <span class="hljs-string">&quot;п. 8 ст. 164 НК РФ, расчётная ставка&quot;</span>
+</code></pre>
+<p>Обязательные поля каждого правила: <code>effectiveFrom</code>, <code>source</code>, и — для проверок — <code>severity</code> и <code>action</code> из модуля 56. Поле <code>source</code> обязательно: вывод продукта, который нельзя сослаться на норму, не является основанием для решения клиента.</p>
+<p>Механизм выбора редакции:</p>
+<pre class="hljs"><code><span class="hljs-keyword">type</span> <span class="hljs-title class_">Rule</span> = {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">effectiveFrom</span>: <span class="hljs-built_in">string</span>;   <span class="hljs-comment">// ISO-дата</span>
+  <span class="hljs-attr">effectiveTo</span>?: <span class="hljs-built_in">string</span>;    <span class="hljs-comment">// открытая редакция не имеет этой даты</span>
+  <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-comment">// ...содержимое правила</span>
+};
+
+<span class="hljs-comment">// Правило действует на дату расчёта: начало ≤ дата &lt; конец</span>
+<span class="hljs-keyword">const</span> rulesFor = (<span class="hljs-attr">rules</span>: <span class="hljs-title class_">Rule</span>[], <span class="hljs-attr">onDate</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Rule</span>[] =&gt;
+  rules.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> r.<span class="hljs-property">effectiveFrom</span> &lt;= onDate &amp;&amp; (!r.<span class="hljs-property">effectiveTo</span> || onDate &lt; r.<span class="hljs-property">effectiveTo</span>));
+</code></pre>
+<p><strong>Практический вывод для архитектора:</strong> дату расчёта результата нужно хранить вместе с правилами и отображать в отчёте. Отчёт без даты и без ссылки на норму нельзя использовать как обоснование перед налоговой, а значит, он не работает как продукт.</p>
+<hr>
+<h2 id="m58-8-реальный-кейс" tabindex="-1">8. Реальный кейс</h2>
+<p><strong>Входные данные.</strong> Продукт определён как контроль соответствия требованиям до подачи отчётности. Первый вопрос, который задал себе автор: от чего именно продукт защищает.</p>
+<p><strong>Ход рассуждения.</strong> Первая версия проверок строилась по контрольным соотношениям модуля 56: сходятся суммы внутри декларации, сходится ли НДС, нет ли арифметических ошибок. Разбор регламента ФНС показал, что это проверки первого уровня — их делает сам налоговый орган автоматически, и на них клиент и так не попадает.</p>
+<p>Реальная работа инспектора начинается с другого: он сравнивает декларацию с данными, которые у клиента нет, — сведения о сделках, банковские данные, данные систем прослеживаемости. Значит, ценность для клиента — не «у меня всё сходится», а «я знаю, где ФНС увидит расхождение раньше меня».</p>
+<p>Вторая находка была про порог блокировки: приостановление операций по счёту наступает при просрочке свыше 20 дней, при этом налоговый орган вправе заранее уведомить. Это превращается в продуктовую фичу: мониторинг сроков с упреждением, где результат не «расхождение», а «до приостановления осталось N дней».</p>
+<p><strong>Результат.</strong> Набор проверок первого релиза сократился с 40 до 6, и каждый из них отвечал на вопрос «что увидит инспектор, чего не видим мы»:</p>
+<ol>
+<li>вычет НДС по контрагенту, не сдавшему декларацию;</li>
+<li>сальдо ЕНС, не покрывающее сумму к уплате;</li>
+<li>просрочка сроков с упреждением до порога блокировки;</li>
+<li>расхождение выручки с данными кассовых чеков;</li>
+<li>комплектность первички по договору перед подачей;</li>
+<li>расхождение остатков маркированного товара с учётом.</li>
+</ol>
+<p>Формулировка отчёта перешла на язык директора: сумма, срок, действие с условиями. Метрика продукта — не количество найденного, а «сколько раз решение принято до подачи».</p>
+<p><strong>Вывод, противоречащий интуиции.</strong> Покрытие 6 проверок продавалось лучше, чем покрытие 40. Причина: 40 проверок дают 40 сигналов в месяц, и у клиента формируется привычка их не читать. Шесть проверок, каждая с суммой и сроком, дают решение, которое можно принять в тот же день.</p>
+<p>Второй вывод: самая простая фича — календарь сроков с упреждением — оказалась самой востребованной, потому что её результат считывается без участия бухгалтера. Продукт, который можно открыть собственнику и увидеть «до приостановления счёта 9 дней», продаётся быстрее, чем продукт, который требует разбираться в расхождениях.</p>
+<p>Третий вывод, архитектурный: граница «контроль, а не учёт» оказалась не юридической осторожностью, а требованием к продукту. Пока продукт проверяет, у него нет ответа за цифры. Как только он начинает предлагать «правильную сумму», ответственность уходит к нему, и остаётся только убрать продукт.</p>
+<hr>
+<h2 id="m58-9-антипаттерны" tabindex="-1">9. Антипаттерны</h2>
+<h3 id="m58-продукт-пересчитывающий-налог" tabindex="-1">Продукт, пересчитывающий налог</h3>
+<p>Проверка, которая пересчитывает налог по своей формуле, ввязывается в учётную политику, льготы и региональные правила. Ответственность смещается с бизнеса на софт, а предмет спора — с расхождения на «кто неправ». Калькуляция налога — зона учётной системы.</p>
+<h3 id="m58-декларация-как-чёрный-ящик" tabindex="-1">Декларация как чёрный ящик</h3>
+<p>Продукт проверяет сводные показатели декларации и не может сказать, из чего они сложились. Бухгалтер не может устранить причину, потому что не видит строку. Pre-flight работает только тогда, когда спускается до документа, породившего цифру.</p>
+<h3 id="m58-один-порог-на-все-правила" tabindex="-1">Один порог на все правила</h3>
+<p>Правило «отправить в малозначительные» выглядит бережливостью по отношению к пользователю. На практике оно выкидывает именно тот класс ошибок, который не повторится второй раз: разовую потерю вычета, разовую просрочку.</p>
+<h3 id="m58-абстрактные-штрафы-в-отчёте" tabindex="-1">Абстрактные штрафы в отчёте</h3>
+<p>Отчёт, использующий валовые суммы штрафов из учебников, дезориентирует. Реальная величина зависит от фактической суммы налога, позиции инспектора и факта добровольной корректировки. Показывать надо диапазон и условия, при которых он применяется.</p>
+<h3 id="m58-продукт-который-просит-доверять" tabindex="-1">Продукт, который просит доверять</h3>
+<p>Доверие — это не текст в интерфейсе, а накопительное свойство: каждое точное срабатывание его повышает, каждое ложное обнуляет. Поэтому качество данных о важнее количества фич, а «мы почти уверены» в интерфейсе — это потеря доверия, а не честность.</p>
+<hr>
+<h2 id="m58-anti-checklist" tabindex="-1">Anti-checklist ☠️</h2>
+<ul>
+<li>[ ] Продукт пересчитывает налог сам — ответственность за цифры уходит от бухгалтера к разработчику</li>
+<li>[ ] В интерфейсе есть фраза «правильная сумма такая» — это позиция по ответственности, а не стилистика</li>
+<li>[ ] Pre-flight проверяет сводные цифры, но не доводит до документа — бухгалтер не может устранить причину</li>
+<li>[ ] В отчёте нет даты и ссылки на норму — вывод нельзя использовать как обоснование</li>
+<li>[ ] Ставки, сроки и пороги зашиты в код — изменение нормы требует релиза вместо правки данных</li>
+<li>[ ] Правило без <code>effectiveTo</code> при изменении нормы — старая редакция применяется после новой</li>
+<li>[ ] Один порог «о малозначительности» на все правила — отсекаются разовые дорогие ошибки</li>
+<li>[ ] Штрафы показаны одной цифрой без условий применения — цифра не соответствует реальности</li>
+<li>[ ] Отчёт смешивает технический разбор и решение для собственника — читает только бухгалтер</li>
+<li>[ ] Продвижение основано на страхе без указания, что именно делать с сигналом</li>
+</ul>
+<hr>
+<h2 id="m58-задачи-ai-кодеру" tabindex="-1">Задачи AI-кодеру</h2>
+<p>Плохая формулировка:</p>
+<blockquote>
+<p>«Сделай проверку налоговой декларации перед отправкой в ФНС, чтобы находить ошибки.»</p>
+</blockquote>
+<p>Разбор: не указаны источник данных, перечень сценариев, правило расчёта пени, требование к формулировке вывода. Результат — пересчёт налога в лучшем случае или абстрактное сообщение об ошибке в худшем, и в обоих случаях продукт берёт на себя чужую ответственность.</p>
+<p>Хорошая формулировка:</p>
+<blockquote>
+<p>«В модуле 58 описаны сценарии декларации и условия освобождения от штрафа: уточнённая декларация подана до обнаружения недоимки при положительном сальдо ЕНС, покрывающем сумму с пенями.</p>
+<p>Задача: реализовать сценарий «вычет НДС по контрагенту, не сдавшему декларацию»: найти в декларации вычеты по контрагентам без сведений о представленной декларации на дату проверки, оценить пени по ставке 1/300 ключевой ставки на дату расчёта и сформировать сигнал.</p>
+<p>Границы: не пересчитывать налог; не предлагать «правильную сумму» — формулировки только в форме вопроса к бухгалтеру; не реализовывать остальные сценарии из модуля 58; правило хранить в конфиге с <code>effectiveFrom</code> и <code>source</code>.</p>
+<p>Критерии готовности:</p>
+<ul>
+<li><code>npm test</code> → зелёный, тест на контрагента с поданной декларацией — сигнала нет</li>
+<li><code>npm test</code> → зелёный, тест на контрагента без декларации — сигнал есть, сумма пени равна ожидаемой по формуле</li>
+<li><code>npm test</code> → зелёный, тест на правило с <code>effectiveFrom</code> в будущем — проверка не выполняется</li>
+<li>в сигнале присутствуют <code>severity</code>, <code>action</code>, <code>source</code>, дата расчёта и сумма</li>
+<li><code>npm run check</code> → код 0</li>
+</ul>
+<p>Контекст проекта: <code>AGENTS.md</code>, <code>docs/CONTEXT.md</code>, модули 56 (раздел 5) и 58 (разделы 3, 4, 5, 7)».</p>
+</blockquote>
+<p>Формула: что делает + границы с явным запретом на пересчёт + конкретные проверяемые свойства + критерии готовности.</p>
+<p>Вторая задача — на границу ответственности:</p>
+<blockquote>
+<p>«Просмотри интерфейсные формулировки этого продукта и найди места, где система сообщает правильную сумму или правильный способ учёта, вместо того чтобы указывать на расхождение. Что должно быть в каждом месте вместо этого и как это проверить автоматически.»</p>
+</blockquote>
+<p>Ожидаемый ответ: перечислить места (подсказки, автозаполнение, «должно быть», «рекомендуемая сумма»), предложить формулировку в форме вопроса с указанием источника расхождения и критерий проверки: в строках интерфейса нет формулировок с указанием единственно верного значения; плюс наличие дисклеймера в отчёте. Критерий готовности: список мест с заменой формулировки и тест, падающий при появлении в интерфейсе запрещённых конструкций.</p>
+<hr>
+<h2 id="m58-чеклист-архитектора" tabindex="-1">Чеклист архитектора</h2>
+<h3 id="m58-продукт" tabindex="-1">Продукт</h3>
+<ul>
+<li>[ ] Первая версия ограничена 3–7 проверками, а не покрытием темы</li>
+<li>[ ] Каждая проверка отвечает на вопрос «что увидит инспектор, чего не видим мы»</li>
+<li>[ ] Метрика продукта — сумма предотвращённого риска, а не количество найденного</li>
+<li>[ ] Сигнал содержит контрагента, документ, сумму, срок и действие</li>
+<li>[ ] Есть интерфейс для бухгалтера (где документ) и для собственника (сколько стоит)</li>
+</ul>
+<h3 id="m58-ответственность" tabindex="-1">Ответственность</h3>
+<ul>
+<li>[ ] Продукт не пересчитывает налог и не формирует проводки</li>
+<li>[ ] Ни одна формулировка не называет правильную сумму</li>
+<li>[ ] В отчёте есть дисклеймер о статусе результата проверки</li>
+<li>[ ] Ответственность за применение учётной политики остаётся на бухгалтере</li>
+</ul>
+<h3 id="m58-регуляторный-контур" tabindex="-1">Регуляторный контур</h3>
+<ul>
+<li>[ ] Ставки, сроки и пороги — версионируемые данные с <code>effectiveFrom</code> и <code>source</code></li>
+<li>[ ] При изменении нормы у правила появляется <code>effectiveTo</code></li>
+<li>[ ] Выбор редакции выполняется по дате расчёта, а не по текущей дате запуска</li>
+<li>[ ] Дата расчёта и ссылка на норму попадают в отчёт</li>
+<li>[ ] Изменения норм отслеживаются как задача, а не как реакция на жалобу клиента</li>
+</ul>
+<h3 id="m58-эксплуатация" tabindex="-1">Эксплуатация</h3>
+<ul>
+<li>[ ] Календарь сроков работает независимо от проверки содержания</li>
+<li>[ ] У порога блокировки счёта есть упреждающее предупреждение</li>
+<li>[ ] Отсутствие данных источника отличается от отсутствия расхождений</li>
+<li>[ ] Покрытие тестами опирается на обезличенные реальные данные</li>
+</ul>
+<hr>
+<p><em>Модуль 58 завершён.</em>
+<em>Курс пройден: от механицы языков до предметной области с реальными внешними системами и регуляторным контуром.</em>
+<em>Следующий шаг — собрать первые 3–5 проверок для одного клиента руками и посмотреть, где предметная область расходится с ожиданиями.</em></p>
+</div><nav class="pager"><a class="pn prev" href="#module-57"><span>← Назад</span>57 Сверка без доступа к учётной системе</a><span class="pn-gap"></span></nav></section><section class="module" id="glossary"><div class="module-content glossary"><h1 id="g-glossary-master-glossary" tabindex="-1">GLOSSARY — Master Glossary</h1>
 <h2 id="g-alphabetical-index" tabindex="-1">Alphabetical Index</h2>
-<p class="gl-index"><a href="#g-a">A</a> · <a href="#g-b">B</a> · <a href="#g-c">C</a> · <a href="#g-d">D</a> · <a href="#g-e">E</a> · <a href="#g-f">F</a> · <a href="#g-g">G</a> · <a href="#g-h">H</a> · <a href="#g-i">I</a> · <a href="#g-j">J</a> · <a href="#g-k">K</a> · <a href="#g-l">L</a> · <a href="#g-m">M</a> · <a href="#g-n">N</a> · <a href="#g-o">O</a> · <a href="#g-p">P</a> · <a href="#g-q">Q</a> · <a href="#g-r">R</a> · <a href="#g-s">S</a> · <a href="#g-t">T</a> · <a href="#g-u">U</a> · <a href="#g-v">V</a> · <a href="#g-w">W</a> · <a href="#g-x">X</a> · <a href="#g-z">Z</a><br><a href="#g-в">В</a> · <a href="#g-к">К</a> · <a href="#g-м">М</a> · <a href="#g-п">П</a> · <a href="#g-г">Г</a> · <a href="#g-д">Д</a> · <a href="#g-з">З</a> · <a href="#g-с">С</a> · <a href="#g-ш">Ш</a> · <a href="#g-ц">Ц</a> · <a href="#g-э">Э</a></p>
+<p class="gl-index"><a href="#g-a">A</a> · <a href="#g-b">B</a> · <a href="#g-c">C</a> · <a href="#g-d">D</a> · <a href="#g-e">E</a> · <a href="#g-f">F</a> · <a href="#g-g">G</a> · <a href="#g-h">H</a> · <a href="#g-i">I</a> · <a href="#g-j">J</a> · <a href="#g-k">K</a> · <a href="#g-l">L</a> · <a href="#g-m">M</a> · <a href="#g-n">N</a> · <a href="#g-o">O</a> · <a href="#g-p">P</a> · <a href="#g-q">Q</a> · <a href="#g-r">R</a> · <a href="#g-s">S</a> · <a href="#g-t">T</a> · <a href="#g-u">U</a> · <a href="#g-v">V</a> · <a href="#g-w">W</a> · <a href="#g-x">X</a> · <a href="#g-z">Z</a><br><a href="#g-в">В</a> · <a href="#g-к">К</a> · <a href="#g-м">М</a> · <a href="#g-п">П</a> · <a href="#g-г">Г</a> · <a href="#g-д">Д</a> · <a href="#g-з">З</a> · <a href="#g-с">С</a> · <a href="#g-ш">Ш</a> · <a href="#g-ц">Ц</a> · <a href="#g-э">Э</a> · <a href="#g-а">А</a> · <a href="#g-и">И</a> · <a href="#g-н">Н</a> · <a href="#g-о">О</a> · <a href="#g-р">Р</a> · <a href="#g-т">Т</a> · <a href="#g-у">У</a> · <a href="#g-ф">Ф</a></p>
 <h2 id="g-a" tabindex="-1">A</h2>
 <p><strong>A2A (Agent-to-Agent)</strong> (<a href="#module-42">Модуль 42</a>)
 Протокол коммуникации между агентами. Решает task submission, status, streaming, cancellation и artifact exchange.</p>
@@ -42713,12 +44088,38 @@ XML-формат метаданных встроенный в PDF как stream.
 <h2 id="g-в" tabindex="-1">В</h2>
 <p><strong>Векторное пространство</strong> (<a href="#module-12">Модуль 12</a>)
 Многомерное пространство (сотни или тысячи измерений) в котором embedding модель размещает тексты. Семантически близкие тексты — в близких точках пространства. Каждая embedding модель создаёт своё несовместимое пространство.</p>
+<p><strong>Внешний формат</strong> (<a href="#module-57">Модуль 57</a>)
+Конкретная структура данных источника: XML, JSON, XLSX, MT940, TXT. Форматов много, и это рутина; проблема возникает, когда формат начинает определять внутреннюю модель.</p>
+<p><strong>Вход без согласований</strong> (<a href="#module-57">Модуль 57</a>)
+Источник данных, доступный без договора с внешним поставщиком: файловая выгрузка учётной системы, файл банк-клиента, открытые сведения реестра. На них строится первая рабочая версия продукта.</p>
+<p><strong>Выписка банковская</strong> (<a href="#module-57">Модуль 57</a>)
+Документ со списком операций по счёту за период с остатками на начало и конец. Отдаётся файлом (XLSX, MT940) или через API банка. Источник правды №1 по ценности и №1 по числу граблей в парсинге.</p>
 <h2 id="g-к" tabindex="-1">К</h2>
 <p><strong>Квота</strong> (<a href="#module-11">Модуль 11</a>)
 Лимит использования API за период (сутки, минута). Виды: RPD, RPM, TPD, TPM. Тип квоты определяет архитектуру ротатора: daily quota → счётчик с timezone-reset, rate limit → throttling с rolling window.</p>
+<p><strong>Камеральная проверка</strong> (<a href="#module-58">Модуль 58</a>)
+Проверка налогового органа по поданной декларации и документам налогоплательщика, без специального решения руководителя инспекции. С 2026 года экстерриториальная. Срок 3 месяца, по НДС — 2 месяца с возможным продлением. Актуальный регламент — письмо ФНС ЕА-36-15/4924@ от 09.06.2026, заменившее письмо 2013 года.</p>
+<p><strong>Книга покупок</strong> (<a href="#module-56">Модуль 56</a>)
+Регистр налогового учёта с суммами счетов-фактур, по которым заявлен вычет НДС. Расхождение с суммой счетов-фактур в учёте — типовое основание для требования при камеральной проверке.</p>
+<p><strong>Ключ операции у банка</strong> (<a href="#module-57">Модуль 57</a>)
+Идентификатор, позволяющий отличить ту же самую операцию от новой при повторной выгрузке выписки.</p>
+<p><strong>Ключевая ставка</strong> (<a href="#module-58">Модуль 58</a>)
+Параметр, из которого считаются пени по ст. 75 НК РФ: 1/300 ставки за каждый день просрочки. Ставка меняется, поэтому пени считаются на дату расчёта, а не фиксируются константой.</p>
+<p><strong>Контроль, а не учёт</strong> (<a href="#module-58">Модуль 58</a>)
+Позиция продукта: система указывает на расхождение и формулирует вопрос, но никогда не называет правильную сумму и не формирует проводку. Ограничение удерживает ответственность за цифры на бухгалтере.</p>
+<p><strong>Контрольный разряд ИНН</strong> (<a href="#module-57">Модуль 57</a>)
+Арифметическая проверка ИНН, отсекающая опечатки до попадания данных в сверку. ИНН хранится строкой: 12 значащих цифр не помещаются в 53-битное число.</p>
+<p><strong>Контрольное соотношение</strong> (<a href="#module-56">Модуль 56</a>)
+Утверждение о данных, нарушение которого имеет денежную цену. Хорошее соотношение выполняется на 100% нормальных данных. Хранится как конфиг с полями <code>severity</code>, <code>effectiveFrom</code>, <code>sources</code>, <code>assertion</code>, <code>action</code>, <code>owner</code>.</p>
+<p><strong>Коррекция банковской операции</strong> (<a href="#module-57">Модуль 57</a>)
+Операция, изменённая после первоначального проведения. Обрабатывается как отмена предыдущей записи, а не как новая операция.</p>
 <h2 id="g-м" tabindex="-1">М</h2>
 <p><strong>монотипизированная функция</strong> (<a href="#module-37">Модуль 37</a>)
 Функция вызываемая всегда с одним типом аргументов. V8 оптимизирует такие функции через inline caching. Полиморфная функция (разные типы) — деоптимизация при смене типа.</p>
+<p><strong>Модель задержки источника</strong> (<a href="#module-57">Модуль 57</a>)
+Правило, определяющее, в каком окне расхождение между двумя источниками считается нормальным, а в каком — сигналом.</p>
+<p><strong>MT940</strong> (<a href="#module-57">Модуль 57</a>)
+Отраслевой стандарт банковской выписки. Опциональные поля в нём опциональны по-разному у разных банков: поле может отсутствовать, быть пустым или заполненным по правилам банка, из-за чего парсер под один банк ломается на другом.</p>
 <h2 id="g-п" tabindex="-1">П</h2>
 <p><strong>Пагинация курсорная</strong> (<a href="#module-51">Модуль 51</a>)
 См. Cursor-пагинация: выгрузки больших объёмов по строгому ключу <code>(updated_at, id)</code> вместо offset. Потолок <code>limit</code>, непрозрачные курсоры, <code>next_cursor: null</code> — явный конец.</p>
@@ -42728,17 +44129,39 @@ XML-формат метаданных встроенный в PDF как stream.
 Паттерн обработки больших PDF: загрузить документ один раз, обрабатывать страницы последовательно или батчами, вызывать <code>page.cleanup()</code> после каждой. Противопоставляется загрузке всего текста сразу — критично для PDF от 50+ страниц.</p>
 <p><strong>Приёмка результата</strong> (<a href="#module-55">Модуль 55</a>)
 Проверка выполненной работы по фиксированному порядку: состояние в git → команды проверки → объём диффа → отчёт. Отчёт без <code>git diff</code> пропускает и недоделанное, и лишнее: отчёт описывает намерение, дифф показывает реальность.</p>
+<p><strong>Пени</strong> (<a href="#module-58">Модуль 58</a>)
+Денежная сумма за просрочку: 1/300 ключевой ставки за каждый день. Основной «тихий» расход, который растёт ежедневно и который пользователь замечает по отчёту, а не по факту.</p>
+<p><strong>Первичка</strong> (<a href="#module-56">Модуль 56</a>)
+Совокупность первичных учётных документов. Часть принадлежит контрагентам и государственным системам, поэтому проверить можно только то, что реально получено.</p>
+<p><strong>Порог приостановления операций</strong> (<a href="#module-58">Модуль 58</a>)
+20 дней просрочки представления отчётности, с 2026 года с правом налогового органа предварительно уведомить за 14 дней. Основание для фичи «календарь сроков с упреждением».</p>
+<p><strong>Правило с датой вступления</strong> (<a href="#module-56">Модуль 56</a>)
+Проверка или норма, хранящаяся как конфиг с полями <code>effectiveFrom</code>, <code>effectiveTo</code>, <code>source</code>. При изменении нормы старая редакция закрывается датой, а не удаляется.</p>
+<p><strong>Приостановление операций по счёту</strong> (<a href="#module-56">Модуль 56</a>)
+Ограничение по ст. 76 НК РФ при просрочке представления отчётности свыше установленного срока. Право предварительного уведомления даёт окно на исправление, поэтому ценность продукта измеряется в календарных днях до срока.</p>
+<p><strong>Pre-flight</strong> (<a href="#module-58">Модуль 58</a>)
+Проверка данных до того, как они уйдут в налоговую. В отличие от отчёта, отвечает на вопрос «что будет, если подать» и даёт варианты решения с суммой и условиями.</p>
 <h2 id="g-г" tabindex="-1">Г</h2>
 <p><strong>Гейт (quality gate)</strong> (<a href="#module-09">Модуль 09</a>)
 Порог закрытия шага стенда: шаг принят только целиком, следующий начинается после закрытия предыдущего. В слепом стенде гейт закрывают все модели, а не одна.</p>
+<p><strong>Граф документов</strong> (<a href="#module-56">Модуль 56</a>)
+Сеть связей между первичными документами: закупка, продажа, касса, маркировка, зарплата. Предмет автоматизации — переходы между документами, а не сами документы.</p>
 <h2 id="g-д" tabindex="-1">Д</h2>
 <p><strong>Диспетчер задач</strong> (<a href="#module-42">Модуль 42</a>)
 Вечный файл-указатель штаба: постоянная часть (как работать) плюс сменная (текущее задание, статус, счётчик, архив). Правят только штаб, сессии его не трогают.</p>
+<p><strong>Дата расчёта</strong> (<a href="#module-58">Модуль 58</a>)
+Дата, на которую применена редакция правил при вычислении результата. Хранится вместе с результатом и попадает в отчёт: без неё вывод нельзя использовать как обоснование перед налоговой.</p>
+<p><strong>Двойная запись</strong> (<a href="#module-56">Модуль 56</a>)
+Правило отражения операции: суммы дебетов и кредитов равны. Ошибка в связях документов через неё не видна — она проявляется через месяцы при внешней проверке.</p>
 <h2 id="g-з" tabindex="-1">З</h2>
 <p><strong>Замороженный полигон</strong> (<a href="#module-09">Модуль 09</a>)
 Код для тестов зафиксированный тегом и читаемый только на чтение. Эксперименты идут в стенде, полигон не правят никогда.</p>
 <p><strong>Заморозка объёма</strong> (<a href="#module-42">Модуль 42</a>)
 Слово штаба посреди сессии объём не меняет. Новая работа — правка файла задачи с новой приёмкой, отдельный номер в очередь или откладывание.</p>
+<p><strong>Задержка источника</strong> (<a href="#module-57">Модуль 57</a>)
+Разница между моментом реального события и моментом, когда оно доступно для сверки. Учётная система отстаёт на секунды, ЭДО — на часы, банк — на дни. Сравнение без модели задержки даёт ложные срабатывания.</p>
+<p><strong>Значение-гипотеза</strong> (<a href="#module-57">Модуль 57</a>)
+Результат автоматического разбора свободного текста (назначение платежа, реквизиты из скана), требующий подтверждения совпадением суммы и даты. Действие по непроверенной гипотезе не выполняется.</p>
 <h2 id="g-с" tabindex="-1">С</h2>
 <p><strong>Слепой прогон</strong> (<a href="#module-09">Модуль 09</a>)
 Сессия видит только свой бриф и свой срез. Чужие прогоны, оценки и эталоны запрещены, нарушение — прогон в брак.</p>
@@ -42746,6 +44169,16 @@ XML-формат метаданных встроенный в PDF как stream.
 Пара или тройка разных моделей для поиска багов веером: покрытие тем парой и тройкой выше одиночки, уникальные находки ловятся только веером. Пересчитывается при выбывании модели.</p>
 <p><strong>Суггестивный контур (suggest-approve)</strong> (<a href="#module-06">Модуль 06</a>)
 Модель предлагает нормализованный текст и пару suggestion-полей рядом, решение остаётся за человеком с ручной правкой после автозаполнения.</p>
+<p><strong>Сальдо ЕНС</strong> (<a href="#module-58">Модуль 58</a>)
+Сводный остаток расчётов с бюджетом. Положительное сальдо, покрывающее недоимку с пенями на дату подачи уточнённой декларации, — второе из двух условий освобождения от штрафа.</p>
+<p><strong>Сверка</strong> (<a href="#module-57">Модуль 57</a>)
+Сопоставление данных нескольких источников правды с учётом задержек. Не запрос к источнику, а процесс: получение, нормализация, проверка целостности, применение правил, обогащение, приоритизация, отчёт.</p>
+<p><strong>Сценарий декларации</strong> (<a href="#module-58">Модуль 58</a>)
+Конечное и перечислимое состояние декларации: сходится; вычет без документа; отрицательное сальдо ЕНС; уточнёнка на уменьшение; нарушен срок; формат не прошёл приём. Предметная область продукта — различение сценариев, а не «сверка декларации».</p>
+<p><strong>Соотношение на признаки</strong> (<a href="#module-56">Модуль 56</a>)
+Проверка, сравнивающая не суммы, а наличие, состояние и дату документа. Нужна там, где равенство сумм обманчиво: фиктивная отгрузка сохраняет арифметику и убивает граф.</p>
+<p><strong>Состояние документа ЭДО</strong> (<a href="#module-57">Модуль 57</a>)
+Позиция документа в маршруте: черновик, подписан отправителем, отправлен, доставлен, подписан получателем, отказ, отклонён оператором. Единственный источник, отличающий «документ есть» от «документ имеет силу».</p>
 <h2 id="g-ш" tabindex="-1">Ш</h2>
 <p><strong>Штаб-сессия</strong> (<a href="#module-42">Модуль 42</a>, <a href="#module-55">Модуль 55</a>)
 Основная сессия команды: обсуждения, планирование, задания, приёмка. Кодовые сессии получают задание файлом, выполняют, пишут отчёт в тот же файл. Штаб решает «что и почему», кодовая сессия — «как»; работает, пока у задания есть один владелец, один критерий готовности и одна проверка.</p>
@@ -42755,6 +44188,50 @@ XML-формат метаданных встроенный в PDF как stream.
 <h2 id="g-э" tabindex="-1">Э</h2>
 <p><strong>Эталон сверки</strong> (<a href="#module-09">Модуль 09</a>)
 Находка подтверждённая минимум четырьмя из пяти судей при перекрёстной сверке. Спорное уходит на арбитраж штаба, а не в мусор.</p>
+<p><strong>Экстерриториальная камеральная проверка</strong> (<a href="#module-58">Модуль 58</a>)
+Право налогового органа, уполномоченного надзорным органом, провести проверку декларации налогоплательщика. С 2026 года аргумент «проверка придёт только к нам в ИФНС» перестал быть основанием откладывать контроль.</p>
+<p><strong>Экстерриториальный вход</strong> (<a href="#module-57">Модуль 57</a>)
+Получение данных из системы по легальному внешнему интерфейсу (файлы обмена, веб-сервисы, API) вместо прямого доступа к внутренней базе. Читает данные, не встраиваясь в чужую систему.</p>
+<h2 id="g-а" tabindex="-1">А</h2>
+<p><strong>Адаптер источника</strong> (<a href="#module-57">Модуль 57</a>)
+Код на границе, приводящий один внешний формат к внутренней модели. Внутренняя модель не повторяет ни один внешний формат, поэтому смена формата вендором меняет адаптер и ничего больше.</p>
+<h2 id="g-и" tabindex="-1">И</h2>
+<p><strong>Идемпотентность по ключу операции</strong> (<a href="#module-57">Модуль 57</a>)
+Повторный запуск сверки на тех же данных не создаёт дублей. Основа — идентификатор операции у банка, а не номер строки в файле: номер строки меняется при повторной выгрузке.</p>
+<h2 id="g-н" tabindex="-1">Н</h2>
+<p><strong>Нормализация</strong> (<a href="#module-57">Модуль 57</a>)
+Приведение данных к единому виду: деньги в целых копейках, идентификаторы строками с проверкой разряда, даты раздельно на дату операции и дату исполнения. Единственное место, где формат влияет на предметную область.</p>
+<h2 id="g-о" tabindex="-1">О</h2>
+<p><strong>Оборотно-сальдовая ведомость (ОСВ)</strong> (<a href="#module-56">Модуль 56</a>)
+Отчёт за период с начальным сальдо, оборотами по дебету и кредиту и конечным сальдо в разрезе счетов. Для внешнего разработчика это единственный интерфейс к учёту: он отвечает на «как сходится учёт», не требуя доступа к базе.</p>
+<p><strong>Основание для освобождения от штрафа</strong> (<a href="#module-58">Модуль 58</a>)
+Подача уточнённой декларации до обнаружения недоимки при положительном сальдо единого налогового счёта, покрывающем сумму с пенями. Оба условия одновременно; выполнение одного не работает.</p>
+<p><strong>Основание для требования</strong> (<a href="#module-58">Модуль 58</a>)
+Выявленные при камеральной проверке ошибки, противоречия или несоответствия сведений. Формирует переход к стадии ответов на требование, где для плательщиков НДС канал только электронный.</p>
+<h2 id="g-р" tabindex="-1">Р</h2>
+<p><strong>Разрыв графа</strong> (<a href="#module-56">Модуль 56</a>)
+Отсутствующая или неподтверждённая связь между документами: неотправленный УПД, непрочитанный платёж, код маркировки, не дошедший до системы. Стоимость разрыва выше стоимости его обнаружения на порядок.</p>
+<p><strong>Редакция правила</strong> (<a href="#module-58">Модуль 58</a>)
+Конкретная версия нормы, действующая на дату расчёта. Хранится вместе с результатом проверки, чтобы через год объяснить, по какому основанию выдан вывод.</p>
+<p><strong>Режим обработки данных</strong> (<a href="#module-57">Модуль 57</a>)
+Где выполняется обработка: в контуре клиента или в облаке подрядчика. Учётные сведения относятся к коммерческой тайне, что делает локальный режим позицией, а не ограничением.</p>
+<p><strong>Роуминг ЭДО</strong> (<a href="#module-57">Модуль 57</a>)
+Обмен документами между разными операторами электронного документооборота. Причина двойного приёма одного документа, поэтому дедупликация ведётся по номеру и дате документа, а не по идентификатору сообщения оператора.</p>
+<h2 id="g-т" tabindex="-1">Т</h2>
+<p><strong>Топология первички</strong> (<a href="#module-56">Модуль 56</a>)
+Повторяющиеся цепочки документов закупки, продажи, кассы, маркировки и зарплаты, где вершины принадлежат разным владельцам, а переходы между ними асинхронны. Автоматизируется переход, не документ.</p>
+<p><strong>Требование</strong> (<a href="#module-58">Модуль 58</a>)
+Запрос налогового органа о пояснениях или предложение внести изменения в декларацию. Для плательщиков НДС ответ возможен только через оператора электронного документооборота: бумажный считается непредставленным.</p>
+<h2 id="g-у" tabindex="-1">У</h2>
+<p><strong>Уведомление о предстоящем приостановлении</strong> (<a href="#module-58">Модуль 58</a>)
+Предупреждение о приостановлении операций по счёту до вынесения постановления. Создаёт окно для исправления и превращает проверку сроков из посмертной в предупреждающую.</p>
+<p><strong>Уточнённая декларация</strong> (<a href="#module-58">Модуль 58</a>)
+Декларация, поданная с изменёнными показателями. Освобождает от штрафа только при одновременном выполнении двух условий: подана до обнаружения недоимки, сальдо ЕНС на дату подачи положительное и покрывает сумму с пенями.</p>
+<h2 id="g-ф" tabindex="-1">Ф</h2>
+<p><strong>Файл выгрузки как основной вход</strong> (<a href="#module-57">Модуль 57</a>)
+Архитектурное решение, при котором продукт строится на файловых выгрузках без внешних API. Даёт подключение клиентов без юридических согласований ценой задержки данных.</p>
+<p><strong>Фантомный шум</strong> (<a href="#module-57">Модуль 57</a>)
+Ложные срабатывания проверок, вызванные сравнением без учёта задержки источника. Пользователь отключает такую проверку, и она больше не включается.</p>
 </div></section><section class="module" id="architecture-landscape"><div class="module-content"><h1 id="al-architecture-landscape-карта-курса" tabindex="-1">Architecture Landscape — карта курса</h1>
 <blockquote>
 <p>Как модули связаны между собой, какие production-системы из них собираются,
@@ -42776,6 +44253,8 @@ XML-формат метаданных встроенный в PDF как stream.
 ║       │                                                        ║
 ║       ▼                                                        ║
 ║  API Design ──► Resilience ──► Code Organization ──► Handoff   ║
+║                              │                                ║
+║                              └──► Accounting ──► Compliance   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 </code></pre>
 <pre class="hljs"><code>01-05  Languages         │  JS/TS, PHP, Python, Go — механика, не синтаксис
@@ -42797,6 +44276,8 @@ XML-формат метаданных встроенный в PDF как stream.
 53     Code Organization │  Связность, срезы вместо слоёв, границы модулей, ACL
 54     Zero-Downtime     │  Expand-contract, флаги, откат, миграции без блокировок
 55     State Transfer    │  Handoff, штаб-сессии, файловый источник истины
+56-58  Accounting / Compliance │  Граф документов, сверка без доступа к 1С,
+                          │  pre-flight под требования ФНС
 </code></pre>
 <hr>
 <h2 id="al-карта-production-систем" tabindex="-1">Карта production-систем</h2>
@@ -43090,6 +44571,11 @@ XML-формат метаданных встроенный в PDF как stream.
 <td>Закрыто</td>
 </tr>
 <tr>
+<td><strong>Бухгалтерия и налоговый контроль</strong></td>
+<td>Закрыто в 2026-10 модулями 56–58: граф первички, контрольные соотношения, сверка по внешним источникам, pre-flight под требования ФНС</td>
+<td>Закрыто; отраслевые вертикали (маркировка, ЭДО для сельхоза, ЕГАИС) — при появлении второго клиента</td>
+</tr>
+<tr>
 <td><strong>Domain-Driven Design</strong></td>
 <td>Event storming, bounded context для AI pipeline</td>
 <td>Открыт; материала из BPMN-потока пока мало для модуля</td>
@@ -43224,6 +44710,20 @@ XML-формат метаданных встроенный в PDF как stream.
         G3[43 Agent Memory] -.-&gt; J3
     end
 
+    subgraph &quot;Accounting / Compliance&quot;
+        K1[56 Accounting Document Graph]
+        K2[57 Reconciliation without ERP]
+        K3[58 FNS Compliance Preflight]
+        J3 --&gt; K1
+        K1 --&gt; K2
+        K2 --&gt; K3
+        D1[14 OOXML] -.-&gt; K2
+        D3[17 XLSX] -.-&gt; K2
+        E2 -.-&gt; K2
+        G2[10 VLM] -.-&gt; K3
+        B4 -.-&gt; K3
+    end
+
     C1 -.-&gt; E1
     C2 -.-&gt; E3
     D2 -.-&gt; E5
@@ -43279,6 +44779,16 @@ XML-формат метаданных встроенный в PDF как stream.
 <li>Handoff: 55 §3–5 — анатомия файла, деградация, один активный</li>
 <li>Штаб: 55 §6–8 — постановка задания файлом, приёмка по diff’у</li>
 <li>Контекст проекта: <code>AGENTS.md</code> + <code>docs/CONTEXT.md</code> + ADR (шаблон в корне)</li>
+</ol>
+<h3 id="al-строю-контроль-для-бухгалтерии" tabindex="-1">«Строю контроль для бухгалтерии»</h3>
+<ol>
+<li>Предмет: 56 §1–2 — граф первички, автоматизируется переход, не документ</li>
+<li>Проверки: 56 §5–7 — контрольное соотношение как конфиг, отбор по цене пропуска</li>
+<li>Доступ: 57 §1–2 — пять входов, цена каждого, чтение без встраивания</li>
+<li>Форматы: 57 §3–7 — адаптеры, идемпотентность, копейки, строковые ИНН</li>
+<li>Деньги и риск: 58 §3–5 — pre-flight, сценарии декларации, цена сигнала</li>
+<li>Граница: 58 §6–7 — контроль не учёт, регуляторный контур как данные</li>
+<li>Разбор документа: 14 (DOCX), 15 (PDF), 17 (XLSX), 10 (VLM) — IDP на входе</li>
 </ol>
 <hr>
 <p><em>Этот файл — living document. Обновляй при добавлении или изменении модулей.</em></p>
@@ -44277,6 +45787,68 @@ XML-формат метаданных встроенный в PDF как stream.
 <td>Всегда, в начале каждой миграции</td>
 <td>—</td>
 <td>54, 49</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="tc-бухгалтерия-и-контроль-56-58" tabindex="-1">Бухгалтерия и контроль (56–58)</h2>
+<table>
+<thead>
+<tr>
+<th>Инструмент</th>
+<th>Когда брать</th>
+<th>Когда не брать</th>
+<th>Модуль</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Файловая выгрузка ОСВ и банк-клиента</strong></td>
+<td>Первая версия продукта: подключение без договоров</td>
+<td>Когда нужна задержка данных меньше суток</td>
+<td>57 §1, §4</td>
+</tr>
+<tr>
+<td><strong>API банка (Sber API, T-API)</strong></td>
+<td>Нужна свежесть данных, есть договор с банком</td>
+<td>Нет бюджета на интеграцию и согласование</td>
+<td>57 §2</td>
+</tr>
+<tr>
+<td><strong>Формат EnterpriseData / веб-сервисы 1С</strong></td>
+<td>Нужны бизнес-сущности, а не остатки</td>
+<td>Нет прав на веб-сервисы в базе</td>
+<td>57 §2</td>
+</tr>
+<tr>
+<td><strong>Прямой доступ к базе 1С</strong></td>
+<td>—</td>
+<td>Всегда: блокировки, поломка на обновлении, лицензия</td>
+<td>57 §2</td>
+</tr>
+<tr>
+<td><strong>MT940</strong></td>
+<td>Нужен отраслевой стандарт выписки</td>
+<td>Банк отдаёт только XLSX или API</td>
+<td>57 §4</td>
+</tr>
+<tr>
+<td><strong>LLM для разбора назначения платежа</strong></td>
+<td>Реквизиты из свободного текста как гипотеза</td>
+<td>Когда нужно автоматическое действие по разбору</td>
+<td>57 §7</td>
+</tr>
+<tr>
+<td><strong>Конфиг правил с <code>effectiveFrom</code> и <code>source</code></strong></td>
+<td>Всегда, когда правило опирается на норму закона</td>
+<td>—</td>
+<td>56 §5, 58 §7</td>
+</tr>
+<tr>
+<td><strong>Golden-тесты на обезличенных выписках</strong></td>
+<td>Любая интеграция с выпиской или ЭДО</td>
+<td>Моки как единственный источник тестовых данных</td>
+<td>57 §4, §6</td>
 </tr>
 </tbody>
 </table>

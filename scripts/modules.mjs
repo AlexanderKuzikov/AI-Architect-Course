@@ -55,6 +55,9 @@ const MODULES = {
   53: { dir: '53-modular-architecture',     name: 'Модульная архитектура' },
   54: { dir: '54-zero-downtime-evolution',   name: 'Эволюция без даунтайма' },
   55: { dir: '55-state-handoff-staff',       name: 'Передача состояния: handoff и штаб' },
+  56: { dir: '56-accounting-document-graph', name: 'Бухгалтерия как граф документов' },
+  57: { dir: '57-reconciliation-without-erp', name: 'Сверка без доступа к учётной системе' },
+  58: { dir: '58-tax-compliance-preflight',  name: 'Контроль соответствия требованиям ФНС' },
 };
 
 // The last module number — every count in the build and audit derives from it,

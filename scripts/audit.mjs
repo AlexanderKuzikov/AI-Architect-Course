@@ -89,6 +89,23 @@ for (const [num, m] of Object.entries(MODULES)) {
   if (n % 2 !== 0) report('FENCE', `${num} ${m.name}: нечётное число fence-строк (${n})`);
 }
 
+// ---------- 3b. mermaid: подписи узлов не должны начинаться с «N. » ----------
+// mermaid разбирает такую подпись как markdown-список и рисует на диаграмме
+// «Unsupported markdown: list» — молча, без ошибки сборки. Проверка ловит
+// источник, а не симптом в готовом HTML.
+for (const [num, m] of Object.entries(MODULES)) {
+  const src = readFileSync(join(ROOT, m.dir, 'README.md'), 'utf-8');
+  let inFence = false;
+  src.split(/\r?\n/).forEach((line, i) => {
+    if (/^\s*```mermaid/.test(line)) { inFence = true; return; }
+    if (inFence && /^\s*```/.test(line)) { inFence = false; return; }
+    if (!inFence) return;
+    // Подпись узла: [N. ...], (N. ...), {N. ...} и вариант в кавычках.
+    if (/\[["']?\d+\.\s|\(["']?\d+\.\s|\{["']?\d+\.\s/.test(line))
+      report('MERMAID_LABEL', `${num} ${m.dir}: подпись узла начинается с «N. » — строка ${i + 1}, mermaid нарисует «Unsupported markdown»\n    ${line.trim().slice(0, 110)}`);
+  });
+}
+
 // ---------- 4. built html sanity ----------
 const htmlPath = join(ROOT, 'course.html');
 if (!existsSync(htmlPath)) {

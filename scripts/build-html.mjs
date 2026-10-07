@@ -122,6 +122,7 @@ function buildSidebar() {
     { name: 'Desktop / Data / Cost',   range: [48, 50] },
     { name: 'API / Resilience',          range: [51, 52] },
     { name: 'Code Organization',         range: [53, 55] },
+    { name: 'Accounting / Compliance',   range: [56, 58] },
   ];
 
   let h = `<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>`;
@@ -317,6 +318,11 @@ pre code{padding:0;background:none}
 .module-content blockquote p:last-child{margin-bottom:0}
 .module-content pre{margin:16px 0;border-radius:8px;overflow-x:auto;background:var(--pb)}
 .module-content pre code{display:block;padding:16px;font-size:.85rem;line-height:1.6}
+/* Инлайновый код в тексте и таблицах — длинные URL, идентификаторы, команды.
+   Без переноса он расширяет страницу целиком: горизонтальный скролл
+   задан только блокам pre и table, а code внутри абзаца им не охвачен. */
+.module-content p code,.module-content li code,.module-content td code,
+.module-content th code,.module-content blockquote code,.toc code{overflow-wrap:anywhere;word-break:break-word}
 .module-content table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem;display:block;overflow-x:auto}
 .module-content td,.module-content th{padding:7px 11px;border:1px solid var(--bd);text-align:left;vertical-align:top}
 .module-content th{background:var(--th);font-weight:600;white-space:nowrap}
@@ -366,6 +372,16 @@ pre code{padding:0;background:none}
   .pager{padding:16px}
   .hero{padding:32px 16px}
   .hero h1{font-size:1.5rem}
+  /* Узкий экран: код и таблицы — горизонтальный скролл внутри своего блока,
+     а не растягивание страницы и не мелкий шрифт ради влезания целиком. */
+  .module-content pre code{font-size:.78rem;line-height:1.5;padding:12px}
+  .module-content table{font-size:.82rem}
+  .module-content td,.module-content th{padding:6px 8px}
+  .mermaid{padding:10px}
+  .module-content h1{font-size:1.45rem}
+  .module-content h2{font-size:1.15rem;margin:26px 0 10px}
+  .module-content h3{font-size:1rem}
+  .pn{max-width:100%}
 }
 ${hljsCss}
 .hljs{background:var(--pb)!important}
@@ -379,7 +395,7 @@ ${hljsCss}
     <div class="hero">
       <h1>AI Architect Course</h1>
       <p>${moduleCount} модулей · один день изучения на модуль</p>
-      <p class="sub">Node.js · TypeScript · PHP · Python · Go · RAG · агенты · MCP · A2A · API · resilience · границы кода</p>
+      <p class="sub">Node.js · TypeScript · PHP · Python · Go · RAG · агенты · MCP · A2A · API · resilience · границы кода · бухгалтерия</p>
     </div>
     ${body}
   </main>
