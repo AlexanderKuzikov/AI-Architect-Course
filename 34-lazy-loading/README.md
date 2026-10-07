@@ -481,20 +481,25 @@ function prefetchOnInteraction() {
 // viewport: prefetch при входе в viewport
 ```
 
-### Vite — динамические import hints
+### Vite — подсказки загрузки для динамических import
 
 ```typescript
-// Vite magic comments для Rollup chunk naming + prefetch hints
-const AdminModule = lazy(() =>
-  import(
-    /* webpackChunkName: "admin" */
-    /* @vite-prefetch */
-    './pages/AdminPage'
-  )
+// Vite сам генерирует <link rel="modulepreload"> для entry-чанка и его прямых
+// импортов, а динамический import переписывает так, что общий чанк C грузится
+// параллельно с A, а не после:
+//   без оптимизации:  Entry → A → C   (два roundtrip)
+//   с оптимизацией:  Entry → (A + C)   (один roundtrip)
+// Волшебного комментария для prefetch не существует: prefetch делает сборщик,
+// а не разметка в импорте.
+const AdminModule = lazy(() => import('./pages/AdminPage'))
+
+// Имя чанка — единственный magic comment, который здесь уместен
+const Charts = lazy(() =>
+  import(/* webpackChunkName: "charts" */ './pages/ChartsPage')
 )
 
-// Более явный способ через Vite modulepreload:
-// vite.config.ts → build.modulePreload: { polyfill: true }
+// polyfill для браузеров без modulepreload: vite.config.ts
+// build: { modulePreload: { polyfill: true } }
 ```
 
 ---

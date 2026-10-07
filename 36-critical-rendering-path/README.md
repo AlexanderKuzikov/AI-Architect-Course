@@ -204,7 +204,7 @@ export default defineConfig({
   plugins: [
     beasties({
       // Inline critical CSS + async load остального автоматически
-      preload: 'media',      // async pattern через media-атрибут + onload
+      preload: 'media',      // media="not x", атрибут снимается после загрузки
       pruneSource: false,    // дублирование: внешний файл остаётся общим для всех страниц
     }),
   ],

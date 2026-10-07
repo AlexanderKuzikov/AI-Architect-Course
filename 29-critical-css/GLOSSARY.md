@@ -47,14 +47,14 @@ Webpack plugin от Google (2018), предшественник Beasties. Авт
 ## M
 
 **media print trick**  
-Паттерн async CSS loading: `<link rel="stylesheet" media="print" onload="this.media='all'">`. `media="print"` — браузер загружает с низким приоритетом без блокировки render. После загрузки `onload` меняет media на `all` — стили применяются. Требует `<noscript>` fallback.
+Рукописный паттерн async CSS loading: `<link rel="stylesheet" media="print" onload="this.media='all'">`. `media="print"` — браузер загружает с низким приоритетом без блокировки render, после загрузки `onload` меняет media на `all`. Требует `<noscript>` fallback и не переживает строгий CSP: inline `onload` при `script-src-attr 'none'` блокируется. Библиотечный аналог — Beasties `preload: 'media'`, который использует `media="not x"` и снимает атрибут скриптом.
 
 ---
 
 ## N
 
 **noscript fallback**  
-`<noscript><link rel="stylesheet" href="..."></noscript>` — обычная загрузка CSS для браузеров с отключённым JavaScript. Обязателен при использовании media print trick или preload+onload swap, так как оба паттерна зависят от JS.
+`<noscript><link rel="stylesheet" href="..."></noscript>` — обычная загрузка CSS для браузеров с отключённым JavaScript. Обязателен при использовании media print trick или preload+onload swap, так как оба паттерна зависят от JS. Для Googlebot особенно: часть краулеров рендерит без выполнения скриптов, и без fallback страница выглядит голой.
 
 ---
 

@@ -40,7 +40,7 @@ CSS необходимый для рендера above-fold контента: re
 ## M
 
 **media="print" trick**  
-Паттерн async CSS loading: `<link rel="stylesheet" media="print" onload="this.media='all'">`. Браузер загружает CSS с низким приоритетом (не блокирует рендер), onload переключает на `all` — стили применяются.
+Рукописный паттерн async CSS loading: `<link rel="stylesheet" media="print" onload="this.media='all'">`. Браузер загружает CSS с низким приоритетом (не блокирует рендер), onload переключает на `all` — стили применяются. Библиотечный аналог в Beasties — `preload: 'media'` с `media="not x"` (модуль 29).
 
 ---
 

@@ -161,10 +161,16 @@ const beasties = new Beasties({
   publicPath: '/',             // публичный URL prefix
 
   // Стратегия загрузки non-critical CSS
-  preload: 'media',            // media="print" onload trick (рекомендуется)
+  preload: 'media',            // media="not x" + снятие атрибута после загрузки (JS)
+  // preload: 'media-script',  // media="print" + data-beasties-media, восстанавливает скрипт
   // preload: 'swap',          // rel=preload + onload swap
-  // preload: 'js',            // JS-based async loading
-  // preload: 'js-lazy',       // js + requestIdleCallback
+  // preload: 'body',          // <link> в конец документа
+  // preload: false,           // без добавления preload-тегов
+
+  // CSP: всё, кроме 'body', 'media-script' и false, полагается на inline
+  // onload или inline <script> — под строгим CSP это заблокировано.
+  // Для строгого CSP: preload: 'media-script' + nonce на каждый ответ.
+  // nonce: (doc) => readNonceFrom(doc),
 
   // Убирать inlined правила из оригинального CSS файла
   // false = дублирование (критичные стили и в inline, и в файле)
@@ -245,19 +251,21 @@ inlineCriticalCSS('./dist')
     /* только above-fold стили */
   </style>
 
-  <!-- Non-critical CSS: media="print" trick — не блокирует -->
-  <link
-    rel="stylesheet"
-    href="/styles/main.css"
-    media="print"
-    onload="this.media='all'"
-  />
+  <!-- Non-critical CSS: media="not x" — не блокирует, атрибут снимается после загрузки -->
+  <link rel="stylesheet" href="/styles/main.css" media="not x">
 
   <!-- noscript fallback: обычная загрузка если JS отключён -->
   <noscript>
     <link rel="stylesheet" href="/styles/main.css">
   </noscript>
 </head>
+```
+
+Разница между стратегиями важна, потому что она определяет, переживёт ли строгий CSP. `preload: 'media'` полагается на inline-скрипт или inline-`onload` — под `script-src 'unsafe-inline'`-запретом это молча не работает, стиль остаётся в `media="not x"` и не применяется никогда. Тот же случай, но переживающий CSP, — `preload: 'media-script'` с `nonce`: отложенные ссылки получают `media="print"` и реальное значение в `data-beasties-media`, а один скрипт в конце документа их восстанавливает:
+
+```html
+<!-- preload: 'media-script' + nonce -->
+<link rel="stylesheet" href="/style.css" media="print" data-beasties-media="all">
 ```
 
 ### Граничные случаи — где ломается

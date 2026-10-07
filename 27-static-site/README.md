@@ -140,23 +140,26 @@ import SvelteChart from './Chart.svelte'
 ### Content Collections — типизированный контент
 
 ```typescript
-// src/content/config.ts
-import { defineCollection, z } from 'astro:content'
+// src/content.config.ts — Content Layer API (Astro 5+).
+// Старый src/content/config.ts с `type: 'content'` удалён: у коллекции
+// обязателен loader, а тип выводится из схемы.
+import { defineCollection } from 'astro:content'
+import { glob, file } from 'astro/loaders'
+import { z } from 'astro/zod'
 
 const blog = defineCollection({
-  type: 'content',  // Markdown/MDX файлы
+  loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
     title: z.string(),
-    publishDate: z.date(),
-    tags: z.array(z.string()),
+    publishDate: z.coerce.date(),          // YAML-дата приходит строкой
+    tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
     author: z.string(),
-    // Автоматическая валидация — ошибка сборки при несовпадении
   }),
 })
 
 const products = defineCollection({
-  type: 'data',    // JSON/YAML файлы
+  loader: file('./src/data/products.json'),   // один JSON-файл
   schema: z.object({
     name: z.string(),
     price: z.number().positive(),
@@ -169,20 +172,19 @@ export const collections = { blog, products }
 
 ```astro
 ---
-// src/pages/blog/[slug].astro
-import { getCollection, getEntry } from 'astro:content'
+// src/pages/blog/[id].astro
+import { getCollection, render } from 'astro:content'
 
-// Все опубликованные посты
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft)
   return posts.map(post => ({
-    params: { slug: post.slug },
+    params: { id: post.id },   // glob loader даёт slugify(id) из имени файла
     props: { post },
   }))
 }
 
 const { post } = Astro.props
-const { Content } = await post.render()
+const { Content } = await render(post)   // не post.render() — Content Layer API
 ---
 
 <article>

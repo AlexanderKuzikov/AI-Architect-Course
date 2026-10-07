@@ -29,7 +29,7 @@ Astro hydration директива: компонент не рендерится
 Astro hydration директива: гидрация при появлении компонента в viewport (IntersectionObserver). Оптимальный выбор для контента ниже fold.
 
 **Content Collections**  
-Astro механизм для типизированного контента: `defineCollection` + Zod schema. Автоматическая валидация frontmatter при сборке — ошибка типа = ошибка build, не runtime.
+Astro механизм для типизированного контента: `defineCollection` + Zod schema в `src/content.config.ts`. С Astro 5 коллекция обязана объявить `loader` (`glob()` или `file()` из `astro/loaders`) — старые `type: 'content'` и путь `src/content/config.ts` удалены. Автоматическая валидация frontmatter при сборке: ошибка типа = ошибка build, не runtime. Рендер entry — `await render(post)` из `astro:content`, а не `post.render()`.
 
 ---
 
