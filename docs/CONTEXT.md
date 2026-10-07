@@ -22,7 +22,8 @@
 | Глубокий аудит | Закрыто ~200 | 4 параллельных прохода по 01–13 / 14–26 / 27–39 / 40–52 + корень: версии по первоисточникам, противоречия, язык |
 | Ссылки | Закрыто 12 | битые `#`-фрагменты в ADR и шаблоне + префикс `../` у файлов из корня репозитория |
 | Консоль | Чисто | 0 ошибок/предупреждений, favicon встроен как SVG data-URI — 404 ушёл |
-| index.html | Удалён | Старый дубль сборки на CDN (1.9 MB), в gitignore вместе с course.html |
+| index.html | Удалён | Старый дубль сборки на CDN (1.9 MB), остаётся в `.gitignore` |
+| course.html | Коммитится | Собранный учебник — ради него репозиторий и существует; раньше был в `.gitignore` |
 
 ## Open-проблемы
 | # | Priority | Описание |
@@ -78,7 +79,7 @@
 
 ## Структура проекта
 ```
-NN-<slug>/README.md     — модуль (52 шт.)
+NN-<slug>/README.md     — модуль (55 шт.)
 NN-<slug>/GLOSSARY.md   — термины модуля
 GLOSSARY.md             — корневой глоссарий (master)
 scripts/modules.mjs     — реестр модулей (номер → папка, название)
@@ -86,7 +87,7 @@ scripts/build-html.mjs  — сборка course.html (markdown-it + mermaid + hl
 scripts/glossary-links.mjs — «(Модуль NN)» → ссылки в корневом GLOSSARY.md
 scripts/audit.mjs       — аудит исходников и собранного HTML
 assets/                 — mermaid.min.js, highlight css
-course.html             — сборка (в .gitignore, не коммитится)
+course.html             — собранный учебник (коммитится)
 ```
 
 ## Команды
